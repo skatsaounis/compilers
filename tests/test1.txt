@@ -1,0 +1,6 @@
+def hello ():
+	def puts(char[] s):
+	skip
+	end
+	puts("Hello world!\n")
+end
