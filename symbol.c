@@ -40,6 +40,7 @@
 Scope        * currentScope;           /* Τρέχουσα εμβέλεια              */
 unsigned int   quadNext;               /* Αριθμός επόμενης τετράδας      */
 unsigned int   tempNumber;             /* Αρίθμηση των temporaries       */
+unsigned int   constNumber;            /* Αρίθμηση των constants         */
 
 
 static unsigned int   hashTableSize;   /* Μέγεθος πίνακα κατακερματισμού */
@@ -147,6 +148,7 @@ void initSymbolTable (unsigned int size)
     currentScope = NULL;
     quadNext     = 1;
     tempNumber   = 1;
+    constNumber   = 1;
     
     /* Αρχικοποίηση του πίνακα κατακερματισμού */
     
@@ -333,8 +335,8 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
         e = newEntry(name);
 */
         char buffer[10];
-    sprintf(buffer, "$%d", tempNumber);
-    tempNumber++;
+    sprintf(buffer, "#%d", constNumber);
+    constNumber++;
     e = newEntry(buffer);
      
     if (e != NULL) {
