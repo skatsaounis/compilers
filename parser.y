@@ -129,7 +129,7 @@ void yyerror (const char *msg);
 %token T_lequal   "<="
 %token T_assignor ":="
 %token<s> T_id       
-%token<c> T_const	  
+%token<s> T_const	  
 %token<s> T_string   
 
 %left "or"
@@ -150,10 +150,12 @@ program:
 	{
 		initSymbolTable(257);
 		openScope();
+                GenQuad3(UNIT_QUAD, "main", NULL, NULL);
 		p = predefines();
 	}
 	func_def
 	{
+                GenQuad3(ENDU_QUAD, "main", NULL, NULL);
 		closeScope();
 		destroySymbolTable();
 	}

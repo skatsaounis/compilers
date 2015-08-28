@@ -38,7 +38,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                         sprintf(bufferx, "%u", (unsigned char) x->u.eConstant.value.vBoolean);
                         break;
                     case TYPE_CHAR:
-                        sprintf(bufferx, "%c", (char) x->u.eConstant.value.vChar);
+                        sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
                         break;
                     case TYPE_IARRAY:
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
@@ -59,7 +59,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                         sprintf(buffery, "%u", (unsigned char) y->u.eConstant.value.vBoolean);
                         break;
                     case TYPE_CHAR:
-                        sprintf(buffery, "%c", (char) y->u.eConstant.value.vChar);
+                        sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
                         break;
                     case TYPE_IARRAY:
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
@@ -91,7 +91,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                         sprintf(bufferx, "%u", (unsigned char) x->u.eConstant.value.vBoolean);
                         break;
                     case TYPE_CHAR:
-                        sprintf(bufferx, "%c", (char) x->u.eConstant.value.vChar);
+                        sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
                         break;
                     case TYPE_IARRAY:
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
@@ -112,7 +112,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                         sprintf(buffery, "%u", (unsigned char) y->u.eConstant.value.vBoolean);
                         break;
                     case TYPE_CHAR:
-                        sprintf(buffery, "%c", (char) y->u.eConstant.value.vChar);
+                        sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
                         break;
                     case TYPE_IARRAY:
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);

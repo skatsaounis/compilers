@@ -255,7 +255,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
 {
     SymbolEntry * e;
     va_list ap;
-
+    RepString str;
     union {
         RepInteger vInteger;
         RepBoolean vBoolean;
@@ -273,7 +273,10 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
             value.vBoolean = va_arg(ap, int);     /* RepBool is promoted */
             break;
         case TYPE_CHAR:
-            value.vChar = va_arg(ap, int);        /* RepChar is promoted */
+            /*value.vChar = va_arg(ap, int); */       /* RepChar is promoted */
+            str = va_arg(ap, RepString);
+            value.vString = (const char *) new(strlen(str) + 1);
+            strcpy((char *) (value.vString), str);
             break;
         case TYPE_REAL:
             value.vReal = va_arg(ap, RepReal);
@@ -351,13 +354,15 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 e->u.eConstant.value.vBoolean = value.vBoolean;
                 break;
             case TYPE_CHAR:
-                e->u.eConstant.value.vChar = value.vChar;
+                /*e->u.eConstant.value.vChar = value.vChar;*/
+                e->u.eConstant.value.vString = value.vString;
                 break;
             case TYPE_REAL:
                 e->u.eConstant.value.vReal = value.vReal;
                 break;
             case TYPE_ARRAY:
                 e->u.eConstant.value.vString = value.vString;
+                break;
             case TYPE_IARRAY:
                 e->u.eConstant.value.vString = value.vString;
         }
