@@ -172,7 +172,7 @@ void destroySymbolTable ()
     delete(hashTable);
 }
 
-void openScope ()
+void openScope (char * name)
 {
     Scope * newScope = (Scope *) new(sizeof(Scope));
 
@@ -185,6 +185,8 @@ void openScope ()
     else
         newScope->nestingLevel = currentScope->nestingLevel + 1;
     
+    if( name != NULL)
+        newScope->name = name;
     currentScope = newScope;
 }
 

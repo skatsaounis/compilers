@@ -149,7 +149,7 @@ void yyerror (const char *msg);
 program:
 	{
 		initSymbolTable(257);
-		openScope();
+		openScope(NULL);
                 p = predefines();
 	}
 	func_def
@@ -163,6 +163,7 @@ func_def:
 	{ flag = 0; }
 	"def" header  ':' func_def_list stmt_list "end"
 	{	
+                GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);                
                 print_all_quads();
 		closeScope();
 	}
@@ -188,7 +189,7 @@ header:
 		if(flag){
 			forwardFunction(p);
 		}
-		openScope();
+		openScope($2);
 	}
 	'(' opt2 ')'
 	{
