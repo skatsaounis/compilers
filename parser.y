@@ -150,13 +150,11 @@ program:
 	{
 		initSymbolTable(257);
 		openScope();
-                GenQuad3(UNIT_QUAD, "main", NULL, NULL);
-		p = predefines();
+                p = predefines();
 	}
 	func_def
 	{
-                GenQuad3(ENDU_QUAD, "main", NULL, NULL);
-		closeScope();
+                closeScope();
 		destroySymbolTable();
 	}
 ;
@@ -165,7 +163,7 @@ func_def:
 	{ flag = 0; }
 	"def" header  ':' func_def_list stmt_list "end"
 	{	
-		print_all_quads();
+                print_all_quads();
 		closeScope();
 	}
 ;
@@ -185,7 +183,8 @@ stmt_list:
 header:
 	opt1 T_id 
 	{	/*fprintf(stderr,"%s \n", $2);*/
-		p = newFunction($2);
+                GenQuad3(UNIT_QUAD, $2, NULL, NULL);		
+                p = newFunction($2);
 		if(flag){
 			forwardFunction(p);
 		}
