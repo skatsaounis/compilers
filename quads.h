@@ -19,6 +19,7 @@ typedef enum {                   /*********/
 	ASSIGN_QUAD,             /*   :=  */
 	JMP_QUAD,                /* jump  */
 	RET_QUAD,                /*  ret  */
+        RETV_QUAD,                /*  retv */
 	ARRAY_QUAD,              /* array */
         LIST_QUAD,               /* list  */
         HEAD_QUAD,               /* head  */
@@ -65,4 +66,8 @@ char * print_quad(int i);                        /* printable version of quad ty
 char *strdup(const char *str);
 void print_all_quads();                          /* prints all quad_array                                  */
 char * outp(char *inp);
+long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z);
+long GenQuad3(QuadType q, char * x, char * y, char * z);
+long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z);
+
 #endif

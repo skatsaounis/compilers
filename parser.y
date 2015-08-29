@@ -20,7 +20,7 @@ node * currnode, * temp;
 int flag;
 SymbolEntry * p, * b;
 Type type, refType;
-PassMode pMode;
+PassMode pMode, pm;
 
 Type lookup_type_find(SymbolEntry * p){
         if(p == NULL)        
@@ -274,6 +274,7 @@ stmt:
 	| "exit"                        
 	| "return" expr 		{ if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
 						ERROR("Wrong type for return value");
+                                          GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL);
                                           GenQuad(RET_QUAD, NULL, NULL, NULL);  
 					  }
 	| "if" expr ':' stmt_list elsif_list else_list "end"
@@ -323,13 +324,29 @@ call:
 ;
 
 opt5: 
-	/* nothing */ {checkNoParams(currnode->a);} 
-	| expr {checkParams(&(currnode->a),lookup_type_find($1.symbol_entry));} opt6
+	/* nothing */ { checkNoParams(currnode->a); } 
+	| expr        { 
+                        pm = currnode->a->u.eParameter.mode;                        
+                        checkParams(&(currnode->a), lookup_type_find($1.symbol_entry));
+                        if (pm == PASS_BY_VALUE)                        
+                                GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
+                        else
+                                GenQuad4(PAR_QUAD, $1.symbol_entry, "REFFERENCE", NULL);
+                      }
+          opt6
 ;
 
 opt6:
 	/* nothing */ {checkNoParams(currnode->a);}
-	| ',' expr {checkParams(&(currnode->a),lookup_type_find($2.symbol_entry));} opt6 
+	| ',' expr    {
+                        pm = currnode->a->u.eParameter.mode;                        
+                        checkParams(&(currnode->a), lookup_type_find($2.symbol_entry));
+                        if (pm == PASS_BY_VALUE)                        
+                                GenQuad4(PAR_QUAD, $2.symbol_entry, "VALUE", NULL);
+                        else
+                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFFERENCE", NULL);
+                       }
+          opt6 
 ;
 
 atom:

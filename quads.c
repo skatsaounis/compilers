@@ -145,6 +145,43 @@ long GenQuad3(QuadType q, char * x, char * y, char * z)
         return nextquad++;
 }
 
+long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
+{
+	quad_array[nextquad].type=q;
+	if (x == NULL)
+		quad_array[nextquad].arg1 = "-";
+        else if (x->entryType == ENTRY_CONSTANT){
+                char bufferx[1];               
+                switch (x->u.eConstant.type->kind) {
+                    case TYPE_INTEGER:
+                        sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
+                        break;
+                    case TYPE_BOOLEAN:
+                        sprintf(bufferx, "%u", (unsigned char) x->u.eConstant.value.vBoolean);
+                        break;
+                    case TYPE_CHAR:
+                        sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
+                        break;
+                    case TYPE_IARRAY:
+                        sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
+                }
+                quad_array[nextquad].arg1 = strdup(bufferx);
+        }	
+        else
+		quad_array[nextquad].arg1 = (char *) x->id;
+	if (y == NULL)
+		quad_array[nextquad].arg2 = "-";
+	else
+		quad_array[nextquad].arg2 = strdup(y);
+	if (z == NULL)
+		quad_array[nextquad].dest = "-";
+	else
+		quad_array[nextquad].dest = strdup(z);
+	
+	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
+        return nextquad++;
+}
+
 label_list emptylist(){
 	return NULL;
 }
@@ -200,6 +237,7 @@ char * print_quad(int i){
 			case PAR_QUAD:		s="par"; break;
 			case CALL_QUAD:		s="call"; break;
 			case RET_QUAD:		s="ret"; break;
+                        case RETV_QUAD:		s="retv"; break;
                         case HEAD_QUAD:         s="head"; break;
                         case TAIL_QUAD:         s="tail"; break; /* 20 */
                         case ISNIL_QUAD:        s="nil?"; break;
