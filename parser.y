@@ -273,7 +273,8 @@ stmt:
 	simple				
 	| "exit"                        
 	| "return" expr 		{ if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
-						ERROR("Wrong type for return value");  
+						ERROR("Wrong type for return value");
+                                          GenQuad(RET_QUAD, NULL, NULL, NULL);  
 					  }
 	| "if" expr ':' stmt_list elsif_list else_list "end"
 		                        { if (lookup_type_find($2.symbol_entry) != typeBoolean) ERROR("if exprs must be of type bool");  }
