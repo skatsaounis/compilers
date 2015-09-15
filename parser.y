@@ -21,6 +21,7 @@ int flag;
 SymbolEntry * p, * b;
 Type type, refType;
 PassMode pMode, pm;
+label_list temp1, temp2, temp3, temp4, temp5, temp6, temp7;
 
 Type lookup_type_find(SymbolEntry * p){
         if(p == NULL)        
@@ -87,6 +88,7 @@ void yyerror (const char *msg);
                 Type refT;
                 label_list true_list;
                 label_list false_list;
+		label_list next_list;
                 SymbolEntry * symbol_entry;
 	} a;
 
@@ -141,7 +143,7 @@ void yyerror (const char *msg);
 %left '*' '/' "mod"
 %left UMINUS UPLUS
 
-%type<a> type opt1 opt3 expr atom call
+%type<a> type opt1 opt3 expr atom call stmt stmt_list elsif_list else_list simple
 
 
 %%
@@ -176,9 +178,9 @@ func_def_list:
 	| var_def func_def_list
 ;
 
-stmt_list:
+stmt_list: /*needs fixing with next_list*/
   	stmt
-	| stmt stmt_list
+	| stmt stmt_list 
 ;
 
 header:
@@ -271,44 +273,84 @@ var_def_list:
 ;
 
 stmt:
-	simple				
-	| "exit"                        
+	simple				{ $$.next_list = $1.next_list;}
+	| "exit"                        { $$.next_list = emptylist();}
 	| "return" expr 		{ if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
 						ERROR("Wrong type for return value");
                                           GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL);
                                           GenQuad(RET_QUAD, NULL, NULL, NULL);  
 					  }
-	| "if" expr ':' stmt_list elsif_list else_list "end"
-		                        { if (lookup_type_find($2.symbol_entry) != typeBoolean) ERROR("if exprs must be of type bool");  }
-	| "for" simple_list ';' expr ';' simple_list ':' stmt_list "end"
-		                        { if (lookup_type_find($4.symbol_entry) != typeBoolean) ERROR("for exprs must be of type bool"); }
+	| "if" expr 			{ if (lookup_type_find($2.symbol_entry) != typeBoolean) ERROR("if exprs must be of type bool"); 
+					  backpatch($2.true_list, nextquad);
+					  temp1 = $2.false_list;
+					  temp2 = emptylist();
+					}
+	  ':' stmt_list elsif_list else_list "end"
+		                        { temp6 = merge(temp1,$5.next_list);
+					  temp7 = merge(temp6,$6.next_list);
+					  temp6 = merge(temp7,$7.next_list);
+					  $$.next_list = merge(temp6, temp2);
+					}
+	| "for" simple_list ';'		{  
+					  temp1 = nextquad;
+					}
+	   expr ';' simple_list ':'     { if (lookup_type_find($5.symbol_entry) != typeBoolean) ERROR("for exprs must be of type bool");
+					  backpatch($5.true_list,nextquad);
+					}
+	   stmt_list "end"		{ backpatch($10.next_list,temp1);
+					  GenQuad2(JMP_QUAD, NULL, NULL, "-1");
+					  $$.next_list = $5.false_list;
+					}
+		                       
 ;
 
 elsif_list:
-	/* nothing */
-	| "elsif" expr ':' stmt_list elsif_list
-		                        { if (lookup_type_find($2.symbol_entry) != typeBoolean) ERROR("elsif exprs must be of type bool"); }
+	/* nothing */			{ $$.next_list = emptylist();}
+	| "elsif" expr			{ if (lookup_type_find($2.symbol_entry) != typeBoolean) ERROR("elsif exprs must be of type bool"); 
+					  backpatch($2.true_list, nextquad);
+					  temp1 = $2.false_list;
+					  temp4 = temp1; /*that is because we need $2.false_list for the else_list*/
+					  temp2 = emptylist();
+					} 
+	  ':' stmt_list 		{ temp1 = make_list(nextquad);
+					  GenQuad2(JMP_QUAD, NULL, NULL, "-1");
+					  backpatch($2.false_list, nextquad);
+					}
+	  elsif_list
+		                        { temp2 = $7.next_list;
+					  temp5 = $5.next_list; /*that is because we need $5.next_list for the else_list*/
+					  temp3 = merge(temp1, $5.next_list);
+					  $$.next_list = merge(temp3, temp2);
+					}
 ;
 
 else_list:
-	/* nothing */
-	| "else" ':' stmt_list
+	/* nothing */			{ $$.next_list = emptylist();}
+	| "else"			{ temp1 = make_list(nextquad);
+					  GenQuad2(JMP_QUAD, NULL, NULL, "-1");
+					  backpatch(temp4, nextquad);
+					} 
+	  ':' stmt_list			{ temp2 = $4.next_list;
+					  temp3 = merge(temp1, temp5);
+					  $$.next_list = merge(temp3, temp2);
+					}
 ;
 
 simple:
-	"skip"                          
+	"skip" 				{$$.next_list = emptylist();}            
 	| atom ":=" expr                { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry)))) 
 					  ERROR("not the same type of exprs");
                                         GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry);
+					$$.next_list = emptylist();
 					  } 
-	| call                          
+	| call   			{ $$.next_list = emptylist();}   		                    
 ;
 
-simple_list:
+simple_list: /*may need fixing with next_list*/
 	simple opt4
 ;
 
-opt4:
+opt4: /*may need fixing with next_list*/
 	/* nothing */
 	| ',' simple opt4
 ;
