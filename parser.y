@@ -143,7 +143,7 @@ void yyerror (const char *msg);
 %left '*' '/' "mod"
 %left UMINUS UPLUS
 
-%type<a> type opt1 opt3 expr atom call stmt stmt_list elsif_list else_list simple
+%type<a> type opt1 opt3 expr atom call stmt stmt_list elsif_list else_list simple opt5 opt6
 
 
 %%
@@ -365,7 +365,7 @@ call:
                           currnode = temp;
                           b = lookupEntry($1, LOOKUP_ALL_SCOPES, true); currnode->a = b->u.eFunction.firstArgument;
                         }
-    '(' opt5 ')'        { $$.symbol_entry = b;
+    '(' opt5 ')'        { $$.symbol_entry = $4.symbol_entry;
                           temp = currnode;
                           currnode = currnode->prev;
                           delete(temp);
@@ -373,7 +373,15 @@ call:
 ;
 
 opt5:
-    /* nothing */       { checkNoParams(currnode->a); }
+    /* nothing */       { checkNoParams(currnode->a);
+                          if(b->u.eFunction.resultType != typeVoid){
+                                $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
+                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                          }
+                          else
+                                $$.symbol_entry = b;
+                          GenQuad(CALL_QUAD, NULL, NULL, b);
+                        }
     | expr              {
                           pm = currnode->a->u.eParameter.mode;
                           checkParams(&(currnode->a), lookup_type_find($1.symbol_entry));
@@ -382,11 +390,19 @@ opt5:
                           else
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "REFFERENCE", NULL);
                         }
-          opt6
+          opt6          { $$.symbol_entry = $3.symbol_entry; }
 ;
 
 opt6:
-    /* nothing */       {checkNoParams(currnode->a);}
+    /* nothing */       { checkNoParams(currnode->a);
+                          if(b->u.eFunction.resultType != typeVoid){
+                                $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
+                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                          }
+                          else
+                                $$.symbol_entry = b;
+                          GenQuad(CALL_QUAD, NULL, NULL, b);
+                        }
     | ',' expr          {
                           pm = currnode->a->u.eParameter.mode;
                           checkParams(&(currnode->a), lookup_type_find($2.symbol_entry));
@@ -395,7 +411,7 @@ opt6:
                           else
                                 GenQuad4(PAR_QUAD, $2.symbol_entry, "REFFERENCE", NULL);
                         }
-          opt6
+          opt6          { $$.symbol_entry = $4.symbol_entry; }
 ;
 
 atom:

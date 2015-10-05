@@ -29,7 +29,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];               
+                char bufferx[1];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
@@ -44,13 +44,13 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
-        }	
+        }
         else
 		quad_array[nextquad].arg1 = (char *) x->id;
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
 	else if (y->entryType == ENTRY_CONSTANT){
-                char buffery[1];               
+                char buffery[1];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(buffery, "%d", (int) y->u.eConstant.value.vInteger);
@@ -65,7 +65,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
                 }
                 quad_array[nextquad].arg2 = strdup(buffery);
-        }	
+        }
 	else
 		quad_array[nextquad].arg2 = (char *) y->id;
 	if (z == NULL)
@@ -82,7 +82,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];               
+                char bufferx[1];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
@@ -97,13 +97,13 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
-        }	
+        }
         else
 		quad_array[nextquad].arg1 = (char *) x->id;
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
 	else if (y->entryType == ENTRY_CONSTANT){
-                char buffery[1];               
+                char buffery[1];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(buffery, "%d", (int) y->u.eConstant.value.vInteger);
@@ -118,7 +118,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
                 }
                 quad_array[nextquad].arg2 = strdup(buffery);
-        }	
+        }
 	else
 		quad_array[nextquad].arg2 = (char *) y->id;
 	quad_array[nextquad].dest = strdup(z);
@@ -140,7 +140,7 @@ long GenQuad3(QuadType q, char * x, char * y, char * z)
 	if (z == NULL)
 		quad_array[nextquad].dest = "-";
 	else
-		quad_array[nextquad].dest = strdup(z);	
+		quad_array[nextquad].dest = strdup(z);
 	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
@@ -151,7 +151,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];               
+                char bufferx[1];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
@@ -166,7 +166,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
-        }	
+        }
         else
 		quad_array[nextquad].arg1 = (char *) x->id;
 	if (y == NULL)
@@ -177,7 +177,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
 		quad_array[nextquad].dest = "-";
 	else
 		quad_array[nextquad].dest = strdup(z);
-	
+
 	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
@@ -220,13 +220,13 @@ char * print_quad(int i){
 	char * s;
 	switch(quad_array[i].type) {
 			case PLUS_QUAD:		s="+"; break; /* 1 */
-			case MINUS_QUAD:	s="-"; break; 
-			case MULT_QUAD:		s="*"; break; 
-			case DIV_QUAD:		s="/"; break; 
+			case MINUS_QUAD:	s="-"; break;
+			case MULT_QUAD:		s="*"; break;
+			case DIV_QUAD:		s="/"; break;
 			case MOD_QUAD:		s="%"; break; /* 5 */
-			case JMP_QUAD:		s="jump"; break; 
-			case ASSIGN_QUAD:	s=":="; break; 
-			case EQ_QUAD:		s="="; break; 
+			case JMP_QUAD:		s="jump"; break;
+			case ASSIGN_QUAD:	s=":="; break;
+			case EQ_QUAD:		s="="; break;
 			case NE_QUAD:		s="<>"; break;
 			case GT_QUAD:		s=">"; break; /* 10 */
 			case LT_QUAD:		s="<"; break;
@@ -241,8 +241,8 @@ char * print_quad(int i){
                         case HEAD_QUAD:         s="head"; break;
                         case TAIL_QUAD:         s="tail"; break; /* 20 */
                         case ISNIL_QUAD:        s="nil?"; break;
-                        case ARRAY_QUAD:        s="array"; break;      
-                        case LIST_QUAD:         s="list"; break;      
+                        case ARRAY_QUAD:        s="array"; break;
+                        case LIST_QUAD:         s="list"; break;
 			default:
 				error("GenQuad: Internal Error\n");
 		}
@@ -259,5 +259,5 @@ char * outp(char * inp){
 void print_all_quads(){
         static int i = 0;
         for(; i < nextquad; i++)
-                printf("quad: %d [%s, %s, %s, %s]\n", i, quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest, print_quad(i));
+                printf("quad: %d [%s, %s, %s, %s]\n", i, print_quad(i), quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest);
 }
