@@ -567,6 +567,14 @@ void yyerror (const char *msg)
 
 int main ()
 {
+  temp1 = emptylist();
+  temp2 = emptylist();
+  temp3 = emptylist();
+  temp4 = emptylist();
+  temp5 = emptylist();
+  temp6 = emptylist();
+  temp7= emptylist();
+
   if (yyparse()==0){
     printf("yyparse returned 0. Everything's all right.\n");
   }

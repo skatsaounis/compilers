@@ -195,7 +195,9 @@ label_list make_list(long val)
 }
 
 label_list merge(label_list a, label_list b){
-	label_list l = a;
+	if (b == NULL)
+        return a;
+    label_list l = a;
 	if (l == NULL)
 		return b;
 	while (l->next != NULL)
