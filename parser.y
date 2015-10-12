@@ -29,22 +29,21 @@ Type lookup_type_find(SymbolEntry * p){
     Type value;
     switch(p->entryType){
         case ENTRY_CONSTANT:
-            value = p->u.eConstant.type;
+            return p->u.eConstant.type;
             break;
         case ENTRY_FUNCTION:
-            value = p->u.eFunction.resultType;
+            return p->u.eFunction.resultType;
             break;
         case ENTRY_PARAMETER:
-            value = p->u.eParameter.type;
+            return p->u.eParameter.type;
             break;
         case ENTRY_VARIABLE:
-            value = p->u.eVariable.type;
+            return p->u.eVariable.type;
             break;
         case ENTRY_TEMPORARY:
-            value = p->u.eTemporary.type;
+            return p->u.eTemporary.type;
             break;
     }
-    return value;
 }
 
 Type lookup_type_in_arrays(Type p){
@@ -179,8 +178,8 @@ func_def_list:
 ;
 
 stmt_list: /* needs fixing with next_list */
-    stmt
-    | stmt stmt_list
+    /* nothing */
+    | stmt_list stmt
 ;
 
 header:
@@ -206,13 +205,10 @@ opt1:
 
 opt2:
     /* nothing */
-    | formal opt2_list
+    |formal
+    | opt2 ';' formal
 ;
 
-opt2_list:
-    /* nothing */
-    | ';' formal opt2_list
-;
 
 formal:
     opt3 type T_id
@@ -221,21 +217,15 @@ formal:
         type = $2.refT;
         pMode = $1.pm;
     }
-    formal_list
+    | formal ',' T_id
+    {
+      newParameter($3, type, pMode, p);
+    }
 ;
 
 opt3:
                                     { $$.pm = PASS_BY_VALUE;       }
     | "ref"                         { $$.pm = PASS_BY_REFERENCE;   }
-;
-
-formal_list:
-    /* nothing */
-    | ',' T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
-        newParameter($2, type, pMode, p);
-    }
-    formal_list
 ;
 
 type:
@@ -260,16 +250,10 @@ var_def:
         newVariable($2, $1.refT);
         type = $1.refT;
     }
-    var_def_list
-;
-
-var_def_list:
-    /* nothing */
-    | ',' T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
-        newVariable($2, type);
+    | var_def ',' T_id
+    {
+      newVariable($3, type);
     }
-    var_def_list
 ;
 
 stmt:
@@ -351,12 +335,8 @@ simple:
 ;
 
 simple_list: /* may need fixing with next_list */
-    simple opt4
-;
-
-opt4: /* may need fixing with next_list */
-    /* nothing */
-    | ',' simple opt4
+    simple
+    | simple_list ',' simple
 ;
 
 call:
