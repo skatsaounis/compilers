@@ -172,9 +172,9 @@ func_def:
 
 func_def_list:
     /* nothing */
-    | func_def func_def_list
-    | func_decl func_def_list
-    | var_def func_def_list
+    | func_def_list func_def
+    | func_def_list func_decl
+    | func_def_list var_def
 ;
 
 stmt_list: /* needs fixing with next_list */
@@ -352,6 +352,7 @@ call:
                         }
 ;
 
+
 opt5:
     /* nothing */       { checkNoParams(currnode->a);
                           if(b->u.eFunction.resultType != typeVoid){
@@ -369,29 +370,17 @@ opt5:
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
                           else
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "REFFERENCE", NULL);
+                          $$.symbol_entry = b;
                         }
-          opt6          { $$.symbol_entry = $3.symbol_entry; }
-;
-
-opt6:
-    /* nothing */       { checkNoParams(currnode->a);
-                          if(b->u.eFunction.resultType != typeVoid){
-                                $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
-                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                          }
-                          else
-                                $$.symbol_entry = b;
-                          GenQuad(CALL_QUAD, NULL, NULL, b);
-                        }
-    | ',' expr          {
+    | opt5 ',' expr     {
                           pm = currnode->a->u.eParameter.mode;
-                          checkParams(&(currnode->a), lookup_type_find($2.symbol_entry));
+                          checkParams(&(currnode->a), lookup_type_find($3.symbol_entry));
                           if (pm == PASS_BY_VALUE)
-                                GenQuad4(PAR_QUAD, $2.symbol_entry, "VALUE", NULL);
+                                GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
                           else
-                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFFERENCE", NULL);
+                                GenQuad4(PAR_QUAD, $3.symbol_entry, "REFFERENCE", NULL);
+                          $$.symbol_entry = $1.symbol_entry;
                         }
-          opt6          { $$.symbol_entry = $4.symbol_entry; }
 ;
 
 atom:
