@@ -10,18 +10,37 @@
 
 
 typedef struct node node;
+typedef struct if_temps if_temps;
 
 struct node{
     SymbolEntry * a;
     node * prev;
 };
 
+struct if_temps{
+  label_list temp1, temp2, temp3, temp4, temp5, temp6, temp7;
+  if_temps * prev;
+};
+
+if_temps * curr_if_temp, *if_temp;
 node * currnode, * temp;
 int flag;
 SymbolEntry * p, * b;
 Type type, refType;
 PassMode pMode, pm;
-label_list temp1, temp2, temp3, temp4, temp5, temp6, temp7;
+label_list temp1;
+
+
+void init_if_temps(if_temps * temps){
+  temps->temp1 = NULL;
+  temps->temp2 = NULL;
+  temps->temp3 = NULL;
+  temps->temp4 = NULL;
+  temps->temp5 = NULL;
+  temps->temp6 = NULL;
+  temps->temp7 = NULL;
+}
+
 
 Type lookup_type_find(SymbolEntry * p){
         if(p == NULL)
@@ -143,7 +162,7 @@ void yyerror (const char *msg);
 %left '*' '/' "mod"
 %left UMINUS UPLUS
 
-%type<a> type opt1 opt3 expr atom call stmt stmt_list elsif_list else_list simple opt5 opt6
+%type<a> simple_list opt4 type opt1 opt3 expr atom call stmt stmt_list elsif_list else_list simple opt5 opt6
 
 
 %%
@@ -179,8 +198,8 @@ func_def_list:
 ;
 
 stmt_list: /* needs fixing with next_list */
-    stmt
-    | stmt stmt_list
+    stmt             { $$.next_list = $1.next_list; }
+    | stmt stmt_list { $$.next_list = $2.next_list; }
 ;
 
 header:
@@ -282,15 +301,25 @@ stmt:
                         }
     | "if" expr         { if (lookup_type_find($2.symbol_entry) != typeBoolean)
                                 ERROR("if exprs must be of type bool");
+
+                          if_temp = (if_temps *) new(sizeof(if_temps));
+                          init_if_temps(if_temp);
+                          if_temp->prev = curr_if_temp;
+                          curr_if_temp = if_temp;
+
                           backpatch($2.true_list, nextquad);
-                          temp1 = $2.false_list;
-                          temp2 = emptylist();
+                          if_temp->temp1 = $2.false_list;
+                          if_temp->temp2 = emptylist();
                         }
       ':' stmt_list elsif_list else_list "end"
-                        { temp6 = merge(temp1,$5.next_list);
-                          temp7 = merge(temp6,$6.next_list);
-                          temp6 = merge(temp7,$7.next_list);
-                          $$.next_list = merge(temp6, temp2);
+                        {
+                          if_temp->temp3 = merge(if_temp->temp1, $5.next_list);
+                          $$.next_list = merge(if_temp->temp3, if_temp->temp2);
+                          backpatch($2.false_list, nextquad);
+
+                          if_temp = curr_if_temp;
+                          curr_if_temp = curr_if_temp->prev;
+                          delete(if_temp);
                         }
     | "for" simple_list ';'
                         {
@@ -309,34 +338,26 @@ stmt:
 ;
 
 elsif_list:
-    /* nothing */       { $$.next_list = emptylist();}
+    /* nothing */       { $$.next_list = emptylist(); }
     | "elsif" expr      { if (lookup_type_find($2.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
-                          backpatch($2.true_list, nextquad);
-                          temp1 = $2.false_list;
-                          temp4 = temp1; /* that is because we need $2.false_list for the else_list */
-                          temp2 = emptylist();
+
                         }
-      ':' stmt_list     { temp1 = make_list(nextquad);
-                          GenQuad2(JMP_QUAD, NULL, NULL, "-1");
-                          backpatch($2.false_list, nextquad);
+      ':' stmt_list     {
+
                         }
-      elsif_list        { temp2 = $7.next_list;
-                          temp5 = $5.next_list; /* that is because we need $5.next_list for the else_list */
-                          temp3 = merge(temp1, $5.next_list);
-                          $$.next_list = merge(temp3, temp2);
+      elsif_list        {
+                          $$.next_list = emptylist();
                         }
 ;
 
 else_list:
-    /* nothing */       { $$.next_list = emptylist();}
-    | "else"            { temp1 = make_list(nextquad);
-                          GenQuad2(JMP_QUAD, NULL, NULL, "-1");
-                          backpatch(temp4, nextquad);
+    /* nothing */       { $$.next_list = emptylist(); }
+    | "else"            {
+
                         }
-      ':' stmt_list     { temp2 = $4.next_list;
-                          temp3 = merge(temp1, temp5);
-                          $$.next_list = merge(temp3, temp2);
+      ':' stmt_list     {
+                          $$.next_list = emptylist();
                         }
 ;
 
@@ -351,12 +372,12 @@ simple:
 ;
 
 simple_list: /* may need fixing with next_list */
-    simple opt4
+    simple opt4         { $$.next_list = $2.next_list; }
 ;
 
 opt4: /* may need fixing with next_list */
-    /* nothing */
-    | ',' simple opt4
+    /* nothing */       { $$.next_list = emptylist();  }
+    | ',' simple opt4   { $$.next_list = $3.next_list; }
 ;
 
 call:
@@ -568,12 +589,6 @@ void yyerror (const char *msg)
 int main ()
 {
   temp1 = emptylist();
-  temp2 = emptylist();
-  temp3 = emptylist();
-  temp4 = emptylist();
-  temp5 = emptylist();
-  temp6 = emptylist();
-  temp7= emptylist();
 
   if (yyparse()==0){
     printf("yyparse returned 0. Everything's all right.\n");

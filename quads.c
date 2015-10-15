@@ -29,7 +29,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];
+                char bufferx[256];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
@@ -50,7 +50,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
 	else if (y->entryType == ENTRY_CONSTANT){
-                char buffery[1];
+                char buffery[256];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(buffery, "%d", (int) y->u.eConstant.value.vInteger);
@@ -82,7 +82,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];
+                char bufferx[256];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
@@ -103,7 +103,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
 	else if (y->entryType == ENTRY_CONSTANT){
-                char buffery[1];
+                char buffery[256];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(buffery, "%d", (int) y->u.eConstant.value.vInteger);
@@ -151,7 +151,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
 	if (x == NULL)
 		quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
-                char bufferx[1];
+                char bufferx[256];
                 switch (x->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
                         sprintf(bufferx, "%d", (int) x->u.eConstant.value.vInteger);
