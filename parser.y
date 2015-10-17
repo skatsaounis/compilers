@@ -200,11 +200,11 @@ func_def_list:
 stmt_list: /* needs fixing with next_list */
     stmt             { $$.next_list = $1.next_list;
                        $$.false_list = $1.false_list;
-                       $$.true_list = $1.false_list;
+                       $$.true_list = $1.true_list;
                      }
     | stmt stmt_list { $$.next_list = $2.next_list;
                        $$.false_list = $2.false_list;
-                       $$.true_list = $2.false_list;
+                       $$.true_list = $2.true_list;
                      }
 ;
 

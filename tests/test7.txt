@@ -2,7 +2,7 @@ def bool quicksort( int[] a; int m,n ):
 	int i, j, ii, jj, temp
 	if n <=m: return  true end
 
-	for i := m ; i <= j ; i := i+1:
+	for i := m, j :=n ; i <= j ; i := i+1:
 		for ii:=i; a[ii] < a[(m+n) / 2]; ii := ii+1 :
 			skip
 		end
