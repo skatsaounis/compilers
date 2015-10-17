@@ -198,8 +198,14 @@ func_def_list:
 ;
 
 stmt_list: /* needs fixing with next_list */
-    stmt             { $$.next_list = $1.next_list; }
-    | stmt stmt_list { $$.next_list = $2.next_list; }
+    stmt             { $$.next_list = $1.next_list;
+                       $$.false_list = $1.false_list;
+                       $$.true_list = $1.false_list;
+                     }
+    | stmt stmt_list { $$.next_list = $2.next_list;
+                       $$.false_list = $2.false_list;
+                       $$.true_list = $2.false_list;
+                     }
 ;
 
 header:
@@ -292,7 +298,11 @@ var_def_list:
 ;
 
 stmt:
-    simple              { $$.next_list = $1.next_list; }
+    simple              {
+                          $$.next_list = $1.next_list;
+                          $$.true_list = $1.true_list;
+                          $$.false_list = $1.false_list;
+                        }
     | "exit"            { $$.next_list = emptylist();  }
     | "return" expr     { if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
                                 ERROR("Wrong type for return value");
@@ -309,13 +319,14 @@ stmt:
 
                           backpatch($2.true_list, nextquad);
                           if_temp->temp1 = $2.false_list;
+                          if_temp->temp4 = $2.false_list;
                           if_temp->temp2 = emptylist();
                         }
       ':' stmt_list elsif_list else_list "end"
                         {
                           if_temp->temp3 = merge(if_temp->temp1, $5.next_list);
                           $$.next_list = merge(if_temp->temp3, if_temp->temp2);
-                          backpatch($2.false_list, nextquad);
+                          backpatch(if_temp->temp5, nextquad);
 
                           if_temp = curr_if_temp;
                           curr_if_temp = curr_if_temp->prev;
@@ -342,6 +353,8 @@ elsif_list:
     | "elsif" expr      { if (lookup_type_find($2.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
 
+                          backpatch($2.true_list, nextquad);
+                          if_temp->temp6 = $2.false_list;
                         }
       ':' stmt_list     {
 
@@ -352,12 +365,17 @@ elsif_list:
 ;
 
 else_list:
-    /* nothing */       { $$.next_list = emptylist(); }
+    /* nothing */       {
+                          backpatch(if_temp->temp4,nextquad);
+                          $$.next_list = emptylist(); }
     | "else"            {
+                          if_temp->temp1 = make_list(nextquad);
+                          if_temp->temp5 = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                          backpatch(if_temp->temp4, nextquad);
 
                         }
       ':' stmt_list     {
-                          $$.next_list = emptylist();
+                          if_temp->temp2 = $4.next_list;
                         }
 ;
 
@@ -365,8 +383,9 @@ simple:
     "skip"              { $$.next_list = emptylist(); }
     | atom ":=" expr    { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
                                 ERROR("not the same type of exprs");
-                          GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry);
-                          $$.next_list = emptylist();
+                          $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry));
+                          $$.false_list = emptylist();
+                          $$.true_list = emptylist();
                         }
     | call              { $$.next_list = emptylist(); }
 ;
@@ -548,7 +567,10 @@ expr:
                                       $$.symbol_entry = newTemporary(typeInteger);
                                       GenQuad(PLUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
                                     }
-    | '(' expr ')'                  { $$.symbol_entry = $2.symbol_entry; }
+    | '(' expr ')'                  { $$.symbol_entry = $2.symbol_entry;
+                                      $$.true_list = $2.true_list;
+                                      $$.false_list = $2.false_list;
+                                    }
     | "not" expr                    { if(lookup_type_find($2.symbol_entry) != typeBoolean)
                                             ERROR("expr must be of type bool");
                                       $$.symbol_entry = newTemporary(typeBoolean);
