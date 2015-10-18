@@ -4,33 +4,34 @@
 #include "symbol.h"
 #define MAX_QUAD_NUM 1000
 
-typedef enum {                   /*********/
-	PLUS_QUAD,               /*   +   */
-	MINUS_QUAD,              /*   -   */
-	MULT_QUAD,               /*   *   */
-	DIV_QUAD,                /*   /   */
-	MOD_QUAD,                /*   %   */
-	EQ_QUAD,                 /*   =   */
-	NE_QUAD,                 /*   <>  */
-	GT_QUAD,                 /*   >   */
-	LT_QUAD,                 /*   <   */
-	GE_QUAD,                 /*   >=  */
-	LE_QUAD,                 /*   <=  */
-	ASSIGN_QUAD,             /*   :=  */
-	JMP_QUAD,                /* jump  */
-	RET_QUAD,                /*  ret  */
-        RETV_QUAD,                /*  retv */
-	ARRAY_QUAD,              /* array */
-        LIST_QUAD,               /* list  */
-        HEAD_QUAD,               /* head  */
-        TAIL_QUAD,               /* tail  */
-        ISNIL_QUAD,              /* nil?  */
-	UNIT_QUAD,               /* unit  */
-	ENDU_QUAD,               /* endu  */
-	PAR_QUAD,                /*  par  */
-	CALL_QUAD,               /* call  */
-	IFB_QUAD                 /*  ifb  */
-} QuadType;                      /*********/
+typedef enum {               /***********/
+	PLUS_QUAD,               /*    +    */
+	MINUS_QUAD,              /*    -    */
+	MULT_QUAD,               /*    *    */
+	DIV_QUAD,                /*    /    */
+	MOD_QUAD,                /*    %    */
+	EQ_QUAD,                 /*    =    */
+	NE_QUAD,                 /*    <>   */
+	GT_QUAD,                 /*    >    */
+	LT_QUAD,                 /*    <    */
+	GE_QUAD,                 /*    >=   */
+	LE_QUAD,                 /*    <=   */
+	ASSIGN_QUAD,             /*    :=   */
+	JMP_QUAD,                /*   jump  */
+	RET_QUAD,                /*   ret   */
+    RETV_QUAD,               /*   retv  */
+	ARRAY_QUAD,              /*   array */
+    LIST_QUAD,               /*   list  */
+    HEAD_QUAD,               /*   head  */
+    TAIL_QUAD,               /*   tail  */
+    ISNIL_QUAD,              /*   nil?  */
+	UNIT_QUAD,               /*   unit  */
+	ENDU_QUAD,               /*   endu  */
+	PAR_QUAD,                /*   par   */
+	CALL_QUAD,               /*   call  */
+	IFB_QUAD,                /*   ifb   */
+	PTR_QUAD,                /* ^points */
+} QuadType;                  /***********/
 
 typedef struct {                 /*********/
 	QuadType type;           /*  op   */

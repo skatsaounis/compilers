@@ -102,7 +102,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 		quad_array[nextquad].arg1 = (char *) x->id;
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
-	else if (y->entryType == ENTRY_CONSTANT){
+	else if ((y->entryType == ENTRY_CONSTANT) && (q != PTR_QUAD)){
                 char buffery[256];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
@@ -222,30 +222,31 @@ void backpatch(label_list list, long val){
 char * print_quad(int i){
 	char * s;
 	switch(quad_array[i].type) {
-			case PLUS_QUAD:		s="+"; break; /* 1 */
-			case MINUS_QUAD:	s="-"; break;
-			case MULT_QUAD:		s="*"; break;
-			case DIV_QUAD:		s="/"; break;
-			case MOD_QUAD:		s="%"; break; /* 5 */
-			case JMP_QUAD:		s="jump"; break;
-			case ASSIGN_QUAD:	s=":="; break;
-			case EQ_QUAD:		s="="; break;
-			case NE_QUAD:		s="<>"; break;
-			case GT_QUAD:		s=">"; break; /* 10 */
-			case LT_QUAD:		s="<"; break;
-			case GE_QUAD:		s=">="; break;
-			case LE_QUAD:		s="<=";	break;
-			case UNIT_QUAD:		s="unit"; break;
-			case ENDU_QUAD:		s="endu"; break; /* 15 */
-			case PAR_QUAD:		s="par"; break;
-			case CALL_QUAD:		s="call"; break;
-			case RET_QUAD:		s="ret"; break;
-                        case RETV_QUAD:		s="retv"; break;
-                        case HEAD_QUAD:         s="head"; break;
-                        case TAIL_QUAD:         s="tail"; break; /* 20 */
-                        case ISNIL_QUAD:        s="nil?"; break;
-                        case ARRAY_QUAD:        s="array"; break;
-                        case LIST_QUAD:         s="list"; break;
+			case PLUS_QUAD:		s="+";       break; /* 1 */
+			case MINUS_QUAD:	s="-";       break;
+			case MULT_QUAD:		s="*";       break;
+			case DIV_QUAD:		s="/";       break;
+			case MOD_QUAD:		s="%";       break; /* 5 */
+			case JMP_QUAD:		s="jump";    break;
+			case ASSIGN_QUAD:	s=":=";      break;
+			case EQ_QUAD:		s="=";       break;
+			case NE_QUAD:		s="<>";      break;
+			case GT_QUAD:		s=">";       break; /* 10 */
+			case LT_QUAD:		s="<";       break;
+			case GE_QUAD:		s=">=";      break;
+			case LE_QUAD:		s="<=";	     break;
+			case UNIT_QUAD:		s="unit";    break;
+			case ENDU_QUAD:		s="endu";    break; /* 15 */
+			case PAR_QUAD:		s="par";     break;
+			case CALL_QUAD:		s="call";    break;
+			case RET_QUAD:		s="ret";     break;
+            case RETV_QUAD:		s="retv";    break;
+            case HEAD_QUAD:     s="head";    break;
+            case TAIL_QUAD:     s="tail";    break; /* 20 */
+            case ISNIL_QUAD:    s="nil?";    break;
+            case ARRAY_QUAD:    s="array";   break;
+            case LIST_QUAD:     s="list";    break;
+            case PTR_QUAD:      s="pointer"; break;
 			default:
 				error("GenQuad: Internal Error\n");
 		}

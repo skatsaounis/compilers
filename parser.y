@@ -33,13 +33,21 @@ struct for_temps{
 if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
+char * S;
 node * currnode, * temp;
 int flag;
-SymbolEntry * p, * b;
+SymbolEntry * p, * b, * W;
 Type type, refType;
 PassMode pMode, pm;
 
-
+char * custom_sizeof(Type refT){
+  int size;
+  char buffer[15];
+  /* needs effort and thought */
+  size = 1;
+  sprintf(buffer, "%d", size);
+  return buffer;
+}
 
 void init_if_temps(if_temps * temps){
   temps->temp1 = NULL;
@@ -118,6 +126,7 @@ void yyerror (const char *msg);
 
 %union {
         struct{
+                int pointer;
                 PassMode pm;
                 Type refT;
                 label_list true_list;
@@ -418,6 +427,12 @@ simple:
     "skip"              { $$.next_list = emptylist(); }
     | atom ":=" expr    { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
                                 ERROR("not the same type of exprs");
+
+                          if($3.pointer == 1){
+                            GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+                            GenQuad2(CALL_QUAD, NULL, NULL, "_new");
+                          }
+
                           $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry));
                           $$.false_list = emptylist();
                           $$.true_list = emptylist();
@@ -626,8 +641,14 @@ expr:
                                     }
     | "new" type '[' expr ']'       { if(lookup_type_find($4.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
+
+                                      S = custom_sizeof($2.refT);
+                                      W = newTemporary(typeInteger);
+                                      GenQuad2(PTR_QUAD, W, $4.symbol_entry, S);
+                                      GenQuad4(PAR_QUAD, W, "VALUE", NULL);
+
+                                      $$.pointer = 1;
                                       $$.symbol_entry = newTemporary(typeIArray($2.refT));
-                                      GenQuad(ARRAY_QUAD, $2.symbol_entry, $4.symbol_entry, $$.symbol_entry); /* Added Today */
                                     }
     | "nil"                         { $$.symbol_entry = newTemporary(typeList(typeVoid)); }
     | "nil?" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
