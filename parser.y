@@ -508,8 +508,16 @@ expr:
     atom                            { $$.symbol_entry = $1.symbol_entry; }
     | T_num                         { $$.symbol_entry = newConstant ("a", typeInteger, atoi($1)); } /* atoi can also go to lexer, I don't know what is better */
     | T_const                       { $$.symbol_entry = newConstant ("a", typeChar, $1);    } /* Here we may have a problem to solve */
-    | "true"                        { $$.symbol_entry = newConstant ("a", typeBoolean, 1);  }
-    | "false"                       { $$.symbol_entry = newConstant ("a", typeBoolean, 0);  }
+    | "true"                        {
+                                      $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                      $$.true_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.false_list = emptylist();
+                                    }
+    | "false"                       {
+                                      $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                      $$.true_list = emptylist();
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                    }
     | expr '+' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);

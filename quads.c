@@ -216,7 +216,6 @@ void backpatch(label_list list, long val){
     		quad_array[l->label].dest = strdup(tmp);
         }
 		l = l->next;
-		delete(list);
 	}
 }
 
