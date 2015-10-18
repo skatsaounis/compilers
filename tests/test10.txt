@@ -1,0 +1,7 @@
+def main():
+	int i
+	list[int] lt
+	if nil?(lt):
+		i := 1
+	end
+end

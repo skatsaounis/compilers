@@ -368,7 +368,7 @@ stmt:
                           GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp3);
                           backpatch($5.false_list,nextquad);
 			  $$.next_list = $5.false_list;
-			  
+
 			  for_temp = curr_for_temp;
                           curr_for_temp = curr_for_temp->prev;
                           delete(for_temp);
@@ -376,7 +376,7 @@ stmt:
 ;
 
 elsif_list:
-    /* nothing */       { 
+    /* nothing */       {
 			  $$.next_list = emptylist(); }
     | "elsif" 		{ if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
 			  backpatch(if_temp->temp4, nextquad);
@@ -618,7 +618,8 @@ expr:
     | "nil?" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      GenQuad(ISNIL_QUAD, $3.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
+                                      $$.true_list = make_list(GenQuad2(ISNIL_QUAD, NULL, $3.symbol_entry, "-1"));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
                                     }
     | "head" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
