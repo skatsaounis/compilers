@@ -348,28 +348,30 @@ stmt:
                           delete(if_temp);
                         }
     | "for" simple_list ';'
-                        { for_temp = (for_temps *) new(sizeof(for_temps));
+                        {
+                          for_temp = (for_temps *) new(sizeof(for_temps));
                           init_for_temps(for_temp);
                           for_temp->prev = curr_for_temp;
                           curr_for_temp = for_temp;
                           sprintf(for_temp->temp1, "%ld", nextquad);
                         }
-       expr ';' 	{ for_temp->temp2 = nextquad;
-			  sprintf(for_temp->temp3, "%ld", nextquad);
-			}
-       simple_list ':'
-                        { if (lookup_type_find($5.symbol_entry) != typeBoolean)
-                                ERROR("for exprs must be of type bool");
-			  GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp1);
-			  backpatch($5.true_list,nextquad);
+      expr ';'          {
+                          for_temp->temp2 = nextquad;
+                          sprintf(for_temp->temp3, "%ld", nextquad);
                         }
-       stmt_list "end"
-                        { backpatch($11.next_list,for_temp->temp2);
+      simple_list ':'   {
+                          if (lookup_type_find($5.symbol_entry) != typeBoolean)
+                                ERROR("for exprs must be of type bool");
+                          GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp1);
+                          backpatch($5.true_list,nextquad);
+                        }
+      stmt_list "end"   {
+                          backpatch($11.next_list,for_temp->temp2);
                           GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp3);
                           backpatch($5.false_list,nextquad);
-			  $$.next_list = $5.false_list;
+                          $$.next_list = $5.false_list;
 
-			  for_temp = curr_for_temp;
+                          for_temp = curr_for_temp;
                           curr_for_temp = curr_for_temp->prev;
                           delete(for_temp);
                         }
@@ -377,19 +379,20 @@ stmt:
 
 elsif_list:
     /* nothing */       {
-			  $$.next_list = emptylist(); }
-    | "elsif" 		{ if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
-			  backpatch(if_temp->temp4, nextquad);
-			}
-       expr      	{ if (lookup_type_find($3.symbol_entry) != typeBoolean)
+                          $$.next_list = emptylist();
+                        }
+    | "elsif"           { if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+                          backpatch(if_temp->temp4, nextquad);
+                        }
+      expr              { if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
 
                           backpatch($3.true_list, nextquad);
-			  if_temp->temp4 = $3.false_list;
-			  if_temp->temp2 = emptylist();
+                          if_temp->temp4 = $3.false_list;
+                          if_temp->temp2 = emptylist();
                         }
       ':' stmt_list     {
-			  if_temp->temp2 = $6.next_list;
+                          if_temp->temp2 = $6.next_list;
                         }
       elsif_list        {
                           $$.next_list = emptylist();
@@ -432,12 +435,14 @@ opt4: /* may need fixing with next_list */
 ;
 
 call:
-    T_id                { temp = (node *) new(sizeof(node));
+    T_id                {
+                          temp = (node *) new(sizeof(node));
                           temp->prev = currnode;
                           currnode = temp;
                           b = lookupEntry($1, LOOKUP_ALL_SCOPES, true); currnode->a = b->u.eFunction.firstArgument;
                         }
-    '(' opt5 ')'        { $$.symbol_entry = $4.symbol_entry;
+    '(' opt5 ')'        {
+                          $$.symbol_entry = $4.symbol_entry;
                           temp = currnode;
                           currnode = currnode->prev;
                           delete(temp);
@@ -445,7 +450,8 @@ call:
 ;
 
 opt5:
-    /* nothing */       { checkNoParams(currnode->a);
+    /* nothing */       {
+                          checkNoParams(currnode->a);
                           if(b->u.eFunction.resultType != typeVoid){
                                 $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
                                 GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
@@ -466,7 +472,8 @@ opt5:
 ;
 
 opt6:
-    /* nothing */       { checkNoParams(currnode->a);
+    /* nothing */       {
+                          checkNoParams(currnode->a);
                           if(b->u.eFunction.resultType != typeVoid){
                                 $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
                                 GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);

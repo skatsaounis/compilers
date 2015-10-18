@@ -211,8 +211,10 @@ void backpatch(label_list list, long val){
 	char tmp[256];
 	sprintf(tmp, "%d", val); /*the previous implementation was giving wrong result*/
 	while ((list = l) != NULL) {
-		delete(quad_array[l->label].dest);
-		quad_array[l->label].dest = strdup(tmp);
+        if(strcmp(quad_array[l->label].dest, "-1") == 0){
+    		delete(quad_array[l->label].dest);
+    		quad_array[l->label].dest = strdup(tmp);
+        }
 		l = l->next;
 		delete(list);
 	}
