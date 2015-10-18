@@ -5,10 +5,6 @@ def main():
 		i := i + 2
 	elsif (i < 5):
 		i := i * 10
-	elsif (i < 4):
-		i := i - 5
-	elsif (i < 3):
-		i := i mod 2
 	else:
 		i := i - 4
 	end

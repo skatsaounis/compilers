@@ -1,0 +1,11 @@
+def main():
+	int i, j, k, p
+	j := 2
+        k := 1
+	for i := 1 ; i < 10 ; i := i+1:
+		j := j + 2
+		for p := 1 ; p < 10 ; p := p+1:
+			k := k + 2	
+	end	
+	end
+end

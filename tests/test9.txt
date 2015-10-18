@@ -1,0 +1,7 @@
+def main():
+	int i, j
+	j := 2
+	for i := 1 ; i < 10 ; i := i+1:
+		j := j + 2
+	end
+end

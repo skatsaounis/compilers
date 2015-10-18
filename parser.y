@@ -11,6 +11,7 @@
 
 typedef struct node node;
 typedef struct if_temps if_temps;
+typedef struct for_temps for_temps;
 
 struct node{
     SymbolEntry * a;
@@ -22,13 +23,22 @@ struct if_temps{
   if_temps * prev;
 };
 
+struct for_temps{
+  char temp1[256];
+  long temp2;
+  char temp3[256];
+  for_temps * prev;
+};
+
 if_temps * curr_if_temp, *if_temp;
+for_temps * curr_for_temp, *for_temp;
+
 node * currnode, * temp;
 int flag;
 SymbolEntry * p, * b;
 Type type, refType;
 PassMode pMode, pm;
-label_list temp1;
+
 
 
 void init_if_temps(if_temps * temps){
@@ -41,6 +51,11 @@ void init_if_temps(if_temps * temps){
   temps->temp7 = NULL;
 }
 
+void init_for_temps(for_temps * temps){
+  sprintf(temps->temp1, "-1");
+  temps->temp2 = 0;
+  sprintf(temps->temp3, "-1");
+}
 
 Type lookup_type_find(SymbolEntry * p){
         if(p == NULL)
@@ -333,31 +348,48 @@ stmt:
                           delete(if_temp);
                         }
     | "for" simple_list ';'
-                        {
-                          temp1 = nextquad;
+                        { for_temp = (for_temps *) new(sizeof(for_temps));
+                          init_for_temps(for_temp);
+                          for_temp->prev = curr_for_temp;
+                          curr_for_temp = for_temp;
+                          sprintf(for_temp->temp1, "%ld", nextquad);
                         }
-       expr ';' simple_list ':'
+       expr ';' 	{ for_temp->temp2 = nextquad;
+			  sprintf(for_temp->temp3, "%ld", nextquad);
+			}
+       simple_list ':'
                         { if (lookup_type_find($5.symbol_entry) != typeBoolean)
                                 ERROR("for exprs must be of type bool");
-                          backpatch($5.true_list,nextquad);
+			  GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp1);
+			  backpatch($5.true_list,nextquad);
                         }
        stmt_list "end"
-                        { backpatch($10.next_list,temp1);
-                          GenQuad2(JMP_QUAD, NULL, NULL, "-1");
-                          $$.next_list = $5.false_list;
+                        { backpatch($11.next_list,for_temp->temp2);
+                          GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp3);
+                          backpatch($5.false_list,nextquad);
+			  $$.next_list = $5.false_list;
+			  
+			  for_temp = curr_for_temp;
+                          curr_for_temp = curr_for_temp->prev;
+                          delete(for_temp);
                         }
 ;
 
 elsif_list:
-    /* nothing */       { $$.next_list = emptylist(); }
-    | "elsif" expr      { if (lookup_type_find($2.symbol_entry) != typeBoolean)
+    /* nothing */       { 
+			  $$.next_list = emptylist(); }
+    | "elsif" 		{ if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+			  backpatch(if_temp->temp4, nextquad);
+			}
+       expr      	{ if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
 
-                          backpatch($2.true_list, nextquad);
-                          if_temp->temp6 = $2.false_list;
+                          backpatch($3.true_list, nextquad);
+			  if_temp->temp4 = $3.false_list;
+			  if_temp->temp2 = emptylist();
                         }
       ':' stmt_list     {
-
+			  if_temp->temp2 = $6.next_list;
                         }
       elsif_list        {
                           $$.next_list = emptylist();
@@ -370,7 +402,7 @@ else_list:
                           $$.next_list = emptylist(); }
     | "else"            {
                           if_temp->temp1 = make_list(nextquad);
-                          if_temp->temp5 = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                          if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
                           backpatch(if_temp->temp4, nextquad);
 
                         }
@@ -459,7 +491,7 @@ atom:
     | T_string                      { $$.symbol_entry = newConstant ("a", typeIArray(typeChar), $1); }
     | atom '[' expr ']'             { if(lookup_type_find($3.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
-                                      $$.symbol_entry = newTemporary(typeIArray(lookup_type_find($1.symbol_entry)));
+                                      $$.symbol_entry = newTemporary(lookup_type_find($1.symbol_entry));
                                       GenQuad(ARRAY_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry);
                                     }
     | call                          { $$.symbol_entry = $1.symbol_entry; }
@@ -611,7 +643,6 @@ void yyerror (const char *msg)
 
 int main ()
 {
-  temp1 = emptylist();
 
   if (yyparse()==0){
     printf("yyparse returned 0. Everything's all right.\n");

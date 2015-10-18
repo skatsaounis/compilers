@@ -1,0 +1,9 @@
+def main():
+	int i
+	i := 1
+	if (i < 10):
+		
+			i := i + 2
+		
+	end
+end
