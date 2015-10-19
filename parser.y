@@ -346,15 +346,15 @@ stmt:
                           curr_if_temp = if_temp;
 
                           backpatch($2.true_list, nextquad);
-                          if_temp->temp1 = $2.false_list;
-                          if_temp->temp4 = $2.false_list;
-                          if_temp->temp2 = emptylist();
+                          curr_if_temp->temp1 = $2.false_list;
+                          curr_if_temp->temp4 = $2.false_list;
+                          curr_if_temp->temp2 = emptylist();
                         }
       ':' stmt_list elsif_list else_list "end"
                         {
-                          if_temp->temp3 = merge(if_temp->temp1, $5.next_list);
-                          $$.next_list = merge(if_temp->temp3, if_temp->temp2);
-                          backpatch(if_temp->temp5, nextquad);
+                          curr_if_temp->temp3 = merge(curr_if_temp->temp1, $5.next_list);
+                          $$.next_list = merge(curr_if_temp->temp3, curr_if_temp->temp2);
+                          backpatch(curr_if_temp->temp5, nextquad);
 
                           if_temp = curr_if_temp;
                           curr_if_temp = curr_if_temp->prev;
@@ -366,21 +366,21 @@ stmt:
                           init_for_temps(for_temp);
                           for_temp->prev = curr_for_temp;
                           curr_for_temp = for_temp;
-                          sprintf(for_temp->temp1, "%ld", nextquad);
+                          sprintf(curr_for_temp->temp1, "%ld", nextquad);
                         }
       expr ';'          {
-                          for_temp->temp2 = nextquad;
-                          sprintf(for_temp->temp3, "%ld", nextquad);
+                          curr_for_temp->temp2 = nextquad;
+                          sprintf(curr_for_temp->temp3, "%ld", nextquad);
                         }
       simple_list ':'   {
                           if (lookup_type_find($5.symbol_entry) != typeBoolean)
                                 ERROR("for exprs must be of type bool");
-                          GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp1);
+                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp1);
                           backpatch($5.true_list,nextquad);
                         }
       stmt_list "end"   {
-                          backpatch($11.next_list,for_temp->temp2);
-                          GenQuad2(JMP_QUAD, NULL, NULL,for_temp->temp3);
+                          backpatch($11.next_list,curr_for_temp->temp2);
+                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp3);
                           backpatch($5.false_list,nextquad);
                           $$.next_list = $5.false_list;
 
@@ -394,18 +394,18 @@ elsif_list:
     /* nothing */       {
                           $$.next_list = emptylist();
                         }
-    | "elsif"           { if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
-                          backpatch(if_temp->temp4, nextquad);
+    | "elsif"           { curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+                          backpatch(curr_if_temp->temp4, nextquad);
                         }
       expr              { if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
 
                           backpatch($3.true_list, nextquad);
-                          if_temp->temp4 = $3.false_list;
-                          if_temp->temp2 = emptylist();
+                          curr_if_temp->temp4 = $3.false_list;
+                          curr_if_temp->temp2 = emptylist();
                         }
       ':' stmt_list     {
-                          if_temp->temp2 = $6.next_list;
+                          curr_if_temp->temp2 = $6.next_list;
                         }
       elsif_list        {
                           $$.next_list = emptylist();
@@ -414,16 +414,16 @@ elsif_list:
 
 else_list:
     /* nothing */       {
-                          backpatch(if_temp->temp4,nextquad);
+                          backpatch(curr_if_temp->temp4,nextquad);
                           $$.next_list = emptylist(); }
     | "else"            {
-                          if_temp->temp1 = make_list(nextquad);
-                          if_temp->temp5 = merge(if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
-                          backpatch(if_temp->temp4, nextquad);
+                          curr_if_temp->temp1 = make_list(nextquad);
+                          curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+                          backpatch(curr_if_temp->temp4, nextquad);
 
                         }
       ':' stmt_list     {
-                          if_temp->temp2 = $4.next_list;
+                          curr_if_temp->temp2 = $4.next_list;
                         }
 ;
 
