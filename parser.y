@@ -33,7 +33,7 @@ struct for_temps{
 if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
-char * S;
+char * S, func_name;
 node * currnode, * temp;
 int flag;
 SymbolEntry * p, * b, * W;
@@ -206,7 +206,11 @@ program:
 
 func_def:
     { flag = 0; }
-    "def" header  ':' func_def_list stmt_list "end"
+    "def" header  ':' func_def_list
+    {
+		GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
+    }
+    stmt_list "end"
     {
                 GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);
                 print_all_quads();
@@ -234,8 +238,8 @@ stmt_list: /* needs fixing with next_list */
 
 header:
     opt1 T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
-                GenQuad3(UNIT_QUAD, $2, NULL, NULL);
+    {   /* fprintf(stderr,"%s \n", $2); 
+                GenQuad3(UNIT_QUAD, $2, NULL, NULL);*/
                 p = newFunction($2);
         if(flag){
             forwardFunction(p);
