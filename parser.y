@@ -7,7 +7,7 @@
 #include "error.h"
 #include "symbol.h"
 #include "general.h"
-
+#include "generator.h"
 
 typedef struct node node;
 typedef struct if_temps if_temps;
@@ -709,5 +709,6 @@ int main ()
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
   fclose(fp);
+  generator();
   return 0;
 }
