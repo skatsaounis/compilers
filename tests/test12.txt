@@ -1,5 +1,5 @@
 def main ():
-	int[] a
-	a := new int[16]
+	char[] a
+	a := new char[16]
 	puts("a")
 end

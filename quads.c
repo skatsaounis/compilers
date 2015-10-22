@@ -102,7 +102,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 		quad_array[nextquad].arg1 = (char *) x->id;
 	if (y == NULL)
 		quad_array[nextquad].arg2 = "-";
-	else if ((y->entryType == ENTRY_CONSTANT) && (q != PTR_QUAD)){
+	else if (y->entryType == ENTRY_CONSTANT){
                 char buffery[256];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
@@ -260,8 +260,8 @@ char * outp(char * inp){
                 return inp;
 }
 
-void print_all_quads(){
+void print_all_quads(FILE * fp){
         static int i = 0;
         for(; i < nextquad; i++)
-                printf("quad: %d [%s, %s, %s, %s]\n", i, print_quad(i), quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest);
+            fprintf(fp, "%d: [%s, %s, %s, %s]\n", i, print_quad(i), quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest);
 }

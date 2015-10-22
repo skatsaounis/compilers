@@ -30,23 +30,42 @@ struct for_temps{
   for_temps * prev;
 };
 
+FILE * fp;
+
 if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
-char * S, func_name;
 node * currnode, * temp;
 int flag;
-SymbolEntry * p, * b, * W;
+SymbolEntry * p, * b, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
 
-char * custom_sizeof(Type refT){
-  int size;
-  char buffer[15];
-  /* needs effort and thought */
-  size = 1;
-  sprintf(buffer, "%d", size);
-  return buffer;
+int custom_sizeof(Type refT){
+  switch (refT->kind) {
+    case TYPE_INTEGER:
+      return 4;
+      break;
+    case TYPE_BOOLEAN:
+      return 1;
+      break;
+    case TYPE_CHAR:
+      return 1;
+      break;
+    case TYPE_IARRAY:
+      /* Needs fixing */
+      return 42;
+      break;
+    case TYPE_LIST:
+      /* Needs fixing */
+      return 64;
+      break;
+    default:
+      internal("Invalid type for refT");
+      return -1;
+  }
+  /* never goes here */
+  return 0;
 }
 
 void init_if_temps(if_temps * temps){
@@ -213,7 +232,7 @@ func_def:
     stmt_list "end"
     {
                 GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);
-                print_all_quads();
+                print_all_quads(fp);
         closeScope();
     }
 ;
@@ -238,7 +257,7 @@ stmt_list: /* needs fixing with next_list */
 
 header:
     opt1 T_id
-    {   /* fprintf(stderr,"%s \n", $2); 
+    {   /* fprintf(stderr,"%s \n", $2);
                 GenQuad3(UNIT_QUAD, $2, NULL, NULL);*/
                 p = newFunction($2);
         if(flag){
@@ -645,10 +664,9 @@ expr:
                                     }
     | "new" type '[' expr ']'       { if(lookup_type_find($4.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
-
-                                      S = custom_sizeof($2.refT);
+                                      S = newConstant ("a", typeInteger, custom_sizeof($2.refT));
                                       W = newTemporary(typeInteger);
-                                      GenQuad2(PTR_QUAD, W, $4.symbol_entry, S);
+                                      GenQuad(MULT_QUAD, $4.symbol_entry, S, W);
                                       GenQuad4(PAR_QUAD, W, "VALUE", NULL);
 
                                       $$.pointer = 1;
@@ -684,11 +702,12 @@ void yyerror (const char *msg)
 
 int main ()
 {
-
+  fp = fopen("quads.txt", "w+");
   if (yyparse()==0){
     printf("yyparse returned 0. Everything's all right.\n");
   }
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
+  fclose(fp);
   return 0;
 }

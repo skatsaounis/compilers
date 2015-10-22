@@ -74,7 +74,7 @@ struct Type_tag {
        TYPE_ARRAY,                       /* Πίνακες γνωστού μεγέθους  */
        TYPE_IARRAY,                      /* Πίνακες άγνωστου μεγέθους */
        TYPE_POINTER,                     /* Δείκτες                   */
-       TYPE_LIST			 /* Λίστες		      */
+       TYPE_LIST			                   /* Λίστες		                */
     } kind;
     Type           refType;              /* Τύπος αναφοράς            */
     RepInteger     size;                 /* Μέγεθος, αν είναι πίνακας */
@@ -84,7 +84,7 @@ struct Type_tag {
 
 /* Τύποι εγγραφών του πίνακα συμβόλων */
 
-typedef enum {            
+typedef enum {
    ENTRY_VARIABLE,                       /* Μεταβλητές                 */
    ENTRY_CONSTANT,                       /* Σταθερές                   */
    ENTRY_FUNCTION,                       /* Συναρτήσεις                */
@@ -95,7 +95,7 @@ typedef enum {
 
 /* Τύποι περάσματος παραμετρων */
 
-typedef enum {            
+typedef enum {
    PASS_BY_VALUE,                        /* Κατ' αξία                  */
    PASS_BY_REFERENCE                     /* Κατ' αναφορά               */
 } PassMode;
