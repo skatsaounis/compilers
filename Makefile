@@ -24,7 +24,7 @@ error.o     : error.c general.h error.h
 symbol.o    : symbol.c symbol.h general.h error.h parser.h quads.h
 quads.o     : quads.c quads.h symbol.h general.h error.h parser.h
 addme.o     : addme.c symbol.h
-generator.o : generator.c generator.h
+generator.o : generator.c generator.h quads.h
 
 clean:
 	$(RM) lexer.c parser.c parser.h parser.output *.o *~
