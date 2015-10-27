@@ -1,12 +1,4 @@
 def solve ():
-	def int readInteger():
-		skip
-	end
-
-	def puts(char[] s):
-		skip
-	end
-
 	def hanoi (int rings; char[] source, target, auxiliary):
 
 		def move (char[] source, target):

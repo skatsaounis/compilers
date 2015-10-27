@@ -1,10 +1,4 @@
 def main ():
-def puts(char[] s):
-skip
-end
-def puti(int s):
-skip
-end
 def bsort (int n; int[] x):
 def swap (ref int x, y):
 int t

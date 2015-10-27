@@ -11,7 +11,7 @@ void generator(){
 
 	fp = fopen("code.txt", "w+");
 	fp2 = fopen("quads.txt", "r");
-	fprintf(fp, "xseg segment public´code´\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near\n\tcall near ptr program\n\tax,4C00h\n\tint 21h\nmain endp\n");
+	fprintf(fp, "xseg segment public´code´\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near\n\tcall near ptr program\n\tmov ax,4C00h\n\tint 21h\nmain endp\n");
 
 	for(i = 0; i < nextquad; i++){
 		fprintf(fp, "@%d:\n", i);
@@ -129,6 +129,10 @@ void generate(Interpreted_quad quad, FILE * fp){
 	else {
 		fprintf(fp, "*** quad: %s not implemented yet***\n", quad.quad);
 	}
+}
+
+void getAR(char * a, FILE * fp){
+	fprintf(fp, "\tgetAR(%s)\n", a);
 }
 
 void load(char * a, char * b, FILE * fp){

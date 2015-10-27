@@ -1,10 +1,4 @@
 def main ():
-def puts(char[] s):
-skip
-end
-def int strlen(char[] s):
-skip
-end
 def char[] reverse (char[] s):
 char[] t
 int i, l

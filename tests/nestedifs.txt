@@ -26,7 +26,7 @@ def main():
 		end
 	elsif	(i < 35):
 		i := i + 1005
-	else:
+	else:	
 		i := 69
 	end
 end
