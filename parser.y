@@ -219,7 +219,7 @@ program:
     func_def
     {
                 closeScope();
-        destroySymbolTable();
+
     }
 ;
 
@@ -353,6 +353,8 @@ stmt:
     | "exit"            { $$.next_list = emptylist();  }
     | "return" expr     { if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
                                 ERROR("Wrong type for return value");
+                          if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
+                            nextquad--;
                           GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL);
                           GenQuad(RET_QUAD, NULL, NULL, NULL);
                         }
@@ -710,5 +712,6 @@ int main ()
     printf("Ooops. Something is wrong. Check the error message above.\n");
   fclose(fp);
   generator();
+  destroySymbolTable();
   return 0;
 }
