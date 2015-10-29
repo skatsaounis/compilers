@@ -105,7 +105,7 @@ void generate(Interpreted_quad quad, FILE * fp){
 	else if (strcmp(quad.quad, "call") == 0){
 		temp_name = name(quad.dest);
 		fprintf(fp, "\tsub sp,2\n");
-		updateAL(fp, quad.nesting);
+		updateAL(fp, quad.dest, quad.nesting);
 		fprintf(fp, "\tcall near ptr %s\n\tadd sp,size+4\n", temp_name);
 	}
 	else if (strcmp(quad.quad, "ret") == 0){
@@ -137,15 +137,17 @@ void generate(Interpreted_quad quad, FILE * fp){
 
 void getAR(char * a, FILE * fp, char * nesting){
 	SymbolEntry * symbol;
-	int na, ncur, times;
+	int na, ncur, times, i;
 
 	symbol = lookupEntry(a, LOOKUP_ALL_SCOPES, true);
 	na = (int) symbol->nestingLevel;
 	ncur = atoi(nesting);
 	times = ncur - na - 1;
-
-	printf("%d\n", times);
-	fprintf(fp, "\tgetAR(%s)\n", a);
+	fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+	for (i=0; i < times ; i++)
+		fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+	/*printf("%d\n", times);
+	fprintf(fp, "\tgetAR(%s)\n", a);*/
 }
 
 void load(char * a, char * b, FILE * fp, char * nesting){
@@ -160,12 +162,12 @@ void load(char * a, char * b, FILE * fp, char * nesting){
 	else if (b[0] == '\'')
 		fprintf(fp, "\tmov %s,%n\n", a, (int) b[1]);
 
-	/*if((isalpha(b[0])) || (b[0] != '\"')){
-		symbol = lookupEntry(b, LOOKUP_ALL_SCOPES, true);
+	else if((isalpha(b[0])) || (b[0] != '\"')){
+			symbol = lookupEntry(b, LOOKUP_ALL_SCOPES, true);
 
 		if(symbol->entryType == ENTRY_VARIABLE)
 			getAR(b, fp, nesting);
-	}*/
+	}
 	else
 		fprintf(fp, "\tload(%s,%s)\n", a, b);
 }
@@ -178,8 +180,26 @@ void loadAddr(char * a, char * b, FILE * fp, char * nesting){
 	fprintf(fp, "\tloadAddr(%s,%s)\n", a, b);
 }
 
-void updateAL(FILE * fp, char * nesting){
+void updateAL(FILE * fp, char * a, char * nesting){
 	fprintf(fp, "\tupdateAL()\n");
+	/*SymbolEntry * symbol;
+	int np, nx, times, i;
+
+	symbol = lookupEntry(a, LOOKUP_ALL_SCOPES, true);
+	nx = (int) symbol->nestingLevel;
+	np = atoi(nesting);
+	times = np - nx - 1;;
+	
+	if (np<nx)
+		fprintf(fp, "\tpush bp\n");
+	else if (np==nx)
+		fprintf(fp, "\tpush word [bp+4]\n");
+	else {
+		fprintf(fp, "\tmov si, word [bp+4]\n");
+		for (i=0; i < times ; i++)
+			fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+		fprintf(fp, "\tpush word ptr [si+4]\n");
+	}*/
 }
 
 char * endof(char * a){
