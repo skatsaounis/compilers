@@ -29,16 +29,33 @@ void generator(){
 Interpreted_quad consume_quad(FILE * fp){
 	int num;
 	char quad[256], arg1[256], arg2[256], dest[256], nest[1];
+	char arg1_pm[256], arg1_type[256], arg1_nesting[256];
+	char arg2_pm[256], arg2_type[256], arg2_nesting[256];
+	char dest_pm[256], dest_type[256], dest_nesting[256];
 	Interpreted_quad interpreted_quad;
 
-	fscanf(fp, "%d: %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n]\n", &num, quad, arg1, arg2, dest, nest);
+	fscanf(fp, "%d: %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n]\n",
+		&num, quad, arg1, arg2, dest, nest,
+		arg1_pm, arg1_type, arg1_nesting,
+		arg2_pm, arg2_type, arg2_nesting,
+		dest_pm, dest_type, dest_nesting
+		);
 
-	interpreted_quad.id   = num;
-	interpreted_quad.quad = strdup(quad);
-	interpreted_quad.arg1 = strdup(arg1);
-	interpreted_quad.arg2 = strdup(arg2);
-	interpreted_quad.dest = strdup(dest);
-	interpreted_quad.nesting = strdup(nest);
+	interpreted_quad.id           = num;
+	interpreted_quad.quad         = strdup(quad);
+	interpreted_quad.arg1         = strdup(arg1);
+	interpreted_quad.arg2         = strdup(arg2);
+	interpreted_quad.dest         = strdup(dest);
+	interpreted_quad.nesting      = strdup(nest);
+	interpreted_quad.arg1_pm      = strdup(arg1_pm);
+	interpreted_quad.arg1_type    = strdup(arg1_type);
+	interpreted_quad.arg1_nesting = strdup(arg1_nesting);
+	interpreted_quad.arg2_pm      = strdup(arg2_pm);
+	interpreted_quad.arg2_type    = strdup(arg2_type);
+	interpreted_quad.arg2_nesting = strdup(arg2_nesting);
+	interpreted_quad.dest_pm      = strdup(dest_pm);
+	interpreted_quad.dest_type    = strdup(dest_type);
+	interpreted_quad.dest_nesting = strdup(dest_nesting);
 
 	return interpreted_quad;
 }
@@ -189,7 +206,7 @@ void updateAL(FILE * fp, char * a, char * nesting){
 	nx = (int) symbol->nestingLevel;
 	np = atoi(nesting);
 	times = np - nx - 1;;
-	
+
 	if (np<nx)
 		fprintf(fp, "\tpush bp\n");
 	else if (np==nx)

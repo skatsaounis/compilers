@@ -33,10 +33,19 @@ typedef enum {               /***********/
 	PTR_QUAD,                /* ^points */
 } QuadType;                  /***********/
 
+typedef struct
+{
+	char * pm;
+	char * type;
+	char * nesting;
+} Quad_req;
+
 typedef struct {                 /*********/
 	QuadType type;           /*  op   */
 	char *arg1, *arg2;       /* x, y  */
 	char *dest;              /*   z   */
+	Quad_req arg1_req, arg2_req;
+	Quad_req dest_req;
 } Quad;                          /*********/
 
 typedef struct label_list_struct {
@@ -70,5 +79,7 @@ char * outp(char *inp);
 long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z);
 long GenQuad3(QuadType q, char * x, char * y, char * z);
 long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z);
+char * symbol_type (SymbolEntry * p);
+char * symbol_pm (SymbolEntry * p);
 
 #endif

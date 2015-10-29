@@ -199,7 +199,7 @@ void closeScope ()
         SymbolEntry * next = e->nextInScope;
 
         hashTable[e->hashValue] = e->nextHash;
-        /*destroyEntry(e);*/
+        destroyEntry(e);
         e = next;
     }
 

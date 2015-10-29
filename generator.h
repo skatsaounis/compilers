@@ -8,6 +8,9 @@ typedef struct{
 	char * arg2;
 	char * dest;
 	char * nesting;
+	char * arg1_pm, * arg1_type, * arg1_nesting;
+	char * arg2_pm, * arg2_type, * arg2_nesting;
+	char * dest_pm, * dest_type, * dest_nesting;
 }Interpreted_quad;
 
 void generator(void);
