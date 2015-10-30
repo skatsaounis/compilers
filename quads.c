@@ -25,11 +25,11 @@ char *strdup(const char *str)
 
 long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
 {
-	char tmp[1];
+    char tmp[1];
 
     quad_array[nextquad].type = q;
     if (x == NULL)
-	   quad_array[nextquad].arg1 = "-";
+       quad_array[nextquad].arg1 = "-";
     else if (x->entryType == ENTRY_CONSTANT){
         char bufferx[256];
         switch (x->u.eConstant.type->kind) {
@@ -48,7 +48,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
         quad_array[nextquad].arg1 = strdup(bufferx);
     }
     else
-	   quad_array[nextquad].arg1 = (char *) x->id;
+       quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -61,7 +61,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
     quad_array[nextquad].arg1_req.nesting = strdup(tmp);
 
     if (y == NULL)
-		quad_array[nextquad].arg2 = "-";
+        quad_array[nextquad].arg2 = "-";
     else if (y->entryType == ENTRY_CONSTANT){
                 char buffery[256];
                 switch (y->u.eConstant.type->kind) {
@@ -80,7 +80,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                 quad_array[nextquad].arg2 = strdup(buffery);
     }
     else
-		quad_array[nextquad].arg2 = (char *) y->id;
+        quad_array[nextquad].arg2 = (char *) y->id;
 
     quad_array[nextquad].arg2_req.type = symbol_type (y);
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
@@ -92,10 +92,10 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
         sprintf(tmp, "-");
     quad_array[nextquad].arg2_req.nesting = strdup(tmp);
 
-	if (z == NULL)
-		quad_array[nextquad].dest = "-";
-	else
-		quad_array[nextquad].dest = (char *) z->id;
+    if (z == NULL)
+        quad_array[nextquad].dest = "-";
+    else
+        quad_array[nextquad].dest = (char *) z->id;
 
     quad_array[nextquad].dest_req.type = symbol_type (z);
     quad_array[nextquad].dest_req.pm = symbol_pm (z);
@@ -114,9 +114,9 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
 {
     char tmp[1];
 
-	quad_array[nextquad].type=q;
-	if (x == NULL)
-		quad_array[nextquad].arg1 = "-";
+    quad_array[nextquad].type=q;
+    if (x == NULL)
+        quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
                 char bufferx[256];
                 switch (x->u.eConstant.type->kind) {
@@ -135,7 +135,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
         else
-		quad_array[nextquad].arg1 = (char *) x->id;
+        quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -147,9 +147,9 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
         sprintf(tmp, "-");
     quad_array[nextquad].arg1_req.nesting = strdup(tmp);
 
-	if (y == NULL)
-		quad_array[nextquad].arg2 = "-";
-	else if (y->entryType == ENTRY_CONSTANT){
+    if (y == NULL)
+        quad_array[nextquad].arg2 = "-";
+    else if (y->entryType == ENTRY_CONSTANT){
                 char buffery[256];
                 switch (y->u.eConstant.type->kind) {
                     case TYPE_INTEGER:
@@ -166,8 +166,8 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                 }
                 quad_array[nextquad].arg2 = strdup(buffery);
         }
-	else
-		quad_array[nextquad].arg2 = (char *) y->id;
+    else
+        quad_array[nextquad].arg2 = (char *) y->id;
 
     quad_array[nextquad].arg2_req.type = symbol_type (y);
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
@@ -179,51 +179,51 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
         sprintf(tmp, "-");
     quad_array[nextquad].arg2_req.nesting = strdup(tmp);
 
-	quad_array[nextquad].dest = strdup(z);
+    quad_array[nextquad].dest = strdup(z);
 
     quad_array[nextquad].dest_req.type = strdup("-");
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
     quad_array[nextquad].dest_req.offset = strdup("-");
-	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
+    /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
 
 long GenQuad3(QuadType q, char * x, char * y, char * z)
 {
-	quad_array[nextquad].type = q;
-	if (x == NULL)
-		quad_array[nextquad].arg1 = "-";
-	else
-		quad_array[nextquad].arg1 = strdup(x);
+    quad_array[nextquad].type = q;
+    if (x == NULL)
+        quad_array[nextquad].arg1 = "-";
+    else
+        quad_array[nextquad].arg1 = strdup(x);
 
     quad_array[nextquad].arg1_req.type = strdup("-");
     quad_array[nextquad].arg1_req.pm = strdup("-");
     quad_array[nextquad].arg1_req.nesting = strdup("-");
     quad_array[nextquad].arg1_req.kind = strdup("-");
     quad_array[nextquad].arg1_req.offset = strdup("-");
-	if (y == NULL)
-		quad_array[nextquad].arg2 = "-";
-	else
-		quad_array[nextquad].arg2 = strdup(y);
+    if (y == NULL)
+        quad_array[nextquad].arg2 = "-";
+    else
+        quad_array[nextquad].arg2 = strdup(y);
 
     quad_array[nextquad].arg2_req.type = strdup("-");
     quad_array[nextquad].arg2_req.pm = strdup("-");
     quad_array[nextquad].arg2_req.nesting = strdup("-");
     quad_array[nextquad].arg2_req.kind = strdup("-");
     quad_array[nextquad].arg2_req.offset = strdup("-");
-	if (z == NULL)
-		quad_array[nextquad].dest = "-";
-	else
-		quad_array[nextquad].dest = strdup(z);
+    if (z == NULL)
+        quad_array[nextquad].dest = "-";
+    else
+        quad_array[nextquad].dest = strdup(z);
 
     quad_array[nextquad].dest_req.type = strdup("-");
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
     quad_array[nextquad].dest_req.offset = strdup("-");
-	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
+    /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
 
@@ -231,9 +231,9 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
 {
     char tmp[1];
 
-	quad_array[nextquad].type=q;
-	if (x == NULL)
-		quad_array[nextquad].arg1 = "-";
+    quad_array[nextquad].type=q;
+    if (x == NULL)
+        quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
                 char bufferx[256];
                 switch (x->u.eConstant.type->kind) {
@@ -252,7 +252,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
         else
-		quad_array[nextquad].arg1 = (char *) x->id;
+        quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -264,99 +264,99 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
         sprintf(tmp, "-");
     quad_array[nextquad].arg1_req.nesting = strdup(tmp);
 
-	if (y == NULL)
-		quad_array[nextquad].arg2 = "-";
-	else
-		quad_array[nextquad].arg2 = strdup(y);
+    if (y == NULL)
+        quad_array[nextquad].arg2 = "-";
+    else
+        quad_array[nextquad].arg2 = strdup(y);
 
     quad_array[nextquad].arg2_req.type = strdup("-");
     quad_array[nextquad].arg2_req.pm = strdup("-");
     quad_array[nextquad].arg2_req.nesting = strdup("-");
     quad_array[nextquad].arg2_req.kind = strdup("-");
     quad_array[nextquad].arg2_req.offset = strdup("-");
-	if (z == NULL)
-		quad_array[nextquad].dest = "-";
-	else
-		quad_array[nextquad].dest = strdup(z);
+    if (z == NULL)
+        quad_array[nextquad].dest = "-";
+    else
+        quad_array[nextquad].dest = strdup(z);
 
     quad_array[nextquad].dest_req.type = strdup("-");
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
     quad_array[nextquad].dest_req.offset = strdup("-");
-	/*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
+    /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
 
 label_list emptylist(){
-	return NULL;
+    return NULL;
 }
 
 label_list make_list(long val)
 {
-	label_list l = (label_list) new(sizeof(label_list_t));
-	l->label = val;
-	l->next = NULL;
-	return l;
+    label_list l = (label_list) new(sizeof(label_list_t));
+    l->label = val;
+    l->next = NULL;
+    return l;
 }
 
 label_list merge(label_list a, label_list b){
-	if (b == NULL)
+    if (b == NULL)
         return a;
     label_list l = a;
-	if (l == NULL)
-		return b;
-	while (l->next != NULL)
-		l = l->next;
-	l->next = b;
-	return a;
+    if (l == NULL)
+        return b;
+    while (l->next != NULL)
+        l = l->next;
+    l->next = b;
+    return a;
 }
 
 void backpatch(label_list list, long val){
-	label_list l = list;
-	char tmp[256];
-	sprintf(tmp, "%d", val); /*the previous implementation was giving wrong result*/
-	while ((list = l) != NULL) {
+    label_list l = list;
+    char tmp[256];
+    sprintf(tmp, "%d", val); /*the previous implementation was giving wrong result*/
+    while ((list = l) != NULL) {
         if(strcmp(quad_array[l->label].dest, "-1") == 0){
-    		delete(quad_array[l->label].dest);
-    		quad_array[l->label].dest = strdup(tmp);
+            delete(quad_array[l->label].dest);
+            quad_array[l->label].dest = strdup(tmp);
         }
-		l = l->next;
-	}
+        l = l->next;
+    }
 }
 
 char * print_quad(int i){
-	char * s;
-	switch(quad_array[i].type) {
-			case PLUS_QUAD:		s="+";       break; /* 1 */
-			case MINUS_QUAD:	s="-";       break;
-			case MULT_QUAD:		s="*";       break;
-			case DIV_QUAD:		s="/";       break;
-			case MOD_QUAD:		s="%";       break; /* 5 */
-			case JMP_QUAD:		s="jump";    break;
-			case ASSIGN_QUAD:	s=":=";      break;
-			case EQ_QUAD:		s="=";       break;
-			case NE_QUAD:		s="<>";      break;
-			case GT_QUAD:		s=">";       break; /* 10 */
-			case LT_QUAD:		s="<";       break;
-			case GE_QUAD:		s=">=";      break;
-			case LE_QUAD:		s="<=";	     break;
-			case UNIT_QUAD:		s="unit";    break;
-			case ENDU_QUAD:		s="endu";    break; /* 15 */
-			case PAR_QUAD:		s="par";     break;
-			case CALL_QUAD:		s="call";    break;
-			case RET_QUAD:		s="ret";     break;
-            case RETV_QUAD:		s="retv";    break;
-            case HEAD_QUAD:     s="head";    break;
-            case TAIL_QUAD:     s="tail";    break; /* 20 */
+    char * s;
+    switch(quad_array[i].type) {
+            case PLUS_QUAD:     s="+";       break;
+            case MINUS_QUAD:    s="-";       break;
+            case MULT_QUAD:     s="*";       break;
+            case DIV_QUAD:      s="/";       break;
+            case MOD_QUAD:      s="%";       break;
+            case JMP_QUAD:      s="jump";    break;
+            case ASSIGN_QUAD:   s=":=";      break;
+            case EQ_QUAD:       s="=";       break;
+            case NE_QUAD:       s="<>";      break;
+            case GT_QUAD:       s=">";       break;
+            case LT_QUAD:       s="<";       break;
+            case GE_QUAD:       s=">=";      break;
+            case LE_QUAD:       s="<=";      break;
+            case UNIT_QUAD:     s="unit";    break;
+            case ENDU_QUAD:     s="endu";    break;
+            case PAR_QUAD:      s="par";     break;
+            case CALL_QUAD:     s="call";    break;
+            case RET_QUAD:      s="ret";     break;
+            case RETV_QUAD:     s="retv";    break;
+            case HEAD_QUAD:     s="head";    break; /* ? */
+            case TAIL_QUAD:     s="tail";    break; /* ? */
             case ISNIL_QUAD:    s="nil?";    break;
-            case ARRAY_QUAD:    s="array";   break;
-            case LIST_QUAD:     s="list";    break;
-            case PTR_QUAD:      s="pointer"; break;
-			default:
-				error("GenQuad: Internal Error\n");
-		}
-	return s;
+            case ARRAY_QUAD:    s="array";   break; /* ? */
+            case LIST_QUAD:     s="list";    break; /* ? */
+            case PTR_QUAD:      s="pointer"; break; /* not used */
+            default:
+                error("GenQuad: Internal Error\n");
+        }
+    return s;
 }
 
 char * outp(char * inp){
@@ -372,12 +372,12 @@ void print_all_quads(FILE * fp){
             fprintf(fp, "%d: %s, %s, %s, %s, %u, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
-                quad_array[i].arg1_req.pm, quad_array[i].arg1_req.type, quad_array[i].arg1_req.nesting, 
-		quad_array[i].arg1_req.kind, quad_array[i].arg1_req.offset,
-                quad_array[i].arg2_req.pm, quad_array[i].arg2_req.type, quad_array[i].arg2_req.nesting, 
-		quad_array[i].arg2_req.kind, quad_array[i].arg2_req.offset,
-                quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting, 
-		quad_array[i].dest_req.kind, quad_array[i].dest_req.offset
+                quad_array[i].arg1_req.pm, quad_array[i].arg1_req.type, quad_array[i].arg1_req.nesting,
+        quad_array[i].arg1_req.kind, quad_array[i].arg1_req.offset,
+                quad_array[i].arg2_req.pm, quad_array[i].arg2_req.type, quad_array[i].arg2_req.nesting,
+        quad_array[i].arg2_req.kind, quad_array[i].arg2_req.offset,
+                quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting,
+        quad_array[i].dest_req.kind, quad_array[i].dest_req.offset
                 );
 }
 
@@ -433,69 +433,81 @@ char * symbol_kind (SymbolEntry * p){
         return strdup("-");
     switch(p->entryType){
         case ENTRY_CONSTANT:
-		switch (p->u.eConstant.type->kind) {
-                    case TYPE_INTEGER:
-                        return strdup("integer");
-                        break;
-                    case TYPE_BOOLEAN:
-                        return strdup("boolean");
-                        break;
-                    case TYPE_CHAR:
-                        return strdup("char");
-                        break;
-                    case TYPE_IARRAY:
-                        return strdup("iarray");
-			break;
-                }	
-            	break;
+            switch (p->u.eConstant.type->kind) {
+                case TYPE_INTEGER:
+                    return strdup("integer");
+                    break;
+                case TYPE_BOOLEAN:
+                    return strdup("boolean");
+                    break;
+                case TYPE_CHAR:
+                    return strdup("char");
+                    break;
+                case TYPE_IARRAY:
+                    return strdup("iarray");
+                    break;
+                case TYPE_LIST:
+                    return strdup("list");
+                    break;
+            }
+            break;
         case ENTRY_PARAMETER:
-        	switch (p->u.eParameter.type->kind) {
-                    case TYPE_INTEGER:
-                        return strdup("integer");
-                        break;
-                    case TYPE_BOOLEAN:
-                        return strdup("boolean");
-                        break;
-                    case TYPE_CHAR:
-                        return strdup("char");
-                        break;
-                    case TYPE_IARRAY:
-                        return strdup("iarray");
-			break;
-                }	
-            	break;
+            switch (p->u.eParameter.type->kind) {
+                case TYPE_INTEGER:
+                    return strdup("integer");
+                    break;
+                case TYPE_BOOLEAN:
+                    return strdup("boolean");
+                    break;
+                case TYPE_CHAR:
+                    return strdup("char");
+                    break;
+                case TYPE_IARRAY:
+                    return strdup("iarray");
+                    break;
+                case TYPE_LIST:
+                    return strdup("list");
+                    break;
+            }
+            break;
         case ENTRY_VARIABLE:
-            	switch (p->u.eVariable.type->kind) {
-                    case TYPE_INTEGER:
-                        return strdup("integer");
-                        break;
-                    case TYPE_BOOLEAN:
-                        return strdup("boolean");
-                        break;
-                    case TYPE_CHAR:
-                        return strdup("char");
-                        break;
-                    case TYPE_IARRAY:
-                        return strdup("iarray");
-			break;
-                }	
-            	break;
+            switch (p->u.eVariable.type->kind) {
+                case TYPE_INTEGER:
+                    return strdup("integer");
+                    break;
+                case TYPE_BOOLEAN:
+                    return strdup("boolean");
+                    break;
+                case TYPE_CHAR:
+                    return strdup("char");
+                    break;
+                case TYPE_IARRAY:
+                    return strdup("iarray");
+                    break;
+                case TYPE_LIST:
+                    return strdup("list");
+                    break;
+            }
+            break;
         case ENTRY_TEMPORARY:
-            	switch (p->u.eTemporary.type->kind) {
-                    case TYPE_INTEGER:
-                        return strdup("integer");
-                        break;
-                    case TYPE_BOOLEAN:
-                        return strdup("boolean");
-                        break;
-                    case TYPE_CHAR:
-                        return strdup("char");
-                        break;
-                    case TYPE_IARRAY:
-                        return strdup("iarray");
-			break;
-                }	
-            	break;
+            switch (p->u.eTemporary.type->kind) {
+                case TYPE_INTEGER:
+                    return strdup("integer");
+                    break;
+                case TYPE_BOOLEAN:
+                    return strdup("boolean");
+                    break;
+                case TYPE_CHAR:
+                    return strdup("char");
+                    break;
+                case TYPE_IARRAY:
+                    return strdup("iarray");
+                    break;
+                case TYPE_LIST:
+                    return strdup("list");
+                    break;
+            }
+            break;
     }
     return NULL;
 }
@@ -506,16 +518,16 @@ char * symbol_offset (SymbolEntry * p){
         return strdup("-");
     switch(p->entryType){
         case ENTRY_PARAMETER:
-        	sprintf(buffer, "%d", (int) p->u.eParameter.offset);	
-            	break;
+            sprintf(buffer, "%d", (int) p->u.eParameter.offset);
+                break;
         case ENTRY_VARIABLE:
-            	sprintf(buffer, "%d", (int) p->u.eVariable.offset);	
-            	break;
+                sprintf(buffer, "%d", (int) p->u.eVariable.offset);
+                break;
         case ENTRY_TEMPORARY:
-            	sprintf(buffer, "%d", (int) p->u.eTemporary.offset);	
-            	break;
-	default:
-		return strdup("-");
+                sprintf(buffer, "%d", (int) p->u.eTemporary.offset);
+                break;
+    default:
+        return strdup("-");
     }
     return strdup(buffer);
 }
