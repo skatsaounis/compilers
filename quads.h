@@ -38,6 +38,8 @@ typedef struct
 	char * pm;
 	char * type;
 	char * nesting;
+	char * kind;
+	char * offset;
 } Quad_req;
 
 typedef struct {                 /*********/
@@ -81,5 +83,7 @@ long GenQuad3(QuadType q, char * x, char * y, char * z);
 long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z);
 char * symbol_type (SymbolEntry * p);
 char * symbol_pm (SymbolEntry * p);
+char * symbol_kind (SymbolEntry * p);
+char * symbol_offset (SymbolEntry * p);
 
 #endif

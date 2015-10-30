@@ -36,7 +36,7 @@ if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
 node * currnode, * temp;
-int flag;
+int flag, main_flag=0;
 SymbolEntry * p, * b, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
@@ -44,7 +44,7 @@ PassMode pMode, pm;
 int custom_sizeof(Type refT){
   switch (refT->kind) {
     case TYPE_INTEGER:
-      return 4;
+      return 2;
       break;
     case TYPE_BOOLEAN:
       return 1;
@@ -259,6 +259,10 @@ header:
     opt1 T_id
     {   /* fprintf(stderr,"%s \n", $2);
                 GenQuad3(UNIT_QUAD, $2, NULL, NULL);*/
+		if (main_flag == 0){
+			main_flag = 1;
+			fprintf(fp, "%s\n", $2);
+		}
                 p = newFunction($2);
         if(flag){
             forwardFunction(p);
