@@ -30,7 +30,7 @@ typedef enum {               /***********/
 	PAR_QUAD,                /*   par   */
 	CALL_QUAD,               /*   call  */
 	IFB_QUAD,                /*   ifb   */
-	PTR_QUAD,                /* ^points */
+	PTR_QUAD                /* ^points */
 } QuadType;                  /***********/
 
 typedef struct
