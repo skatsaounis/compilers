@@ -13,6 +13,14 @@ typedef struct{
 	char * dest_pm, * dest_type, * dest_nesting, * dest_kind, * dest_offset;
 }Interpreted_quad;
 
+typedef struct program_strings_struct{
+	int id;
+	char * node_str;
+	struct program_strings_struct * next;
+}program_string_t;
+
+typedef program_string_t * Program_strings;
+
 void generator(void);
 Interpreted_quad consume_quad(FILE * fp);
 void print_consumed_quad(Interpreted_quad quad);
@@ -25,5 +33,7 @@ void getAR(char * a, FILE * fp, char * nesting);
 char * endof(char * a);
 char * label(char * a);
 char * name(char * a);
+void printstrings(FILE * fp);
+void string_to_db(FILE * fp, char * node_str);
 
 #endif

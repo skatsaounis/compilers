@@ -3,15 +3,24 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "general.h"
 #include "symbol.h"
 #include "generator.h"
 #include "quads.h"
 
+Program_strings program_strings;
+Program_strings temp;
+
+int unique;
 
 void generator(){
     int i;
     char program[256];
     FILE * fp, * fp2;
+
+    unique = 0;
+    program_strings = (program_string_t *) new(sizeof(program_string_t));
+    program_strings->next = NULL;
 
     fp = fopen("code.txt", "w+");
     fp2 = fopen("quads.txt", "r");
@@ -23,6 +32,8 @@ void generator(){
         generate(consume_quad(fp2), fp);
         fprintf(fp, "\n");
     }
+
+    printstrings(fp);
 
     fprintf(fp, "xseg ends\n\tend main\n");
     fclose(fp);
@@ -273,8 +284,17 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
 }
 
 void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
-    if (b[0] == '\"')
-        fprintf(fp, "\tlea %s,byte ptr %s\n", a, b);
+    if (b[0] == '\"'){
+        unique++;
+        memmove(b, b+1, strlen(b));
+        b[strlen(b)-1] = 0;
+        fprintf(fp, "\tlea %s,byte ptr @str%d\n", a, unique);
+        temp = (program_string_t *) new(sizeof(program_string_t));
+        temp->node_str = strdup(b);
+        temp->id = unique;
+        temp->next = program_strings;
+        program_strings = temp;
+    }
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0)
@@ -346,4 +366,64 @@ char * name(char * a){
 
 void print_consumed_quad(Interpreted_quad quad){
     printf("%d: [%s, %s, %s, %s]\n", quad.id, quad.quad, quad.arg1, quad.arg2, quad.dest);
+}
+
+void printstrings(FILE * fp){
+    while (program_strings->next != NULL){
+        /*fprintf(fp, "@str%d db ´%s´\n\tdb 0\n", program_strings->id, program_strings->node_str);*/
+        fprintf(fp, "@str%d ", program_strings->id);
+        string_to_db(fp, program_strings->node_str);
+        fprintf(fp, "\n\tdb 00\n");
+        program_strings = program_strings->next;
+    }
+    fprintf(fp, "\n");
+}
+
+void string_to_db(FILE * fp, char * node_str){
+    int i, flag, flag2;
+    i = 0;
+    flag = 0;
+    flag2 = 0;
+    while (node_str[i] != '\0'){
+        if (node_str[i] == '\\'){
+            flag2 = 1;
+            i++;
+            if ( (node_str[i] == 'n') || (node_str[i] == 't') || (node_str[i] == 'r') || (node_str[i] == '0') || (node_str[i] == '\\') || (node_str[i] == '\'') || (node_str[i] == '\"') || (node_str[i] == 'x') ){
+                if (flag == 1)
+                    fprintf(fp, "´");
+                if (node_str[i] == 'n')
+                    fprintf(fp, "\n\tdb 0A");
+                else if (node_str[i] == 't')
+                    fprintf(fp, "\n\tdb 09");
+                else if (node_str[i] == 'r')
+                    fprintf(fp, "\n\tdb 0D");
+                else if (node_str[i] == '0')
+                    fprintf(fp, "\n\tdb 00");
+                else if (node_str[i] == '\\')
+                    fprintf(fp, "\n\tdb 5C");
+                else if (node_str[i] == '\'')
+                    fprintf(fp, "\n\tdb 27");
+                else if (node_str[i] == '\"')
+                    fprintf(fp, "\n\tdb 22");
+                else{
+                    i++;
+                    fprintf(fp, "\n\tdb %d", node_str[i]);
+                    i++;
+                    fprintf(fp, "%d", node_str[i]);
+                }
+                flag = 0;
+            }
+        }
+        else if (flag == 0){
+            fprintf(fp, "\n\tdb ´");
+            flag = 1;
+        }
+        if (flag2 == 0){
+            fprintf(fp, "%c", node_str[i]);
+        }
+        flag2 = 0;
+        i++;
+    }
+    if (flag == 1)
+        fprintf(fp, "´");
 }

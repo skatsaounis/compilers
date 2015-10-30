@@ -8,7 +8,7 @@ SymbolEntry * predefines(){
 	p = newFunction("puti");
 	forwardFunction(p);
 	openScope("puti");
-	newParameter("n", typeInteger, PASS_BY_VALUE, p);
+	newParameter("n", typeInteger, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -16,7 +16,7 @@ SymbolEntry * predefines(){
 	p = newFunction("putb");
 	forwardFunction(p);
 	openScope("putb");
-	newParameter("b", typeBoolean, PASS_BY_VALUE, p);
+	newParameter("b", typeBoolean, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -24,7 +24,7 @@ SymbolEntry * predefines(){
 	p = newFunction("putc");
 	forwardFunction(p);
 	openScope("putc");
-	newParameter("c", typeChar, PASS_BY_VALUE, p);
+	newParameter("c", typeChar, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -32,7 +32,7 @@ SymbolEntry * predefines(){
 	p = newFunction("puts");
 	forwardFunction(p);
 	openScope("puts");
-	newParameter("s", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("s", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -61,8 +61,8 @@ SymbolEntry * predefines(){
 	p = newFunction("gets");
 	forwardFunction(p);
 	openScope("gets");
-	newParameter("n", typeInteger, PASS_BY_VALUE, p);
-	newParameter("s", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("n", typeInteger, PASS_BY_REFERENCE, p);
+	newParameter("s", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -70,7 +70,7 @@ SymbolEntry * predefines(){
 	p = newFunction("abs");
 	forwardFunction(p);
 	openScope("abs");
-	newParameter("n", typeInteger, PASS_BY_VALUE, p);
+	newParameter("n", typeInteger, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeInteger);
 	closeScope();
 
@@ -78,7 +78,7 @@ SymbolEntry * predefines(){
 	p = newFunction("ord");
 	forwardFunction(p);
 	openScope("ord");
-	newParameter("c", typeChar, PASS_BY_VALUE, p);
+	newParameter("c", typeChar, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeInteger);
 	closeScope();
 
@@ -86,7 +86,7 @@ SymbolEntry * predefines(){
 	p = newFunction("chr");
 	forwardFunction(p);
 	openScope("chr");
-	newParameter("n", typeInteger, PASS_BY_VALUE, p);
+	newParameter("n", typeInteger, PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeChar);
 	closeScope();
 
@@ -94,7 +94,7 @@ SymbolEntry * predefines(){
 	p = newFunction("strlen");
 	forwardFunction(p);
 	openScope("strlen");
-	newParameter("s", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("s", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeInteger);
 	closeScope();
 
@@ -102,8 +102,8 @@ SymbolEntry * predefines(){
 	p = newFunction("strcmp");
 	forwardFunction(p);
 	openScope("strcmp");
-	newParameter("s1", typeIArray(typeChar), PASS_BY_VALUE, p);
-	newParameter("s2", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("s1", typeIArray(typeChar), PASS_BY_REFERENCE, p);
+	newParameter("s2", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeInteger);
 	closeScope();
 
@@ -111,8 +111,8 @@ SymbolEntry * predefines(){
 	p = newFunction("strcpy");
 	forwardFunction(p);
 	openScope("strcpy");
-	newParameter("trg", typeIArray(typeChar), PASS_BY_VALUE, p);
-	newParameter("src", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("trg", typeIArray(typeChar), PASS_BY_REFERENCE, p);
+	newParameter("src", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -120,8 +120,8 @@ SymbolEntry * predefines(){
 	p = newFunction("strcat");
 	forwardFunction(p);
 	openScope("strcat");
-	newParameter("trg", typeIArray(typeChar), PASS_BY_VALUE, p);
-	newParameter("src", typeIArray(typeChar), PASS_BY_VALUE, p);
+	newParameter("trg", typeIArray(typeChar), PASS_BY_REFERENCE, p);
+	newParameter("src", typeIArray(typeChar), PASS_BY_REFERENCE, p);
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
@@ -131,6 +131,6 @@ SymbolEntry * predefines(){
 	openScope("readInteger");
 	endFunctionHeader(p, typeInteger);
 	closeScope();
-	
+
 	return p;
 }
