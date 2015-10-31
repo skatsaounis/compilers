@@ -1,3 +1,3 @@
 def hello ():
-	puts("Hello \x15 world!\n")
+	puts("Hello \x6d\x79 world!\n")
 end

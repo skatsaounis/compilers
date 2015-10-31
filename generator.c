@@ -8,7 +8,7 @@
 #include "generator.h"
 #include "quads.h"
 
-Program_strings program_strings;
+Program_strings program_strings, program_strings_tail;
 Program_strings temp;
 
 int unique;
@@ -20,7 +20,9 @@ void generator(){
 
     unique = 0;
     program_strings = (program_string_t *) new(sizeof(program_string_t));
-    program_strings->next = NULL;
+    program_strings = NULL;
+    program_strings_tail = (program_string_t *) new(sizeof(program_string_t));
+	program_strings_tail = program_strings;
 
     fp = fopen("code.txt", "w+");
     fp2 = fopen("quads.txt", "r");
@@ -292,8 +294,12 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
         temp = (program_string_t *) new(sizeof(program_string_t));
         temp->node_str = strdup(b);
         temp->id = unique;
-        temp->next = program_strings;
-        program_strings = temp;
+        temp->next = NULL;
+		if (program_strings == NULL)
+        	program_strings = temp;
+		else 
+			program_strings_tail->next = temp;
+		program_strings_tail = temp;
     }
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
@@ -369,7 +375,7 @@ void print_consumed_quad(Interpreted_quad quad){
 }
 
 void printstrings(FILE * fp){
-    while (program_strings->next != NULL){
+    while (program_strings != NULL){
         /*fprintf(fp, "@str%d db ´%s´\n\tdb 0\n", program_strings->id, program_strings->node_str);*/
         fprintf(fp, "@str%d ", program_strings->id);
         string_to_db(fp, program_strings->node_str);
@@ -381,6 +387,7 @@ void printstrings(FILE * fp){
 
 void string_to_db(FILE * fp, char * node_str){
     int i, flag, flag2;
+	char * temp = malloc(3);
     i = 0;
     flag = 0;
     flag2 = 0;
@@ -407,9 +414,9 @@ void string_to_db(FILE * fp, char * node_str){
                     fprintf(fp, "\n\tdb 22");
                 else{
                     i++;
-                    fprintf(fp, "\n\tdb %d", node_str[i]);
-                    i++;
-                    fprintf(fp, "%d", node_str[i]);
+					sprintf(temp, "%c%c", node_str[i], node_str[i+1]);
+					i++;
+                    fprintf(fp, "\n\tdb ´%c´", (char) strtol(temp,NULL,16));
                 }
                 flag = 0;
             }
