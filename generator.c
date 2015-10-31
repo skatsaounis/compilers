@@ -36,7 +36,7 @@ void generator(){
     }
 
     printstrings(fp);
-
+	printexterns(fp);
     fprintf(fp, "xseg ends\n\tend main\n");
     fclose(fp);
 }
@@ -433,4 +433,22 @@ void string_to_db(FILE * fp, char * node_str){
     }
     if (flag == 1)
         fprintf(fp, "´");
+}
+
+void printexterns(FILE * fp){
+	fprintf(fp,"\textrn puti : proc\n");
+	fprintf(fp,"\textrn putb : proc\n");
+	fprintf(fp,"\textrn putc : proc\n");
+	fprintf(fp,"\textrn puts : proc\n");
+	fprintf(fp,"\textrn geti : proc\n");
+	fprintf(fp,"\textrn getb : proc\n");
+	fprintf(fp,"\textrn getc : proc\n");
+	fprintf(fp,"\textrn gets : proc\n");
+	fprintf(fp,"\textrn abs : proc\n");
+	fprintf(fp,"\textrn org : proc\n");
+	fprintf(fp,"\textrn chr : proc\n");
+	fprintf(fp,"\textrn strlen : proc\n");
+	fprintf(fp,"\textrn strcmp : proc\n");
+	fprintf(fp,"\textrn strcpy : proc\n");
+	fprintf(fp,"\textrn strcat : proc\n");
 }

@@ -125,12 +125,5 @@ SymbolEntry * predefines(){
 	endFunctionHeader(p, typeVoid);
 	closeScope();
 
-	/* decl readInteger () */
-	p = newFunction("readInteger");
-	forwardFunction(p);
-	openScope("readInteger");
-	endFunctionHeader(p, typeInteger);
-	closeScope();
-
 	return p;
 }

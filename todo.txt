@@ -1,5 +1,3 @@
 -- missing quads from code-generator: head, tail, array, list
--- string manipulation
 -- [x] and {x} cases of load, store, loadAddr
--- ready functions library (extrn)
 -- memory allocation for iarray, list

@@ -34,6 +34,7 @@ char * endof(char * a);
 char * label(char * a);
 char * name(char * a);
 void printstrings(FILE * fp);
+void printexterns(FILE * fp);
 void string_to_db(FILE * fp, char * node_str);
 
 #endif
