@@ -70,7 +70,7 @@ E  ["n""t""r""0"\'\"\\]
 {D}+					{ yylval.s = strdup(yytext);
 					  return T_num; } /* Numbers munch */
 
-\'(\\{E}|"x"{X}{X}|.)\'			{ yylval.s = strdup(yytext);
+\'(\\({E}|"x"{X}{X})|.)\'		{ yylval.s = strdup(yytext);
 					  return T_const; }
 
 [\+\-\*/#=<>]  				{ return yytext[0]; } /* Symbolic Operators munch */
@@ -81,7 +81,7 @@ E  ["n""t""r""0"\'\"\\]
 [\(\)\[\]\,\;\:]			{ return yytext[0]; } /* Separators munch */
 ":="					{ return T_assignor; }
 
-\"([^\'\"\r\n\\]|\\{E})*\"		{ yylval.s = strdup(yytext); 
+\"([^\'\"\r\n\\]|\\({E}|"x"{X}{X}))*\"	{ yylval.s = strdup(yytext); 
 					  return T_string; } /* Strings munch */
 {W}+					{ /*columnno++;*/ }
 \t   					{ yycolumn += 9 - (yycolumn % 8); }
