@@ -190,14 +190,10 @@ void generate(Interpreted_quad quad, FILE * fp){
 			fprintf(fp, "\tmov si,sp\n");
             fprintf(fp, "\tmov byte ptr [si],al\n");
         }
-        else if ((strcmp(quad.arg2, "REFFERENCE") == 0) || (strcmp(quad.arg2, "RET") == 0)){
+        else if ((strcmp(quad.arg2, "REFERENCE") == 0) || (strcmp(quad.arg2, "RET") == 0)){
             loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush si\n");
         }
-		else {
-			loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
-            fprintf(fp, "\tpush si\n");
-		}
     } 
 	else if (strcmp(quad.quad, "array") == 0){
 		load("ax", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
