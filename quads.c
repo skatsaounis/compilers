@@ -369,7 +369,7 @@ char * outp(char * inp){
 void print_all_quads(FILE * fp){
         static int i = 0;
         for(; i < nextquad; i++)
-            fprintf(fp, "%d: %s, %s, %s, %s, %u, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n", i, print_quad(i),
+            fprintf(fp, "%d:%s,%s,%s,%s,%u,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
                 quad_array[i].arg1_req.pm, quad_array[i].arg1_req.type, quad_array[i].arg1_req.nesting,

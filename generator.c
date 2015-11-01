@@ -42,41 +42,69 @@ void generator(){
 }
 
 Interpreted_quad consume_quad(FILE * fp){
-    int num;
-    char quad[256], arg1[256], arg2[256], dest[256], nest[1];
-    char arg1_pm[256], arg1_type[256], arg1_nesting[256], arg1_kind[256], arg1_offset[256];
-    char arg2_pm[256], arg2_type[256], arg2_nesting[256], arg2_kind[256], arg2_offset[256];
-    char dest_pm[256], dest_type[256], dest_nesting[256], dest_kind[256], dest_offset[256];
     Interpreted_quad interpreted_quad;
+    int i;
+    char * line = NULL;
+    char * token, * temp;
+    size_t linesize;
+    char temp2[256];
 
-    fscanf(fp, "%d: %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n,], %[^\t\n]\n",
-        &num, quad, arg1, arg2, dest, nest,
-        arg1_pm, arg1_type, arg1_nesting, arg1_kind, arg1_offset,
-        arg2_pm, arg2_type, arg2_nesting, arg2_kind, arg2_offset,
-        dest_pm, dest_type, dest_nesting, dest_kind, dest_offset
-        );
+    linesize = 0;
+    getline(&line, &linesize, fp);
+    token = strtok (line,":");
+    interpreted_quad.id = atoi(token);
 
-    interpreted_quad.id           = num;
-    interpreted_quad.quad         = strdup(quad);
-    interpreted_quad.arg1         = strdup(arg1);
-    interpreted_quad.arg2         = strdup(arg2);
-    interpreted_quad.dest         = strdup(dest);
-    interpreted_quad.nesting      = strdup(nest);
-    interpreted_quad.arg1_pm      = strdup(arg1_pm);
-    interpreted_quad.arg1_type    = strdup(arg1_type);
-    interpreted_quad.arg1_nesting = strdup(arg1_nesting);
-    interpreted_quad.arg1_kind    = strdup(arg1_kind);
-    interpreted_quad.arg1_offset  = strdup(arg1_offset);
-    interpreted_quad.arg2_pm      = strdup(arg2_pm);
-    interpreted_quad.arg2_type    = strdup(arg2_type);
-    interpreted_quad.arg2_nesting = strdup(arg2_nesting);
-    interpreted_quad.arg2_kind    = strdup(arg2_kind);
-    interpreted_quad.arg2_offset  = strdup(arg2_offset);
-    interpreted_quad.dest_pm      = strdup(dest_pm);
-    interpreted_quad.dest_type    = strdup(dest_type);
-    interpreted_quad.dest_nesting = strdup(dest_nesting);
-    interpreted_quad.dest_kind    = strdup(dest_kind);
-    interpreted_quad.dest_offset  = strdup(dest_offset);
+    token = strtok (NULL,",");
+    interpreted_quad.quad = strdup(token);
+
+    token = strtok (NULL,",");
+    temp = token;
+    for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+    if (i == 1){
+        temp = strtok (NULL,",");
+        sprintf(temp2, ",%s", temp);
+        strcat(token, temp2);
+    }
+    interpreted_quad.arg1         = strdup(token);
+
+    token = strtok (NULL,",");
+    temp = token;
+    for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+    if (i == 1){
+        temp = strtok (NULL,",");
+        sprintf(temp2, ",%s", temp);
+        strcat(token, temp2);
+    }
+    interpreted_quad.arg2         = strdup(token);
+
+    token = strtok (NULL,",");
+    temp = token;
+    for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+    if (i == 1){
+        temp = strtok (NULL,",");
+        sprintf(temp2, ",%s", temp);
+        strcat(token, temp2);
+    }
+    interpreted_quad.dest         = strdup(token);
+
+    interpreted_quad.nesting      = strdup(strtok (NULL,","));
+    interpreted_quad.arg1_pm      = strdup(strtok (NULL,","));
+    interpreted_quad.arg1_type    = strdup(strtok (NULL,","));
+    interpreted_quad.arg1_nesting = strdup(strtok (NULL,","));
+    interpreted_quad.arg1_kind    = strdup(strtok (NULL,","));
+    interpreted_quad.arg1_offset  = strdup(strtok (NULL,","));
+    interpreted_quad.arg2_pm      = strdup(strtok (NULL,","));
+    interpreted_quad.arg2_type    = strdup(strtok (NULL,","));
+    interpreted_quad.arg2_nesting = strdup(strtok (NULL,","));
+    interpreted_quad.arg2_kind    = strdup(strtok (NULL,","));
+    interpreted_quad.arg2_offset  = strdup(strtok (NULL,","));
+    interpreted_quad.dest_pm      = strdup(strtok (NULL,","));
+    interpreted_quad.dest_type    = strdup(strtok (NULL,","));
+    interpreted_quad.dest_nesting = strdup(strtok (NULL,","));
+    interpreted_quad.dest_kind    = strdup(strtok (NULL,","));
+    interpreted_quad.dest_offset  = strdup(strtok (NULL,","));
+
+    free(line);
 
     return interpreted_quad;
 }
@@ -194,14 +222,14 @@ void generate(Interpreted_quad quad, FILE * fp){
             loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush si\n");
         }
-    } 
+    }
 	else if (strcmp(quad.quad, "array") == 0){
 		load("ax", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
-		if (strcmp(quad.arg1_kind, "integer") == 0)		
+		if (strcmp(quad.arg1_kind, "integer") == 0)
 			fprintf(fp, "\tmov cx,2\n");
-		else if (strcmp(quad.arg1_kind, "iarray") == 0)		
+		else if (strcmp(quad.arg1_kind, "iarray") == 0)
 			fprintf(fp, "\tmov cx,42\n");
-		else if (strcmp(quad.arg1_kind, "list") == 0)		
+		else if (strcmp(quad.arg1_kind, "list") == 0)
 			fprintf(fp, "\tmov cx,64\n");
 		else
 			fprintf(fp, "\tmov cx,1\n");
@@ -314,7 +342,7 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
         temp->next = NULL;
 		if (program_strings == NULL)
         	program_strings = temp;
-		else 
+		else
 			program_strings_tail->next = temp;
 		program_strings_tail = temp;
     }
