@@ -293,9 +293,15 @@ opt2_list:
 formal:
     opt3 type T_id
     {   /* fprintf(stderr,"%s \n", $3); */
-        newParameter($3, $2.refT, $1.pm, p);
-        type = $2.refT;
-        pMode = $1.pm;
+	if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST){
+		newParameter($3, $2.refT, PASS_BY_REFERENCE, p);
+		type = $2.refT;
+		pMode = PASS_BY_REFERENCE;
+	} else {
+		newParameter($3, $2.refT, $1.pm, p);
+		type = $2.refT;
+		pMode = $1.pm;
+	}
     }
     formal_list
 ;
@@ -510,7 +516,7 @@ opt5:
                           if (pm == PASS_BY_VALUE)
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
                           else
-                                GenQuad4(PAR_QUAD, $1.symbol_entry, "REFFERENCE", NULL);
+                                GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
                         }
           opt6          { $$.symbol_entry = $3.symbol_entry; }
 ;
@@ -532,7 +538,7 @@ opt6:
                           if (pm == PASS_BY_VALUE)
                                 GenQuad4(PAR_QUAD, $2.symbol_entry, "VALUE", NULL);
                           else
-                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFFERENCE", NULL);
+                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFERENCE", NULL);
                         }
           opt6          { $$.symbol_entry = $4.symbol_entry; }
 ;

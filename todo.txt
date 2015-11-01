@@ -1,3 +1,3 @@
--- missing quads from code-generator: head, tail, array, list
+-- missing quads from code-generator: head, tail, list
 -- [x] and {x} cases of load, store, loadAddr
 -- memory allocation for iarray, list
