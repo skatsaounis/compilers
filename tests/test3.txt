@@ -31,5 +31,5 @@ puti(number + 1)
 puts("\n")
 end
 end
-puts("\nTotal: ") puti(counter) puts("\n")
+puts("\nTo,\",s,,df\"tal: ") puti(counter) puts("\n")
 end

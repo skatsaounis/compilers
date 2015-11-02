@@ -52,115 +52,27 @@ Interpreted_quad consume_quad(FILE * fp){
     flag = 0;
     linesize = 0;
     getline(&line, &linesize, fp);
-    token = strtok (line,":");
-    interpreted_quad.id = atoi(token);
-
-    token = strtok (NULL,",");
-    interpreted_quad.quad = strdup(token);
-
-    token = strtok (NULL,",");
-    temp = token;
-    i = 0; j = 0;
-    while(temp[j] != '\0'){
-        if (temp[j] == '\"'){
-            if (j == 0) i++;
-            else if ((j > 0) && (temp[j-1] != '\\'))
-                i++;
-        }
-        j++;
-    }
-    if (i == 1) flag = 1;
-    while (flag == 1){
-        temp = strtok (NULL,",");
-        sprintf(temp2, ",%s", temp);
-        strcat(token, temp2);
-        i = 0; j = 0;
-        while(temp[j] != '\0'){
-            if (temp[j] == '\"'){
-                if (j == 0) i++;
-                else if ((j > 0) && (temp[j-1] != '\\'))
-                    i++;
-            }
-            j++;
-        }
-        if (i == 1) flag = 0;
-    }
-    interpreted_quad.arg1         = strdup(token);
-
-    token = strtok (NULL,",");
-    temp = token;
-    i = 0; j = 0;
-    while(temp[j] != '\0'){
-        if (temp[j] == '\"'){
-            if (j == 0) i++;
-            else if ((j > 0) && (temp[j-1] != '\\'))
-                i++;
-        }
-        j++;
-    }
-    if (i == 1) flag = 1;
-    while (flag == 1){
-        temp = strtok (NULL,",");
-        sprintf(temp2, ",%s", temp);
-        strcat(token, temp2);
-        i = 0; j = 0;
-        while(temp[j] != '\0'){
-            if (temp[j] == '\"'){
-                if (j == 0) i++;
-                else if ((j > 0) && (temp[j-1] != '\\'))
-                    i++;
-            }
-            j++;
-        }
-        if (i == 1) flag = 0;
-    }
-    interpreted_quad.arg2         = strdup(token);
-
-    token = strtok (NULL,",");
-    temp = token;
-    i = 0; j = 0;
-    while(temp[j] != '\0'){
-        if (temp[j] == '\"'){
-            if (j == 0) i++;
-            else if ((j > 0) && (temp[j-1] != '\\'))
-                i++;
-        }
-        j++;
-    }
-    if (i == 1) flag = 1;
-    while (flag == 1){
-        temp = strtok (NULL,",");
-        sprintf(temp2, ",%s", temp);
-        strcat(token, temp2);
-        i = 0; j = 0;
-        while(temp[j] != '\0'){
-            if (temp[j] == '\"'){
-                if (j == 0) i++;
-                else if ((j > 0) && (temp[j-1] != '\\'))
-                    i++;
-            }
-            j++;
-        }
-        if (i == 1) flag = 0;
-    }
-    interpreted_quad.dest         = strdup(token);
-
-    interpreted_quad.nesting      = strdup(strtok (NULL,","));
-    interpreted_quad.arg1_pm      = strdup(strtok (NULL,","));
-    interpreted_quad.arg1_type    = strdup(strtok (NULL,","));
-    interpreted_quad.arg1_nesting = strdup(strtok (NULL,","));
-    interpreted_quad.arg1_kind    = strdup(strtok (NULL,","));
-    interpreted_quad.arg1_offset  = strdup(strtok (NULL,","));
-    interpreted_quad.arg2_pm      = strdup(strtok (NULL,","));
-    interpreted_quad.arg2_type    = strdup(strtok (NULL,","));
-    interpreted_quad.arg2_nesting = strdup(strtok (NULL,","));
-    interpreted_quad.arg2_kind    = strdup(strtok (NULL,","));
-    interpreted_quad.arg2_offset  = strdup(strtok (NULL,","));
-    interpreted_quad.dest_pm      = strdup(strtok (NULL,","));
-    interpreted_quad.dest_type    = strdup(strtok (NULL,","));
-    interpreted_quad.dest_nesting = strdup(strtok (NULL,","));
-    interpreted_quad.dest_kind    = strdup(strtok (NULL,","));
-    interpreted_quad.dest_offset  = strdup(strtok (NULL,","));
+    interpreted_quad.id           = atoi(strtok (line,"\v"));
+    interpreted_quad.quad         = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1         = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2         = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest         = strdup(strtok (NULL,"\v"));
+    interpreted_quad.nesting      = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1_pm      = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1_type    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1_nesting = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1_kind    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg1_offset  = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2_pm      = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2_type    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2_nesting = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2_kind    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.arg2_offset  = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest_pm      = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest_type    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest_nesting = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest_kind    = strdup(strtok (NULL,"\v"));
+    interpreted_quad.dest_offset  = strdup(strtok (NULL,"\v"));
 
     free(line);
 
