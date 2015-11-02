@@ -43,12 +43,13 @@ void generator(){
 
 Interpreted_quad consume_quad(FILE * fp){
     Interpreted_quad interpreted_quad;
-    int i;
+    int i, flag;
     char * line = NULL;
     char * token, * temp;
     size_t linesize;
     char temp2[256];
 
+    flag = 0;
     linesize = 0;
     getline(&line, &linesize, fp);
     token = strtok (line,":");
@@ -60,31 +61,40 @@ Interpreted_quad consume_quad(FILE * fp){
     token = strtok (NULL,",");
     temp = token;
     for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
-    if (i == 1){
+    if (i == 1) flag = 1;
+    while (flag == 1){
         temp = strtok (NULL,",");
         sprintf(temp2, ",%s", temp);
         strcat(token, temp2);
-    }
+        for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+        if (i == 1) flag = 0;
+    }printf("token1:%s\n", token);
     interpreted_quad.arg1         = strdup(token);
 
     token = strtok (NULL,",");
     temp = token;
     for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
-    if (i == 1){
+    if (i == 1) flag = 1;
+    while (flag == 1){
         temp = strtok (NULL,",");
         sprintf(temp2, ",%s", temp);
         strcat(token, temp2);
-    }
+        for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+        if (i == 1) flag = 0;
+    }printf("token2:%s\n", token);
     interpreted_quad.arg2         = strdup(token);
 
     token = strtok (NULL,",");
     temp = token;
     for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
-    if (i == 1){
+    if (i == 1) flag = 1;
+    while (flag == 1){
         temp = strtok (NULL,",");
         sprintf(temp2, ",%s", temp);
         strcat(token, temp2);
-    }
+        for (i=0; temp[i]; temp[i]=='\"' ? i++ : *temp++);
+        if (i == 1) flag = 0;
+    }printf("token3:%s\n", token);
     interpreted_quad.dest         = strdup(token);
 
     interpreted_quad.nesting      = strdup(strtok (NULL,","));
