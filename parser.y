@@ -108,7 +108,7 @@ Type lookup_type_find(SymbolEntry * p){
 }
 
 Type lookup_type_in_arrays(Type p){
-    while (p->kind == TYPE_IARRAY)
+    while (p->kind == TYPE_IARRAY || p->kind == TYPE_POINTER)
         p = p->refType;
     return p;
 }
@@ -583,7 +583,7 @@ atom:
     | T_string                      { $$.symbol_entry = newConstant ("a", typeIArray(typeChar), $1); }
     | atom '[' expr ']'             { if(lookup_type_find($3.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
-                                      $$.symbol_entry = newTemporary(lookup_type_find($1.symbol_entry));
+                                      $$.symbol_entry = newTemporary(typePointer(lookup_type_find($1.symbol_entry)));
                                       GenQuad(ARRAY_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry);
                                     }
     | call                          { $$.symbol_entry = $1.symbol_entry; }

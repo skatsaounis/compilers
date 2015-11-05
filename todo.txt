@@ -1,3 +1,3 @@
--- [x] and {x} cases of load, store, loadAddr
+-- [x] pointer dereference of load, store, loadAddr
 -- check before call head, tail for nil lists
 

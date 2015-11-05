@@ -48,7 +48,15 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
         quad_array[nextquad].arg1 = strdup(bufferx);
     }
     else
-       quad_array[nextquad].arg1 = (char *) x->id;
+    	if (x->entryType == ENTRY_TEMPORARY)
+			if (x->u.eTemporary.type->kind == TYPE_POINTER){
+				char bufferx[256];
+				sprintf(bufferx, "[%s]", (char *) x->id);
+				quad_array[nextquad].arg1 = strdup(bufferx);
+			} else
+				quad_array[nextquad].arg1 = (char *) x->id;
+		else
+			quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -80,7 +88,15 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
                 quad_array[nextquad].arg2 = strdup(buffery);
     }
     else
-        quad_array[nextquad].arg2 = (char *) y->id;
+    	if (y->entryType == ENTRY_TEMPORARY)
+			if (y->u.eTemporary.type->kind == TYPE_POINTER){
+				char buffery[256];
+				sprintf(buffery, "[%s]", (char *) y->id);
+				quad_array[nextquad].arg2 = strdup(buffery);
+			} else
+				quad_array[nextquad].arg2 = (char *) y->id;
+		else
+			quad_array[nextquad].arg2 = (char *) y->id;
 
     quad_array[nextquad].arg2_req.type = symbol_type (y);
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
@@ -95,7 +111,15 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
     if (z == NULL)
         quad_array[nextquad].dest = "-";
     else
-        quad_array[nextquad].dest = (char *) z->id;
+    	if (z->entryType == ENTRY_TEMPORARY)
+			if (z->u.eTemporary.type->kind == TYPE_POINTER && quad_array[nextquad].type != ARRAY_QUAD){
+				char bufferz[256];
+				sprintf(bufferz, "[%s]", (char *) z->id);
+				quad_array[nextquad].dest = strdup(bufferz);
+			} else
+				quad_array[nextquad].dest = (char *) z->id;
+		else
+			quad_array[nextquad].dest = (char *) z->id;
 
     quad_array[nextquad].dest_req.type = symbol_type (z);
     quad_array[nextquad].dest_req.pm = symbol_pm (z);
@@ -134,8 +158,16 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
-        else
-        quad_array[nextquad].arg1 = (char *) x->id;
+    else
+    	if (x->entryType == ENTRY_TEMPORARY)
+			if (x->u.eTemporary.type->kind == TYPE_POINTER){
+				char bufferx[256];
+				sprintf(bufferx, "[%s]", (char *) x->id);
+				quad_array[nextquad].arg1 = strdup(bufferx);
+			} else
+				quad_array[nextquad].arg1 = (char *) x->id;
+		else
+			quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -167,7 +199,15 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
                 quad_array[nextquad].arg2 = strdup(buffery);
         }
     else
-        quad_array[nextquad].arg2 = (char *) y->id;
+    	if (y->entryType == ENTRY_TEMPORARY)
+			if (y->u.eTemporary.type->kind == TYPE_POINTER){
+				char buffery[256];
+				sprintf(buffery, "[%s]", (char *) y->id);
+				quad_array[nextquad].arg2 = strdup(buffery);
+			} else
+				quad_array[nextquad].arg2 = (char *) y->id;
+		else
+			quad_array[nextquad].arg2 = (char *) y->id;
 
     quad_array[nextquad].arg2_req.type = symbol_type (y);
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
@@ -251,8 +291,16 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
-        else
-        quad_array[nextquad].arg1 = (char *) x->id;
+    else
+    	if (x->entryType == ENTRY_TEMPORARY)
+			if (x->u.eTemporary.type->kind == TYPE_POINTER){
+				char bufferx[256];
+				sprintf(bufferx, "[%s]", (char *) x->id);
+				quad_array[nextquad].arg1 = strdup(bufferx);
+			} else
+				quad_array[nextquad].arg1 = (char *) x->id;
+		else
+			quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);

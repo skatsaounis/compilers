@@ -235,8 +235,45 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
     else if ((strcmp(b, "false") == 0) || (strcmp(b, "nil") == 0 ))
         fprintf(fp, "\tmov %s,0\n", a);
     else if (b[0] == '\'')
-        fprintf(fp, "\tmov %s,%d\n", a, (int) b[1]);
-    else if(atoi(data_nesting)==atoi(nesting)) {
+        if (b[1] != '\\')        
+            fprintf(fp, "\tmov %s,%d\n", a, (int) b[1]);
+        else {
+            char buf;
+            if (b[2] == 'n')
+                buf = '\n';
+            else if (b[2] == 't')
+                buf = '\t';
+            else if (b[2] == 'r')
+                buf = '\r';
+            else if (b[2] == '0')
+                buf = '\0';
+            else if (b[2] == '\\')
+                buf = '\\';
+            else if (b[2] == '\'')
+                buf = '\'';
+            else if (b[2] == '\"')
+                buf = '\"';
+            else {
+                int i, j;
+                if ((int) b[3] >= 97)
+                    i = (int) b[3] - 87;
+                else if ((int) b[3] >= 65)
+                    i = (int) b[3] - 55;
+                else
+                    i = (int) b[3] - 48;
+                if ((int) b[4] >= 97)
+                    j = (int) b[4] - 87;
+                else if ((int) b[4] >= 65)
+                    j = (int) b[4] - 55;
+                else
+                    j = (int) b[4] - 48;
+                buf = (char) (16*i+j);
+            }
+            fprintf(fp, "\tmov %s,%d\n", a, (int) buf);
+        }
+    else if (b[0] == '[') {
+        fprintf(fp, "*** pointer dereference not implemented yet***\n");   
+    } else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0)
@@ -269,7 +306,10 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
 }
 
 void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
-    if(atoi(data_nesting)==atoi(nesting)) {
+    if (b[0] == '[') {
+        fprintf(fp, "*** pointer dereference not implemented yet***\n");   
+    }     
+    else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0)
                 fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
@@ -316,6 +356,9 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
 			program_strings_tail->next = temp;
 		program_strings_tail = temp;
     }
+    else if (b[0] == '[') {
+        fprintf(fp, "*** pointer dereference not implemented yet***\n");   
+    }    
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0)
@@ -325,7 +368,8 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
         }
-    } else
+    } 
+    else
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
             if(strcmp(data_kind, "integer") == 0)
