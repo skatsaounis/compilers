@@ -21,9 +21,6 @@ typedef enum {               /***********/
 	RET_QUAD,                /*   ret   */
     RETV_QUAD,               /*   retv  */
 	ARRAY_QUAD,              /*   array */
-    LIST_QUAD,               /*   list  */
-    HEAD_QUAD,               /*   head  */
-    TAIL_QUAD,               /*   tail  */
     ISNIL_QUAD,              /*   nil?  */
 	UNIT_QUAD,               /*   unit  */
 	ENDU_QUAD,               /*   endu  */

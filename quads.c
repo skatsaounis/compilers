@@ -347,11 +347,8 @@ char * print_quad(int i){
             case CALL_QUAD:     s="call";    break;
             case RET_QUAD:      s="ret";     break;
             case RETV_QUAD:     s="retv";    break;
-            case HEAD_QUAD:     s="head";    break; /* ? */
-            case TAIL_QUAD:     s="tail";    break; /* ? */
             case ISNIL_QUAD:    s="nil?";    break;
             case ARRAY_QUAD:    s="array";   break; /* ? */
-            case LIST_QUAD:     s="list";    break; /* ? */
             case PTR_QUAD:      s="pointer"; break; /* not used */
             default:
                 error("GenQuad: Internal Error\n");

@@ -13,7 +13,7 @@ Program_strings temp;
 
 int unique;
 
-void generator(){
+void generator(int * externs){
     int i;
     char program[256];
     FILE * fp, * fp2;
@@ -36,7 +36,7 @@ void generator(){
     }
 
     printstrings(fp);
-	printexterns(fp);
+    printexterns(fp, externs);
     fprintf(fp, "xseg ends\n\tend main\n");
     fclose(fp);
 }
@@ -198,9 +198,9 @@ void generate(Interpreted_quad quad, FILE * fp){
 		if (strcmp(quad.arg1_kind, "integer") == 0)
 			fprintf(fp, "\tmov cx,2\n");
 		else if (strcmp(quad.arg1_kind, "iarray") == 0)
-			fprintf(fp, "\tmov cx,42\n");
+			fprintf(fp, "\tmov cx,2\n");
 		else if (strcmp(quad.arg1_kind, "list") == 0)
-			fprintf(fp, "\tmov cx,64\n");
+			fprintf(fp, "\tmov cx,2\n");
 		else
 			fprintf(fp, "\tmov cx,1\n");
 		fprintf(fp, "\timul cx\n");
@@ -450,20 +450,73 @@ void string_to_db(FILE * fp, char * node_str){
         fprintf(fp, "´");
 }
 
-void printexterns(FILE * fp){
-	fprintf(fp,"\textrn puti : proc\n");
-	fprintf(fp,"\textrn putb : proc\n");
-	fprintf(fp,"\textrn putc : proc\n");
-	fprintf(fp,"\textrn puts : proc\n");
-	fprintf(fp,"\textrn geti : proc\n");
-	fprintf(fp,"\textrn getb : proc\n");
-	fprintf(fp,"\textrn getc : proc\n");
-	fprintf(fp,"\textrn gets : proc\n");
-	fprintf(fp,"\textrn abs : proc\n");
-	fprintf(fp,"\textrn org : proc\n");
-	fprintf(fp,"\textrn chr : proc\n");
-	fprintf(fp,"\textrn strlen : proc\n");
-	fprintf(fp,"\textrn strcmp : proc\n");
-	fprintf(fp,"\textrn strcpy : proc\n");
-	fprintf(fp,"\textrn strcat : proc\n");
+void printexterns(FILE * fp, int * externs){
+    int i;
+    for (i=0;i<21;i++)
+        if (externs[i] != 0)
+            switch(i){
+                case 0:
+	                fprintf(fp,"\textrn _puti : proc\n");
+                    break;
+                case 1:
+	                fprintf(fp,"\textrn _putb : proc\n");
+                    break;
+                case 2:
+	                fprintf(fp,"\textrn _putc : proc\n");
+                    break;
+                case 3:
+	                fprintf(fp,"\textrn _puts : proc\n");
+                    break;
+                case 4:
+	                fprintf(fp,"\textrn _geti : proc\n");
+                    break;
+                case 5:
+	                fprintf(fp,"\textrn _getb : proc\n");
+                    break;
+                case 6:
+	                fprintf(fp,"\textrn _getc : proc\n");
+                    break;
+                case 7:
+	                fprintf(fp,"\textrn _gets : proc\n");
+                    break;
+                case 8:
+	                fprintf(fp,"\textrn _abs : proc\n");
+                    break;
+                case 9:
+	                fprintf(fp,"\textrn _org : proc\n");
+                    break;
+                case 10:
+                    fprintf(fp,"\textrn _chr : proc\n");
+                    break;
+                case 11:
+	                fprintf(fp,"\textrn _strlen : proc\n");
+                    break;
+                case 12:
+	                fprintf(fp,"\textrn _strcmp : proc\n");
+                    break;
+                case 13:
+	                fprintf(fp,"\textrn _strcpy : proc\n");
+                    break;
+                case 14:
+	                fprintf(fp,"\textrn _strcat : proc\n");
+                    break;
+                case 15:
+                    fprintf(fp,"\textrn _consp : proc\n");
+                    break;
+                case 16:
+                    fprintf(fp,"\textrn _consv : proc\n");
+                    break;
+                case 17:
+                    fprintf(fp,"\textrn _head : proc\n");
+                    break;
+                case 18:
+                    fprintf(fp,"\textrn _newarrp : proc\n");
+                    break;
+                case 19:
+                    fprintf(fp,"\textrn _newarrv : proc\n");
+                    break;
+                case 20:
+                    fprintf(fp,"\textrn _tail : proc\n");
+                    break;
+            }
 }

@@ -37,6 +37,7 @@ for_temps * curr_for_temp, *for_temp;
 
 node * currnode, * temp;
 int flag, main_flag=0;
+int externs[21];
 SymbolEntry * p, * b, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
@@ -53,12 +54,10 @@ int custom_sizeof(Type refT){
       return 1;
       break;
     case TYPE_IARRAY:
-      /* Needs fixing */
-      return 42;
+      return 1; /*size in words (2 bytes) cause newarrp needs the size in words*/
       break;
     case TYPE_LIST:
-      /* Needs fixing */
-      return 64;
+      return 1; /*size in words (2 bytes) cause newarrp needs the size in words*/
       break;
     default:
       internal("Invalid type for refT");
@@ -465,8 +464,13 @@ simple:
 
                           if($3.pointer == 1){
                             GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
-                            GenQuad2(CALL_QUAD, NULL, NULL, "_new");
-                          }
+                            GenQuad2(CALL_QUAD, NULL, NULL, "_newarrv");
+							externs[19] = 1;
+                          } else if($3.pointer == 2){
+							GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+                            GenQuad2(CALL_QUAD, NULL, NULL, "_newarrp");
+							externs[18] = 1;
+						  }
 
                           $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry));
                           $$.false_list = emptylist();
@@ -490,6 +494,37 @@ call:
                           temp->prev = currnode;
                           currnode = temp;
                           b = lookupEntry($1, LOOKUP_ALL_SCOPES, true); currnode->a = b->u.eFunction.firstArgument;
+
+						  if (strcmp($1, "puti") == 0)
+							externs[0] = 1;
+						  else if (strcmp($1, "putb") == 0 )
+							externs[1] = 1;
+						  else if (strcmp($1, "putc") == 0)
+							externs[2] = 1;
+						  else if (strcmp($1, "puts") == 0)
+							externs[3] = 1;
+						  else if (strcmp($1, "geti") == 0)
+							externs[4] = 1;
+						  else if (strcmp($1, "getb") == 0)
+							externs[5] = 1;
+						  else if (strcmp($1, "getc") == 0)
+							externs[6] = 1;
+						  else if (strcmp($1, "gets") == 0)
+							externs[7] = 1;
+						  else if (strcmp($1, "abs") == 0)
+							externs[8] = 1;
+						  else if (strcmp($1, "org") == 0)
+							externs[9] = 1;
+						  else if (strcmp($1, "chr") == 0)
+							externs[10] = 1;
+						  else if (strcmp($1, "strlen") == 0)
+							externs[11] = 1;
+						  else if (strcmp($1, "strcmp") == 0)
+							externs[12] = 1;
+						  else if (strcmp($1, "strcpy") == 0)
+							externs[13] = 1;
+						  else if (strcmp($1, "strcat") == 0)
+							externs[14] = 1;
                         }
     '(' opt5 ')'        {
                           $$.symbol_entry = $4.symbol_entry;
@@ -652,7 +687,20 @@ expr:
     | expr '#' expr                 { if((lookup_type_find($3.symbol_entry)->kind != TYPE_LIST) || (lookup_type_find($1.symbol_entry) != lookup_type_find($3.symbol_entry)->refType))
                                             ERROR("exprs must be of type t and list[t] respectively") ;
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
-                                      GenQuad(LIST_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      if((lookup_type_find($1.symbol_entry) == TYPE_LIST || lookup_type_find($1.symbol_entry) == TYPE_IARRAY)){
+											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
+											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                      		GenQuad2(CALL_QUAD, NULL, NULL, "_consp");
+											externs[15] = 1;
+									  } else {
+											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
+											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                      		GenQuad2(CALL_QUAD, NULL, NULL, "_consv");
+											externs[16] = 1;
+									  }
+										
                                     }
     | '-' expr         %prec UMINUS { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
@@ -680,8 +728,11 @@ expr:
                                       W = newTemporary(typeInteger);
                                       GenQuad(MULT_QUAD, $4.symbol_entry, S, W);
                                       GenQuad4(PAR_QUAD, W, "VALUE", NULL);
-
-                                      $$.pointer = 1;
+										
+									  if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST)
+                                      		$$.pointer = 2; /*array of pointers*/
+									  else
+											$$.pointer = 1; /*array of values*/
                                       $$.symbol_entry = newTemporary(typeIArray($2.refT));
                                     }
     | "nil"                         { $$.symbol_entry = newTemporary(typeList(typeVoid)); }
@@ -694,12 +745,18 @@ expr:
     | "head" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
                                       $$.symbol_entry = newTemporary(lookup_type_find($3.symbol_entry)->refType);
-                                      GenQuad(HEAD_QUAD, $3.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
+									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                      GenQuad2(CALL_QUAD, NULL, NULL, "_head");
+									  externs[17] = 1;
                                     }
     | "tail" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
-                                      GenQuad(TAIL_QUAD, $3.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
+                                      GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                      GenQuad2(CALL_QUAD, NULL, NULL, "_tail");
+									  externs[20] = 1;
                                     }
 ;
 
@@ -713,15 +770,17 @@ void yyerror (const char *msg)
 }
 
 int main ()
-{
+{ int i;
   fp = fopen("quads.txt", "w+");
+  for (i = 0; i<21; i++)
+	externs[i] = 0;
   if (yyparse()==0){
     printf("yyparse returned 0. Everything's all right.\n");
   }
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
   fclose(fp);
-  generator();
+  generator(externs);
   destroySymbolTable();
   return 0;
 }
