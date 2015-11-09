@@ -744,6 +744,8 @@ expr:
                                     }
     | "head" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
+									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
+                                            ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(lookup_type_find($3.symbol_entry)->refType);
 									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
@@ -752,6 +754,8 @@ expr:
                                     }
     | "tail" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
+									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
+                                            ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
                                       GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
