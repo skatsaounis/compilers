@@ -672,7 +672,7 @@ unsigned int sizeOfType (Type type)
 
 bool equalType (Type type1, Type type2)
 {	/*printf("I am here: %d\n",yylloc.first_line);*/
-    if (type1->kind != type2->kind)
+    if (type1->kind != type2->kind && ((type1->kind == TYPE_IARRAY && type2->kind == TYPE_POINTER) || (type1->kind == TYPE_POINTER && type2->kind == TYPE_IARRAY)))
         return false;
     switch (type1->kind) {
         case TYPE_ARRAY:

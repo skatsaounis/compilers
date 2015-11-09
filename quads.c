@@ -489,7 +489,7 @@ char * symbol_kind (SymbolEntry * p){
                     return strdup("char");
                     break;
                 case TYPE_IARRAY:
-					switch (p->u.eConstant.type->refType->kind) {
+				switch (p->u.eConstant.type->refType->kind) {
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -509,6 +509,25 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eConstant.type->refType->kind) {
+						case TYPE_INTEGER:
+                    		return strdup("integer");
+                    		break;
+                		case TYPE_BOOLEAN:
+                    		return strdup("boolean");
+                    		break;
+                		case TYPE_CHAR:
+				            return strdup("char");
+				            break;
+                		case TYPE_IARRAY:
+							return strdup("iarray");
+                    		break;
+						case TYPE_LIST:
+                    		return strdup("list");
+                    		break;
+					}
+                    break;
+				case TYPE_POINTER:
+				switch (p->u.eConstant.type->refType->kind) {
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -577,6 +596,25 @@ char * symbol_kind (SymbolEntry * p){
                     		break;
 					}
                     break;
+				case TYPE_POINTER:
+				switch (p->u.eConstant.type->refType->kind) {
+						case TYPE_INTEGER:
+                    		return strdup("integer");
+                    		break;
+                		case TYPE_BOOLEAN:
+                    		return strdup("boolean");
+                    		break;
+                		case TYPE_CHAR:
+				            return strdup("char");
+				            break;
+                		case TYPE_IARRAY:
+							return strdup("iarray");
+                    		break;
+						case TYPE_LIST:
+                    		return strdup("list");
+                    		break;
+					}
+                    break;
             }
             break;
         case ENTRY_VARIABLE:
@@ -628,6 +666,25 @@ char * symbol_kind (SymbolEntry * p){
                     		break;
 					}
                     break;
+				case TYPE_POINTER:
+				switch (p->u.eConstant.type->refType->kind) {
+						case TYPE_INTEGER:
+                    		return strdup("integer");
+                    		break;
+                		case TYPE_BOOLEAN:
+                    		return strdup("boolean");
+                    		break;
+                		case TYPE_CHAR:
+				            return strdup("char");
+				            break;
+                		case TYPE_IARRAY:
+							return strdup("iarray");
+                    		break;
+						case TYPE_LIST:
+                    		return strdup("list");
+                    		break;
+					}
+                    break;
             }
             break;
         case ENTRY_TEMPORARY:
@@ -662,6 +719,25 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eTemporary.type->refType->kind) {
+						case TYPE_INTEGER:
+                    		return strdup("integer");
+                    		break;
+                		case TYPE_BOOLEAN:
+                    		return strdup("boolean");
+                    		break;
+                		case TYPE_CHAR:
+				            return strdup("char");
+				            break;
+                		case TYPE_IARRAY:
+							return strdup("iarray");
+                    		break;
+						case TYPE_LIST:
+                    		return strdup("list");
+                    		break;
+					}
+                    break;
+				case TYPE_POINTER:
+				switch (p->u.eConstant.type->refType->kind) {
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;

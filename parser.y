@@ -123,7 +123,7 @@ void checkParams(SymbolEntry ** p, Type t){
     if ( *p == NULL)
         ERROR("More arguments than expected");
     else if (!equalType(lookup_type_find(*p),t))
-        if(t->kind == TYPE_IARRAY && equalType(lookup_type_find(*p),t->refType))
+        if((t->kind == TYPE_IARRAY || t->kind == TYPE_POINTER) && equalType(lookup_type_find(*p),t->refType))
             *p = (*p)->u.eParameter.next;
         else
             ERROR("Typical and real parameters type mismatch");
