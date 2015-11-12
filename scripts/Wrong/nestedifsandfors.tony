@@ -1,0 +1,15 @@
+def main():
+	int i
+	i := 1
+	if (i < 10):
+		for i:= 0; i < 20; i := i+1:
+			if (true):
+				puts("a")
+			end
+		end
+	elsif	(i < 35):
+		i := i + 1005
+	else:
+		i := 69
+	end
+end

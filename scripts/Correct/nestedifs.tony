@@ -1,0 +1,32 @@
+def main():
+	int i
+	i := 1
+	if (i < 10):
+		if (i > 5):
+			i := i * 5
+		elsif (i < 5):
+			i := i * 10
+			if (i < 101):
+				i := i + 2
+			elsif (i < 5):
+				i := i * 10
+			elsif (i < 41):
+				i := i - 5
+			elsif (i < 31):
+				i := i mod 2
+			else:
+				i := i - 4
+			end
+		elsif (i < 4):
+			i := i - 5
+		elsif (i < 3):
+			i := i mod 2
+		else:
+			i := i - 4
+		end
+	elsif	(i < 35):
+		i := i + 1005
+	else:	
+		i := 69
+	end
+end
