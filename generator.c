@@ -237,7 +237,7 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
     else if ((strcmp(b, "false") == 0) || (strcmp(b, "nil") == 0 ))
         fprintf(fp, "\tmov %s,0\n", a);
     else if (b[0] == '\'')
-        if (b[1] != '\\')        
+        if (b[1] != '\\')
             fprintf(fp, "\tmov %s,%d\n", a, (int) b[1]);
         else {
             char buf;
@@ -274,14 +274,13 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
             fprintf(fp, "\tmov %s,%d\n", a, (int) buf);
         }
     else if (b[0] == '[') {
-		char temp_buf[257];
-		strcat(temp_buf,&(b[1]));
-		temp_buf[strlen(temp_buf)-1] = '\0';
-		load("di", temp_buf, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
+		memmove(b, b+1, strlen(b));
+        b[strlen(b)-1] = 0;
+		load("di", b, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
         if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [di]\n", a);
        	else
-                fprintf(fp, "\tmov %s, byte ptr [di]\n", a);   
+                fprintf(fp, "\tmov %s, byte ptr [di]\n", a);
     } else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0))
@@ -316,15 +315,14 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
 
 void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
     if (b[0] == '[') {
-        char temp_buf[257];
-		strcat(temp_buf,&(b[1]));
-		temp_buf[strlen(temp_buf)-1] = '\0';
-		load("di", temp_buf, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
+        memmove(b, b+1, strlen(b));
+        b[strlen(b)-1] = 0;
+		load("di", b, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
         if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [di], %s\n", a);
        	else
-                fprintf(fp, "\tmov byte ptr [di], %s\n", a);   
-    }     
+                fprintf(fp, "\tmov byte ptr [di], %s\n", a);
+    }
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
@@ -373,11 +371,10 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
 		program_strings_tail = temp;
     }
     else if (b[0] == '[') {
-        char temp_buf[257];
-		strcat(temp_buf,&(b[1]));
-		temp_buf[strlen(temp_buf)-1] = '\0';
-		load("di", temp_buf, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);    
-    }    
+        memmove(b, b+1, strlen(b));
+        b[strlen(b)-1] = 0;
+        load(a, b, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
+    }
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
@@ -387,7 +384,7 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
         }
-    } 
+    }
     else
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);

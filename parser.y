@@ -463,7 +463,8 @@ simple:
     "skip"              { $$.next_list = emptylist(); }
     | atom ":=" expr    { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
                                 ERROR("not the same type of exprs");
-
+                          if(($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
+                            nextquad--;
                           if($3.pointer == 1){
                             GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrv", 2);
@@ -581,7 +582,12 @@ opt6:
 ;
 
 atom:
-    T_id                            { $$.symbol_entry = lookupEntry($1, LOOKUP_ALL_SCOPES, true); }
+    T_id                            { $$.symbol_entry = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
+                                      /* ??? */
+                                      $$.true_list = make_list(GenQuad2(EQ_QUAD, $1.symbol_entry, newConstant ("a", typeBoolean, 1), "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
+                                      /* ??? */
+                                    }
     | T_string                      { $$.symbol_entry = newConstant ("a", typeIArray(typeChar), $1); }
     | atom '[' expr ']'             { if(lookup_type_find($3.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
@@ -702,7 +708,7 @@ expr:
                                       		GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4);
 											externs[16] = 1;
 									  }
-										
+
                                     }
     | '-' expr         %prec UMINUS { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
@@ -730,7 +736,7 @@ expr:
                                       W = newTemporary(typeInteger);
                                       GenQuad(MULT_QUAD, $4.symbol_entry, S, W, 0);
                                       GenQuad4(PAR_QUAD, W, "VALUE", NULL);
-										
+
 									  if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST)
                                       		$$.pointer = 2; /*array of pointers*/
 									  else
