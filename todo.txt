@@ -1,5 +1,4 @@
 -- Fix externs variables for library functions
--- Fix problem in test5.tony with the condition-boolean variable
 -- Fix general bugs to make the programs run.
 -- Optimizations
 

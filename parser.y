@@ -36,7 +36,7 @@ if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
 node * currnode, * temp;
-int flag, main_flag=0, counter=0;
+int flag, main_flag=0, counter=0, logical_expr=0;
 int externs[21], offsets[257];
 SymbolEntry * p, * b, * W, * S;
 Type type, refType;
@@ -369,22 +369,23 @@ stmt:
                           GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL, 0);
                           GenQuad(RET_QUAD, NULL, NULL, NULL, 0);
                         }
-    | "if" expr         { if (lookup_type_find($2.symbol_entry) != typeBoolean)
+    | "if" 				{logical_expr = 1;} 
+	   expr         	{ if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("if exprs must be of type bool");
-
+			  			  logical_expr = 0;
                           if_temp = (if_temps *) new(sizeof(if_temps));
                           init_if_temps(if_temp);
                           if_temp->prev = curr_if_temp;
                           curr_if_temp = if_temp;
 
-                          backpatch($2.true_list, nextquad);
-                          curr_if_temp->temp1 = $2.false_list;
-                          curr_if_temp->temp4 = $2.false_list;
+                          backpatch($3.true_list, nextquad);
+                          curr_if_temp->temp1 = $3.false_list;
+                          curr_if_temp->temp4 = $3.false_list;
                           curr_if_temp->temp2 = emptylist();
                         }
       ':' stmt_list elsif_list else_list "end"
                         {
-                          curr_if_temp->temp3 = merge(curr_if_temp->temp1, $5.next_list);
+                          curr_if_temp->temp3 = merge(curr_if_temp->temp1, $6.next_list);
                           $$.next_list = merge(curr_if_temp->temp3, curr_if_temp->temp2);
                           backpatch(curr_if_temp->temp5, nextquad);
 
@@ -399,8 +400,10 @@ stmt:
                           for_temp->prev = curr_for_temp;
                           curr_for_temp = for_temp;
                           sprintf(curr_for_temp->temp1, "%ld", nextquad);
+			  			  logical_expr = 1;
                         }
       expr ';'          {
+			  			  logical_expr = 0;
                           curr_for_temp->temp2 = nextquad;
                           sprintf(curr_for_temp->temp3, "%ld", nextquad);
                         }
@@ -428,10 +431,11 @@ elsif_list:
                         }
     | "elsif"           { curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0)));
                           backpatch(curr_if_temp->temp4, nextquad);
+			  			  logical_expr = 1;
                         }
       expr              { if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("elsif exprs must be of type bool");
-
+			  			  logical_expr = 0;
                           backpatch($3.true_list, nextquad);
                           curr_if_temp->temp4 = $3.false_list;
                           curr_if_temp->temp2 = emptylist();
@@ -583,10 +587,10 @@ opt6:
 
 atom:
     T_id                            { $$.symbol_entry = lookupEntry($1, LOOKUP_ALL_SCOPES, true);
-                                      /* ??? */
-                                      $$.true_list = make_list(GenQuad2(EQ_QUAD, $1.symbol_entry, newConstant ("a", typeBoolean, 1), "-1", 0));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
-                                      /* ??? */
+                                      if ((logical_expr == 1) && (lookup_type_find($$.symbol_entry) == typeBoolean)){
+                                      	$$.true_list = make_list(GenQuad2(EQ_QUAD, $$.symbol_entry, newConstant ("a", typeBoolean, 1), "-1", 0));
+                                      	$$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
+                                      }
                                     }
     | T_string                      { $$.symbol_entry = newConstant ("a", typeIArray(typeChar), $1); }
     | atom '[' expr ']'             { if(lookup_type_find($3.symbol_entry) != typeInteger)
