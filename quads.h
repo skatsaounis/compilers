@@ -64,7 +64,7 @@ extern long nextquad;                            /* returns next's quad label   
 
 
 long GenQuad(QuadType q, SymbolEntry * x,        /* generates next quad                                    */
-	SymbolEntry * y, SymbolEntry * z);
+	SymbolEntry * y, SymbolEntry * z, int offset);
 label_list emptylist();                          /* generates an empty quad labels' list                   */
 label_list make_list(long val);                  /* generates quad label's list containing label: val      */
 label_list merge(label_list a, label_list b);    /* merges two quad labels' lists                          */
@@ -75,7 +75,7 @@ char * print_quad(int i);                        /* printable version of quad ty
 char *strdup(const char *str);
 void print_all_quads();                          /* prints all quad_array                                  */
 char * outp(char *inp);
-long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z);
+long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset);
 long GenQuad3(QuadType q, char * x, char * y, char * z);
 long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z);
 char * symbol_type (SymbolEntry * p);

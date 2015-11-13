@@ -11,9 +11,10 @@
 Program_strings program_strings, program_strings_tail;
 Program_strings temp;
 
-int unique;
+int unique, counterg=0;
+char * unit_name;
 
-void generator(int * externs){
+void generator(int * externs, int * offsets){
     int i;
     char program[256];
     FILE * fp, * fp2;
@@ -24,14 +25,14 @@ void generator(int * externs){
     program_strings_tail = (program_string_t *) new(sizeof(program_string_t));
 	program_strings_tail = program_strings;
 
-    fp = fopen("code.txt", "w+");
+    fp = fopen("a.asm", "w+");
     fp2 = fopen("quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
-    fprintf(fp, "xseg segment public´code´\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near\n\tcall near ptr %s\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
+    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near\n\tcall near ptr _%s\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
 
     for(i = 0; i < nextquad; i++){
         fprintf(fp, "@%d:\n", i);
-        generate(consume_quad(fp2), fp);
+        generate(consume_quad(fp2), fp, offsets[counterg]);
         fprintf(fp, "\n");
     }
 
@@ -80,10 +81,10 @@ Interpreted_quad consume_quad(FILE * fp){
 }
 
 
-void generate(Interpreted_quad quad, FILE * fp){
+void generate(Interpreted_quad quad, FILE * fp, int offset){
     char * temp_label, * temp_name, * temp_endof;
     if (strcmp(quad.quad, ":=") == 0){
-        if(strcmp(quad.arg1_kind, "integer") == 0){
+        if(strcmp(quad.arg1_kind, "integer") == 0 || strcmp(quad.arg1_kind, "iarray") == 0 || strcmp(quad.arg1_kind, "list") == 0 || strcmp(quad.dest_kind, "integer") == 0 || strcmp(quad.dest_kind, "iarray") == 0 || strcmp(quad.dest_kind, "list") == 0){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             store("ax", quad.dest, fp, quad.dest_pm, quad.dest_type, quad.dest_nesting, quad.nesting, quad.dest_kind, quad.dest_offset);
         } else {
@@ -137,26 +138,27 @@ void generate(Interpreted_quad quad, FILE * fp){
             fprintf(fp, "\tjle %s\n", temp_label);
     }
     else if (strcmp(quad.quad, "unit") == 0){
-        temp_name = name(quad.arg1);
-        fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,size\n", temp_name);
+        unit_name = name(quad.arg1);
+        fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
+		counterg++;
     }
     else if (strcmp(quad.quad, "endu") == 0){
-        temp_name = name(quad.arg1);
-        temp_endof = endof(quad.arg1);
-        fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, temp_name);
+        unit_name = name(quad.arg1);
+        temp_endof = endof(unit_name);
+        fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
         fprintf(fp, "\tsub sp,2\n");
-        updateAL(fp, quad.dest, quad.nesting);
-        fprintf(fp, "\tcall near ptr %s\n\tadd sp,size+4\n", temp_name);
+        updateAL(fp, quad.dest_nesting, quad.nesting);
+        fprintf(fp, "\tcall near ptr %s\n\tadd sp,%d+4\n", temp_name, atoi(quad.dest_offset));
     }
     else if (strcmp(quad.quad, "ret") == 0){
-        temp_endof = endof("current");
+        temp_endof = endof(unit_name);
         fprintf(fp, "\tjmp %s\n", temp_endof);
     }
     else if (strcmp(quad.quad, "retv") == 0){
-        if (strcmp(quad.arg1_kind, "integer") == 0) {
+        if (strcmp(quad.arg1_kind, "integer") == 0 || strcmp(quad.arg1_kind, "iarray") == 0 || strcmp(quad.arg1_kind, "list") == 0) {
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tmov\tsi,[bp+6]\n");
             fprintf(fp, "\tmov\t[si],ax\n");
@@ -173,12 +175,12 @@ void generate(Interpreted_quad quad, FILE * fp){
     }
     else if (strcmp(quad.quad, "nil?") == 0){
         temp_label = label(quad.dest);
-        load("al", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
-        fprintf(fp, "\tor al,al\n");
+        load("ax", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
+        fprintf(fp, "\tor ax,ax\n");
         fprintf(fp, "\tjnz %s\n", temp_label);
     }
     else if (strcmp(quad.quad, "par") == 0){
-        if ((strcmp(quad.arg2, "VALUE") == 0) && (strcmp(quad.arg2_kind, "integer") == 0)){
+        if ((strcmp(quad.arg2, "VALUE") == 0) && (strcmp(quad.arg1_kind, "integer") == 0)){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush ax\n");
         }
@@ -276,20 +278,20 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
 		strcat(temp_buf,&(b[1]));
 		temp_buf[strlen(temp_buf)-1] = '\0';
 		load("di", temp_buf, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
-        if(strcmp(data_kind, "integer") == 0)
+        if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [di]\n", a);
        	else
                 fprintf(fp, "\tmov %s, byte ptr [di]\n", a);   
     } else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0))
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
             else
                 fprintf(fp, "\tmov %s, byte ptr [bp + (%d)]\n", a, atoi(data_offset));
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             fprintf(fp, "\tmov si, word ptr [bp + (%d)]\n", atoi(data_offset));
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [si]\n", a);
             else
                 fprintf(fp, "\tmov %s, byte ptr [si]\n", a);
@@ -298,14 +300,14 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [si + (%d)]\n", a, atoi(data_offset));
             else
                 fprintf(fp, "\tmov %s, byte ptr [si + (%d)]\n", a, atoi(data_offset));
         } else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             getAR(data_nesting, fp, nesting);
             fprintf(fp, "\tmov si, word ptr [si + (%d)]\n", atoi(data_offset));
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [si]\n", a);
             else
                 fprintf(fp, "\tmov %s, byte ptr [si]\n", a);
@@ -318,20 +320,20 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
 		strcat(temp_buf,&(b[1]));
 		temp_buf[strlen(temp_buf)-1] = '\0';
 		load("di", temp_buf, fp, data_pm, data_type, data_nesting, nesting, data_kind, data_offset);
-        if(strcmp(data_kind, "integer") == 0)
+        if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [di], %s\n", a);
        	else
                 fprintf(fp, "\tmov byte ptr [di], %s\n", a);   
     }     
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
             else
                 fprintf(fp, "\tmov byte ptr [bp + (%d)], %s\n", atoi(data_offset), a);
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             fprintf(fp, "\tmov si, word ptr [bp + (%d)]\n", atoi(data_offset));
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [si], %s\n", a);
             else
                 fprintf(fp, "\tmov byte ptr [si], %s\n", a);
@@ -340,14 +342,14 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [si + (%d)], %s\n", atoi(data_offset), a);
             else
                 fprintf(fp, "\tmov byte ptr [si + (%d)], %s\n", atoi(data_offset), a);
         } else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             getAR(data_nesting, fp, nesting);
             fprintf(fp, "\tmov si, word ptr [si + (%d)]\n", atoi(data_offset));
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [si], %s\n", a);
             else
                 fprintf(fp, "\tmov byte ptr [si], %s\n", a);
@@ -378,7 +380,7 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
     }    
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tlea %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
             else
                 fprintf(fp, "\tlea %s, byte ptr [bp + (%d)]\n", a, atoi(data_offset));
@@ -389,7 +391,7 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
     else
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
-            if(strcmp(data_kind, "integer") == 0)
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tlea %s, word ptr [si + (%d)]\n", a, atoi(data_offset));
             else
                 fprintf(fp, "\tlea %s, byte ptr [si + (%d)]\n", a, atoi(data_offset));
@@ -405,16 +407,16 @@ void updateAL(FILE * fp, char * a, char * nesting){
 
     nx = atoi(a);
     np = atoi(nesting);
-    times = np - nx - 1;;
+    times = np - nx - 1;
 
     if (np<nx)
         fprintf(fp, "\tpush bp\n");
     else if (np==nx)
-        fprintf(fp, "\tpush word [bp+4]\n");
+        fprintf(fp, "\tpush word ptr [bp+4]\n");
     else {
-        fprintf(fp, "\tmov si, word [bp+4]\n");
+        fprintf(fp, "\tmov si, word ptr [bp+4]\n");
         for (i=0; i < times ; i++)
-            fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+            fprintf(fp, "\tmov si, word ptr [si+4]\n");
         fprintf(fp, "\tpush word ptr [si+4]\n");
     }
 }
@@ -452,53 +454,54 @@ void print_consumed_quad(Interpreted_quad quad){
 
 void printstrings(FILE * fp){
     while (program_strings != NULL){
-        /*fprintf(fp, "@str%d db ´%s´\n\tdb 0\n", program_strings->id, program_strings->node_str);*/
+        /*fprintf(fp, "@str%d db '%s'\n\tdb 0\n", program_strings->id, program_strings->node_str);*/
         fprintf(fp, "@str%d ", program_strings->id);
         string_to_db(fp, program_strings->node_str);
-        fprintf(fp, "\n\tdb 00\n");
+        fprintf(fp, "\tdb 0\n");
         program_strings = program_strings->next;
     }
     fprintf(fp, "\n");
 }
 
 void string_to_db(FILE * fp, char * node_str){
-    int i, flag, flag2;
+    int i, flag, flag2, flag3;
 	char * temp = malloc(3);
     i = 0;
     flag = 0;
     flag2 = 0;
+    flag3 = 0;
     while (node_str[i] != '\0'){
         if (node_str[i] == '\\'){
             flag2 = 1;
             i++;
             if ( (node_str[i] == 'n') || (node_str[i] == 't') || (node_str[i] == 'r') || (node_str[i] == '0') || (node_str[i] == '\\') || (node_str[i] == '\'') || (node_str[i] == '\"') || (node_str[i] == 'x') ){
                 if (flag == 1)
-                    fprintf(fp, "´");
+                    fprintf(fp, "'\n");
                 if (node_str[i] == 'n')
-                    fprintf(fp, "\n\tdb 0A");
+                    fprintf(fp, "\tdb 10\n");
                 else if (node_str[i] == 't')
-                    fprintf(fp, "\n\tdb 09");
+                    fprintf(fp, "\tdb 9\n");
                 else if (node_str[i] == 'r')
-                    fprintf(fp, "\n\tdb 0D");
+                    fprintf(fp, "\tdb 13\n");
                 else if (node_str[i] == '0')
-                    fprintf(fp, "\n\tdb 00");
+                    fprintf(fp, "\tdb 0\n");
                 else if (node_str[i] == '\\')
-                    fprintf(fp, "\n\tdb 5C");
+                    fprintf(fp, "\tdb 92\n");
                 else if (node_str[i] == '\'')
-                    fprintf(fp, "\n\tdb 27");
+                    fprintf(fp, "\tdb 39\n");
                 else if (node_str[i] == '\"')
-                    fprintf(fp, "\n\tdb 22");
+                    fprintf(fp, "\tdb 34\n");
                 else{
                     i++;
 					sprintf(temp, "%c%c", node_str[i], node_str[i+1]);
 					i++;
-                    fprintf(fp, "\n\tdb ´%c´", (char) strtol(temp,NULL,16));
+                    fprintf(fp, "\tdb '%c'\n", (char) strtol(temp,NULL,16));
                 }
                 flag = 0;
             }
         }
         else if (flag == 0){
-            fprintf(fp, "\n\tdb ´");
+			fprintf(fp, "\tdb '");
             flag = 1;
         }
         if (flag2 == 0){
@@ -508,7 +511,7 @@ void string_to_db(FILE * fp, char * node_str){
         i++;
     }
     if (flag == 1)
-        fprintf(fp, "´");
+        fprintf(fp, "'\n");
 }
 
 void printexterns(FILE * fp, int * externs){

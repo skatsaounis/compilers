@@ -23,7 +23,7 @@ char *strdup(const char *str)
     return dup;
 }
 
-long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
+long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int offset)
 {
     char tmp[1];
 
@@ -124,7 +124,12 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
     quad_array[nextquad].dest_req.type = symbol_type (z);
     quad_array[nextquad].dest_req.pm = symbol_pm (z);
     quad_array[nextquad].dest_req.kind = symbol_kind (z);
-    quad_array[nextquad].dest_req.offset = symbol_offset (z);
+    if (q == CALL_QUAD){
+        char buffer[256];
+        sprintf(buffer, "%d", offset);
+        quad_array[nextquad].dest_req.offset = strdup(buffer);
+    } else
+        quad_array[nextquad].dest_req.offset = symbol_offset (z);
     if (z != NULL)
         sprintf(tmp, "%u", z->nestingLevel);
     else
@@ -134,7 +139,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z)
     return nextquad++;
 }
 
-long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
+long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset)
 {
     char tmp[1];
 
@@ -225,7 +230,12 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z)
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
-    quad_array[nextquad].dest_req.offset = strdup("-");
+    if (q == CALL_QUAD){
+        char buffer[256];
+        sprintf(buffer, "%d", offset);
+        quad_array[nextquad].dest_req.offset = strdup(buffer);
+    } else
+        quad_array[nextquad].dest_req.offset = strdup("-");
     /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
@@ -479,6 +489,9 @@ char * symbol_kind (SymbolEntry * p){
     switch(p->entryType){
         case ENTRY_CONSTANT:
             switch (p->u.eConstant.type->kind) {
+                case TYPE_VOID:
+                    return strdup("list");
+                    break;
                 case TYPE_INTEGER:
                     return strdup("integer");
                     break;
@@ -490,6 +503,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_IARRAY:
 				switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -509,6 +525,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -528,6 +547,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
 				case TYPE_POINTER:
 				switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -549,6 +571,9 @@ char * symbol_kind (SymbolEntry * p){
             break;
         case ENTRY_PARAMETER:
             switch (p->u.eParameter.type->kind) {
+                case TYPE_VOID:
+                    return strdup("list");
+                    break;
                 case TYPE_INTEGER:
                     return strdup("integer");
                     break;
@@ -560,6 +585,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_IARRAY:
 					switch (p->u.eParameter.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -579,6 +607,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eParameter.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -598,6 +629,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
 				case TYPE_POINTER:
 				switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -619,6 +653,9 @@ char * symbol_kind (SymbolEntry * p){
             break;
         case ENTRY_VARIABLE:
             switch (p->u.eVariable.type->kind) {
+                case TYPE_VOID:
+                    return strdup("list");
+                    break;
                 case TYPE_INTEGER:
                     return strdup("integer");
                     break;
@@ -630,6 +667,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_IARRAY:
 					switch (p->u.eVariable.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -649,6 +689,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eVariable.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -668,6 +711,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
 				case TYPE_POINTER:
 				switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -689,6 +735,9 @@ char * symbol_kind (SymbolEntry * p){
             break;
         case ENTRY_TEMPORARY:
             switch (p->u.eTemporary.type->kind) {
+                case TYPE_VOID:
+                    return strdup("list");
+                    break;
                 case TYPE_INTEGER:
                     return strdup("integer");
                     break;
@@ -700,6 +749,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_IARRAY:
 					switch (p->u.eTemporary.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -719,6 +771,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
                 case TYPE_LIST:
                     switch (p->u.eTemporary.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;
@@ -738,6 +793,9 @@ char * symbol_kind (SymbolEntry * p){
                     break;
 				case TYPE_POINTER:
 				switch (p->u.eConstant.type->refType->kind) {
+                        case TYPE_VOID:
+                            return strdup("list");
+                            break;
 						case TYPE_INTEGER:
                     		return strdup("integer");
                     		break;

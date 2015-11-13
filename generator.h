@@ -21,10 +21,10 @@ typedef struct program_strings_struct{
 
 typedef program_string_t * Program_strings;
 
-void generator(int * externs);
+void generator(int * externs, int * offsets);
 Interpreted_quad consume_quad(FILE * fp);
 void print_consumed_quad(Interpreted_quad quad);
-void generate(Interpreted_quad quad, FILE * fp);
+void generate(Interpreted_quad quad, FILE * fp, int offset);
 void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offet);
 void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset);
 void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset);

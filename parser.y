@@ -36,8 +36,8 @@ if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 
 node * currnode, * temp;
-int flag, main_flag=0;
-int externs[21];
+int flag, main_flag=0, counter=0;
+int externs[21], offsets[257];
 SymbolEntry * p, * b, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
@@ -226,11 +226,13 @@ func_def:
     { flag = 0; }
     "def" header  ':' func_def_list
     {
-		GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
+		        GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
     }
     stmt_list "end"
     {
                 GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);
+		        offsets[counter] = -(currentScope->negOffset);
+                counter++;
                 print_all_quads(fp);
         closeScope();
     }
@@ -364,8 +366,8 @@ stmt:
                                 ERROR("Wrong type for return value");
                           if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
                             nextquad--;
-                          GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL);
-                          GenQuad(RET_QUAD, NULL, NULL, NULL);
+                          GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL, 0);
+                          GenQuad(RET_QUAD, NULL, NULL, NULL, 0);
                         }
     | "if" expr         { if (lookup_type_find($2.symbol_entry) != typeBoolean)
                                 ERROR("if exprs must be of type bool");
@@ -405,12 +407,12 @@ stmt:
       simple_list ':'   {
                           if (lookup_type_find($5.symbol_entry) != typeBoolean)
                                 ERROR("for exprs must be of type bool");
-                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp1);
+                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp1, 0);
                           backpatch($5.true_list,nextquad);
                         }
       stmt_list "end"   {
                           backpatch($11.next_list,curr_for_temp->temp2);
-                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp3);
+                          GenQuad2(JMP_QUAD, NULL, NULL,curr_for_temp->temp3, 0);
                           backpatch($5.false_list,nextquad);
                           $$.next_list = $5.false_list;
 
@@ -424,7 +426,7 @@ elsif_list:
     /* nothing */       {
                           $$.next_list = emptylist();
                         }
-    | "elsif"           { curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+    | "elsif"           { curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0)));
                           backpatch(curr_if_temp->temp4, nextquad);
                         }
       expr              { if (lookup_type_find($3.symbol_entry) != typeBoolean)
@@ -448,7 +450,7 @@ else_list:
                           $$.next_list = emptylist(); }
     | "else"            {
                           curr_if_temp->temp1 = make_list(nextquad);
-                          curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1")));
+                          curr_if_temp->temp5 = merge(curr_if_temp->temp5, make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0)));
                           backpatch(curr_if_temp->temp4, nextquad);
 
                         }
@@ -464,15 +466,15 @@ simple:
 
                           if($3.pointer == 1){
                             GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
-                            GenQuad2(CALL_QUAD, NULL, NULL, "_newarrv");
+                            GenQuad2(CALL_QUAD, NULL, NULL, "newarrv", 2);
 							externs[19] = 1;
                           } else if($3.pointer == 2){
 							GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
-                            GenQuad2(CALL_QUAD, NULL, NULL, "_newarrp");
+                            GenQuad2(CALL_QUAD, NULL, NULL, "newarrp", 2);
 							externs[18] = 1;
 						  }
 
-                          $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry));
+                          $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry, 0));
                           $$.false_list = emptylist();
                           $$.true_list = emptylist();
                         }
@@ -543,7 +545,7 @@ opt5:
                           }
                           else
                                 $$.symbol_entry = b;
-                          GenQuad(CALL_QUAD, NULL, NULL, b);
+                          GenQuad(CALL_QUAD, NULL, NULL, b, 0);
                         }
     | expr              {
                           pm = currnode->a->u.eParameter.mode;
@@ -565,7 +567,7 @@ opt6:
                           }
                           else
                                 $$.symbol_entry = b;
-                          GenQuad(CALL_QUAD, NULL, NULL, b);
+                          GenQuad(CALL_QUAD, NULL, NULL, b, (b->u.eFunction.firstArgument)->u.eParameter.offset - 6);
                         }
     | ',' expr          {
                           pm = currnode->a->u.eParameter.mode;
@@ -584,7 +586,7 @@ atom:
     | atom '[' expr ']'             { if(lookup_type_find($3.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
                                       $$.symbol_entry = newTemporary(typePointer(lookup_type_find($1.symbol_entry)));
-                                      GenQuad(ARRAY_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry);
+                                      GenQuad(ARRAY_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0);
                                     }
     | call                          { $$.symbol_entry = $1.symbol_entry; }
 ;
@@ -595,74 +597,74 @@ expr:
     | T_const                       { $$.symbol_entry = newConstant ("a", typeChar, $1);    } /* Here we may have a problem to solve */
     | "true"                        {
                                       $$.symbol_entry = newConstant ("a", typeBoolean, 1);
-                                      $$.true_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                       $$.false_list = emptylist();
                                     }
     | "false"                       {
                                       $$.symbol_entry = newConstant ("a", typeBoolean, 0);
                                       $$.true_list = emptylist();
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr '+' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0); /* Added Today */
                                     }
     | expr '-' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0); /* Added Today */
                                     }
     | expr '*' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0); /* Added Today */
                                     }
     | expr '/' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0); /* Added Today */
                                     }
     | expr "mod" expr               { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry); /* Added Today */
+                                      GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0); /* Added Today */
                                     }
     | expr '=' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(EQ_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(EQ_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr '<' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(LT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(LT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr '>' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(GT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(GT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr "<>" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(NE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(NE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr "<=" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(LE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(LE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr ">=" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(GE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(GE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | expr                          { if(lookup_type_find($1.symbol_entry) != typeBoolean)
                                             ERROR("exprs must be of type bool");
@@ -691,13 +693,13 @@ expr:
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                                      		GenQuad2(CALL_QUAD, NULL, NULL, "_consp");
+                                      		GenQuad2(CALL_QUAD, NULL, NULL, "consp", 4);
 											externs[15] = 1;
 									  } else {
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                                      		GenQuad2(CALL_QUAD, NULL, NULL, "_consv");
+                                      		GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4);
 											externs[16] = 1;
 									  }
 										
@@ -705,12 +707,12 @@ expr:
     | '-' expr         %prec UMINUS { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MINUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
+                                      GenQuad(MINUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry, 0); /* Added Today */
                                     }
     | '+' expr         %prec UPLUS  { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
                                       $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(PLUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry); /* Added Today */
+                                      GenQuad(PLUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry, 0); /* Added Today */
                                     }
     | '(' expr ')'                  { $$.symbol_entry = $2.symbol_entry;
                                       $$.true_list = $2.true_list;
@@ -726,7 +728,7 @@ expr:
                                             ERROR("expr must be of type int");
                                       S = newConstant ("a", typeInteger, custom_sizeof($2.refT));
                                       W = newTemporary(typeInteger);
-                                      GenQuad(MULT_QUAD, $4.symbol_entry, S, W);
+                                      GenQuad(MULT_QUAD, $4.symbol_entry, S, W, 0);
                                       GenQuad4(PAR_QUAD, W, "VALUE", NULL);
 										
 									  if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST)
@@ -739,8 +741,8 @@ expr:
     | "nil?" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
                                       $$.symbol_entry = newTemporary(typeBoolean);
-                                      $$.true_list = make_list(GenQuad2(ISNIL_QUAD, NULL, $3.symbol_entry, "-1"));
-                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1"));
+                                      $$.true_list = make_list(GenQuad2(ISNIL_QUAD, NULL, $3.symbol_entry, "-1", 0));
+                                      $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0));
                                     }
     | "head" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
                                             ERROR("expr must be of type list");
@@ -749,7 +751,7 @@ expr:
                                       $$.symbol_entry = newTemporary(lookup_type_find($3.symbol_entry)->refType);
 									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                                      GenQuad2(CALL_QUAD, NULL, NULL, "_head");
+                                      GenQuad2(CALL_QUAD, NULL, NULL, "head", 2);
 									  externs[17] = 1;
                                     }
     | "tail" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
@@ -759,7 +761,7 @@ expr:
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
                                       GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                                      GenQuad2(CALL_QUAD, NULL, NULL, "_tail");
+                                      GenQuad2(CALL_QUAD, NULL, NULL, "tail", 2);
 									  externs[20] = 1;
                                     }
 ;
@@ -784,7 +786,7 @@ int main ()
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
   fclose(fp);
-  generator(externs);
+  generator(externs, offsets);
   destroySymbolTable();
   return 0;
 }
