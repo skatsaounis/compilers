@@ -2,10 +2,10 @@ def test ():
 
     def make_list (int size):
         list[int] result
-
+        int i
         result := nil
         for i := 1; i <= size; i := i+1:
-            result := cons(i, result)
+            result := i # result
         end
         return result
     end
@@ -38,7 +38,7 @@ def test ():
         if l = nil:
             return r
         else:
-            return revert_aux(tail(l), cons(head(l), r))
+            return revert_aux(tail(l), head(l) # r)
         end
     end
 

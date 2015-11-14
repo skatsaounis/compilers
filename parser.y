@@ -30,6 +30,9 @@ struct for_temps{
   for_temps * prev;
 };
 
+int unit_counter;
+char units[256][256];
+
 FILE * fp;
 
 if_temps * curr_if_temp, *if_temp;
@@ -226,7 +229,8 @@ func_def:
     { flag = 0; }
     "def" header  ':' func_def_list
     {
-		        GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
+            snprintf(units[unit_counter++], "%s", currentScope->name);
+            GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
     }
     stmt_list "end"
     {
@@ -369,7 +373,7 @@ stmt:
                           GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL, 0);
                           GenQuad(RET_QUAD, NULL, NULL, NULL, 0);
                         }
-    | "if" 				{logical_expr = 1;} 
+    | "if" 				{logical_expr = 1;}
 	   expr         	{ if (lookup_type_find($3.symbol_entry) != typeBoolean)
                                 ERROR("if exprs must be of type bool");
 			  			  logical_expr = 0;
@@ -787,6 +791,7 @@ void yyerror (const char *msg)
 
 int main ()
 { int i;
+  unit_counter = 0;
   fp = fopen("quads.txt", "w+");
   for (i = 0; i<21; i++)
 	externs[i] = 0;

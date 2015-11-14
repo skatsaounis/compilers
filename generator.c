@@ -13,6 +13,8 @@ Program_strings temp;
 
 int unique, counterg=0;
 char * unit_name;
+char * current_unit;
+int call_counter;
 
 void generator(int * externs, int * offsets){
     int i;
@@ -28,7 +30,16 @@ void generator(int * externs, int * offsets){
     fp = fopen("a.asm", "w+");
     fp2 = fopen("quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
-    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near\n\tcall near ptr _%s\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
+    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near");
+    fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
+
+    for(i = 0; i < unit_counter; i++){
+        fprintf(fp, "\n\tmov ax, OFFSET _%s_call_table\n\tcall near ptr _register_call_table", units[i]);
+    }
+
+    printexterns2(fp, externs);
+
+    fprintf(fp, "\n\tcall near ptr _%s\n_ret_of_main:\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
 
     for(i = 0; i < nextquad; i++){
         fprintf(fp, "@%d:\n", i);
@@ -38,7 +49,8 @@ void generator(int * externs, int * offsets){
 
     printstrings(fp);
     printexterns(fp, externs);
-    fprintf(fp, "xseg ends\n\tend main\n");
+    fprintf(fp, "\tpublic _next\n\tpublic _space_from\n\tpublic _limit_from\n\tpublic _space_to\n\tpublic _limit_to\n\tpublic _ret_of_main\n\n\t_space_from dw ?\n\t_limit_from dw ?\n\t_space_to dw ?\n\t_limit_to dw ?\n\t_next dw ?\n\n\txseg ends\n\n_DATA_END segment byte public 'stack'\n_start_of_space label byte\n_DATA_END ends\n\nDGROUP group xseg,_DATA_END\n\n\tend main\n"
+);
     fclose(fp);
 }
 
@@ -145,6 +157,8 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
     }
     else if (strcmp(quad.quad, "unit") == 0){
         unit_name = name(quad.arg1);
+        current_unit = strdup(quad.arg1);
+        call_counter = 1;
         fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
 		counterg++;
     }
@@ -157,7 +171,9 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         temp_name = name(quad.dest);
         fprintf(fp, "\tsub sp,2\n");
         updateAL(fp, quad.dest_nesting, quad.nesting);
-        fprintf(fp, "\tcall near ptr %s\n\tadd sp,%d+4\n", temp_name, atoi(quad.dest_offset));
+        fprintf(fp, "\tcall near ptr %s", temp_name);
+        fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);
+        fprintf(fp, "\n\tadd sp,%d+4\n", atoi(quad.dest_offset));
     }
     else if (strcmp(quad.quad, "ret") == 0){
         temp_endof = endof(unit_name);
@@ -519,71 +535,164 @@ void string_to_db(FILE * fp, char * node_str){
 
 void printexterns(FILE * fp, int * externs){
     int i;
+    fprintf(fp,"\textrn _register_call_table : proc\n");
     for (i=0;i<21;i++)
         if (externs[i] != 0)
             switch(i){
                 case 0:
 	                fprintf(fp,"\textrn _puti : proc\n");
+                    fprintf(fp,"\textrn _puti_call_table : word\n");
                     break;
                 case 1:
 	                fprintf(fp,"\textrn _putb : proc\n");
+                    fprintf(fp,"\textrn _putb_call_table : word\n");
                     break;
                 case 2:
 	                fprintf(fp,"\textrn _putc : proc\n");
+                    fprintf(fp,"\textrn _putc_call_table : word\n");
                     break;
                 case 3:
 	                fprintf(fp,"\textrn _puts : proc\n");
+                    fprintf(fp,"\textrn _puts_call_table : word\n");
                     break;
                 case 4:
 	                fprintf(fp,"\textrn _geti : proc\n");
+                    fprintf(fp,"\textrn _geti_call_table : word\n");
                     break;
                 case 5:
 	                fprintf(fp,"\textrn _getb : proc\n");
+                    fprintf(fp,"\textrn _getb_call_table : word\n");
                     break;
                 case 6:
 	                fprintf(fp,"\textrn _getc : proc\n");
+                    fprintf(fp,"\textrn _getc_call_table : word\n");
                     break;
                 case 7:
 	                fprintf(fp,"\textrn _gets : proc\n");
+                    fprintf(fp,"\textrn _gets_call_table : word\n");
                     break;
                 case 8:
 	                fprintf(fp,"\textrn _abs : proc\n");
+                    fprintf(fp,"\textrn _abs_call_table : word\n");
                     break;
                 case 9:
 	                fprintf(fp,"\textrn _org : proc\n");
+                    fprintf(fp,"\textrn _org_call_table : word\n");
                     break;
                 case 10:
                     fprintf(fp,"\textrn _chr : proc\n");
+                    fprintf(fp,"\textrn _chr_call_table : word\n");
                     break;
                 case 11:
 	                fprintf(fp,"\textrn _strlen : proc\n");
+                    fprintf(fp,"\textrn _strlen_call_table : word\n");
                     break;
                 case 12:
 	                fprintf(fp,"\textrn _strcmp : proc\n");
+                    fprintf(fp,"\textrn _strcmp_call_table : word\n");
                     break;
                 case 13:
 	                fprintf(fp,"\textrn _strcpy : proc\n");
+                    fprintf(fp,"\textrn _strcpy_call_table : word\n");
                     break;
                 case 14:
 	                fprintf(fp,"\textrn _strcat : proc\n");
+                    fprintf(fp,"\textrn _strcat_call_table : word\n");
                     break;
                 case 15:
                     fprintf(fp,"\textrn _consp : proc\n");
+                    fprintf(fp,"\textrn _consp_call_table : word\n");
                     break;
                 case 16:
                     fprintf(fp,"\textrn _consv : proc\n");
+                    fprintf(fp,"\textrn _consv_call_table : word\n");
                     break;
                 case 17:
                     fprintf(fp,"\textrn _head : proc\n");
+                    fprintf(fp,"\textrn _head_call_table : word\n");
                     break;
                 case 18:
                     fprintf(fp,"\textrn _newarrp : proc\n");
+                    fprintf(fp,"\textrn _newarrp_call_table : word\n");
                     break;
                 case 19:
                     fprintf(fp,"\textrn _newarrv : proc\n");
+                    fprintf(fp,"\textrn _newarrv_call_table : word\n");
                     break;
                 case 20:
                     fprintf(fp,"\textrn _tail : proc\n");
+                    fprintf(fp,"\textrn _tail_call_table : word\n");
+                    break;
+            }
+}
+
+void printexterns2(FILE * fp, int * externs){
+    int i;
+    for (i=0;i<21;i++)
+        if (externs[i] != 0)
+            switch(i){
+                case 0:
+                    fprintf(fp,"\n\tmov ax, OFFSET _puti_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 1:
+                    fprintf(fp,"\n\tmov ax, OFFSET _putb_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 2:
+                    fprintf(fp,"\n\tmov ax, OFFSET _putc_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 3:
+                    fprintf(fp,"\n\tmov ax, OFFSET _puts_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 4:
+                    fprintf(fp,"\n\tmov ax, OFFSET _geti_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 5:
+                    fprintf(fp,"\n\tmov ax, OFFSET _getb_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 6:
+                    fprintf(fp,"\n\tmov ax, OFFSET _getc_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 7:
+                    fprintf(fp,"\n\tmov ax, OFFSET _gets_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 8:
+                    fprintf(fp,"\n\tmov ax, OFFSET _abs_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 9:
+                    fprintf(fp,"\n\tmov ax, OFFSET _org_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 10:
+                    fprintf(fp,"\n\tmov ax, OFFSET _chr_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 11:
+                    fprintf(fp,"\n\tmov ax, OFFSET _strlen_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 12:
+                    fprintf(fp,"\n\tmov ax, OFFSET _strcmp_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 13:
+                    fprintf(fp,"\n\tmov ax, OFFSET _strcpy_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 14:
+                    fprintf(fp,"\n\tmov ax, OFFSET _strcat_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 15:
+                    fprintf(fp,"\n\tmov ax, OFFSET _consp_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 16:
+                    fprintf(fp,"\n\tmov ax, OFFSET _consv_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 17:
+                    fprintf(fp,"\n\tmov ax, OFFSET _head_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 18:
+                    fprintf(fp,"\n\tmov ax, OFFSET _newarrp_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 19:
+                    fprintf(fp,"\n\tmov ax, OFFSET _newarrv_call_table\n\tcall near ptr _register_call_table");
+                    break;
+                case 20:
+                    fprintf(fp,"\n\tmov ax, OFFSET _tail_call_table\n\tcall near ptr _register_call_table");
                     break;
             }
 }

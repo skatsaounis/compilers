@@ -35,6 +35,7 @@ char * label(char * a);
 char * name(char * a);
 void printstrings(FILE * fp);
 void printexterns(FILE * fp, int * externs);
+void printexterns2(FILE * fp, int * externs);
 void string_to_db(FILE * fp, char * node_str);
 
 #endif

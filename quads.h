@@ -59,7 +59,8 @@ typedef label_list_t * label_list;
    ------------------------------------------------------------------------------------------------------- */
 
 extern Quad quad_array[MAX_QUAD_NUM];            /* an array storing quads                                 */
-
+extern char units[256][256];
+extern int unit_counter;
 extern long nextquad;                            /* returns next's quad label                              */
 
 
