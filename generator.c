@@ -30,7 +30,7 @@ void generator(int * externs, int * offsets){
     fp = fopen("a.asm", "w+");
     fp2 = fopen("quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
-    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nmain proc near");
+    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nLIVENESS = 0\nmain proc near");
     fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
 
     for(i = 0; i < unit_counter; i++){
@@ -56,13 +56,9 @@ void generator(int * externs, int * offsets){
 
 Interpreted_quad consume_quad(FILE * fp){
     Interpreted_quad interpreted_quad;
-    int i, j, flag;
     char * line = NULL;
-    char * token, * temp;
     size_t linesize;
-    char temp2[256];
 
-    flag = 0;
     linesize = 0;
     getline(&line, &linesize, fp);
     interpreted_quad.id           = atoi(strtok (line,"\v"));
@@ -166,6 +162,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
         fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
+        print_call_table(fp, current_unit, call_counter);
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
@@ -483,12 +480,11 @@ void printstrings(FILE * fp){
 }
 
 void string_to_db(FILE * fp, char * node_str){
-    int i, flag, flag2, flag3;
+    int i, flag, flag2;
 	char * temp = malloc(3);
     i = 0;
     flag = 0;
     flag2 = 0;
-    flag3 = 0;
     while (node_str[i] != '\0'){
         if (node_str[i] == '\\'){
             flag2 = 1;
@@ -695,4 +691,36 @@ void printexterns2(FILE * fp, int * externs){
                     fprintf(fp,"\n\tmov ax, OFFSET _tail_call_table\n\tcall near ptr _register_call_table");
                     break;
             }
+}
+
+void print_call_table(FILE * fp, char * fun_name, int call_counter){
+    /* this needs fixing */
+    int temp_number;
+    /* this needs fixing */
+
+    int i, j;
+
+    /* this needs fixing */
+    temp_number = 3;
+    /* this needs fixing */
+
+    fprintf(fp, "_%s_call_table:\n", fun_name);
+    for(i = 1; i < call_counter; i++){
+        fprintf(fp, "@call_%s_%d\tdw @%s_call_%d\n", fun_name, i, fun_name, i);
+        if((call_counter - i) == 1)
+            fprintf(fp, "\tdw 0\n");
+        else
+            fprintf(fp, "\tdw @call_%s_%d\n", fun_name, i+1);
+        fprintf(fp, "\tdw 1 + 2 + 3 + 4\n"); /* this line needs fixing */
+        fprintf(fp, "IF LIVENESS eq 0\n");
+        /* this needs fixing */
+        for(j =0; j < temp_number; j++){
+            fprintf(fp, "\tdw 10\n");
+        }
+        /* this needs fixing */
+        fprintf(fp, "ENDIF\n");
+        if((call_counter - i) > 1)
+            fprintf(fp, "\tdw -10\n");
+        fprintf(fp, "\tdw 0\n");
+    }
 }
