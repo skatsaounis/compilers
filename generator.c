@@ -166,7 +166,8 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
-        fprintf(fp, "\tsub sp,2\n");
+	if (strcmp(quad.dest_kind, "procedure") == 0)
+        	fprintf(fp, "\tsub sp,2\n");
         updateAL(fp, quad.dest_nesting, quad.nesting);
         fprintf(fp, "\tcall near ptr %s", temp_name);
         fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);

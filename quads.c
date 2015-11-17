@@ -815,6 +815,16 @@ char * symbol_kind (SymbolEntry * p){
                     break;
             }
             break;
+		case ENTRY_FUNCTION:
+			switch (p->u.eFunction.resultType->kind) {
+                case TYPE_VOID:
+                    return strdup("procedure");
+                    break;
+				default:
+					return strdup("function");
+					break;
+			}
+			break;
     }
     return NULL;
 }
