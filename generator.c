@@ -156,13 +156,13 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         current_unit = strdup(quad.arg1);
         call_counter = 1;
         fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
-		counterg++;
     }
     else if (strcmp(quad.quad, "endu") == 0){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
         fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
-        print_call_table(fp, current_unit, call_counter);
+        print_call_table(fp, current_unit, call_counter, offset);
+		counterg++;
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
@@ -694,7 +694,7 @@ void printexterns2(FILE * fp, int * externs){
             }
 }
 
-void print_call_table(FILE * fp, char * fun_name, int call_counter){
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset){
     /* this needs fixing */
     int temp_number;
     /* this needs fixing */
@@ -712,7 +712,7 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter){
             fprintf(fp, "\tdw 0\n");
         else
             fprintf(fp, "\tdw @call_%s_%d\n", fun_name, i+1);
-        fprintf(fp, "\tdw 1 + 2 + 3 + 4\n"); /* this line needs fixing */
+        fprintf(fp, "\tdw 1 + 2 + %d + 4\n", temp_var_offset); /* this line needs fixing */
         fprintf(fp, "IF LIVENESS eq 0\n");
         /* this needs fixing */
         for(j =0; j < temp_number; j++){
