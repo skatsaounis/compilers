@@ -15,6 +15,8 @@ int unique, counterg=0;
 char * unit_name;
 char * current_unit;
 int call_counter;
+int param_byte_table[256];
+int inception_function_table[256];
 
 void generator(int * externs, int * offsets){
     int i;
@@ -91,6 +93,7 @@ Interpreted_quad consume_quad(FILE * fp){
 
 void generate(Interpreted_quad quad, FILE * fp, int offset){
     char * temp_label, * temp_name, * temp_endof;
+	int return_param;
     if (strcmp(quad.quad, ":=") == 0){
         if(strcmp(quad.arg1_kind, "integer") == 0 || strcmp(quad.arg1_kind, "iarray") == 0 || strcmp(quad.arg1_kind, "list") == 0 || strcmp(quad.dest_kind, "integer") == 0 || strcmp(quad.dest_kind, "iarray") == 0 || strcmp(quad.dest_kind, "list") == 0){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
@@ -155,22 +158,32 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         unit_name = name(quad.arg1);
         current_unit = strdup(quad.arg1);
         call_counter = 1;
+		inception_function_table[call_counter] = 0;
         fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
     }
     else if (strcmp(quad.quad, "endu") == 0){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
         fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
-        print_call_table(fp, current_unit, call_counter, offset);
+        print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table);
 		counterg++;
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
-	if (strcmp(quad.dest_kind, "procedure") == 0)
+		if (strcmp(quad.dest_kind, "procedure") == 0)
         	fprintf(fp, "\tsub sp,2\n");
         updateAL(fp, quad.dest_nesting, quad.nesting);
         fprintf(fp, "\tcall near ptr %s", temp_name);
+		if (strcmp(quad.dest_kind, "procedure") == 0)
+			return_param = 0;
+		else if (strcmp(quad.dest_kind, "byte") == 0)
+			return_param = 1;
+		else
+			return_param = 2;
+		inception_function_table[call_counter] = inception_function_table[call_counter] - atoi(quad.dest_offset) - return_param;
+		param_byte_table[call_counter] = atoi(quad.dest_offset);
         fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);
+		inception_function_table[call_counter] = inception_function_table[call_counter-1];
         fprintf(fp, "\n\tadd sp,%d+4\n", atoi(quad.dest_offset));
     }
     else if (strcmp(quad.quad, "ret") == 0){
@@ -203,16 +216,22 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         if ((strcmp(quad.arg2, "VALUE") == 0) && (strcmp(quad.arg1_kind, "integer") == 0)){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush ax\n");
+			inception_function_table[call_counter] += 2;
         }
         else if (strcmp(quad.arg2, "VALUE") == 0){
             load("al", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
 			fprintf(fp, "\tsub sp,1\n");
 			fprintf(fp, "\tmov si,sp\n");
             fprintf(fp, "\tmov byte ptr [si],al\n");
+			inception_function_table[call_counter] += 1;
         }
         else if ((strcmp(quad.arg2, "REFERENCE") == 0) || (strcmp(quad.arg2, "RET") == 0)){
             loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush si\n");
+			if(((strcmp(quad.arg1_kind, "boolean") == 0) || (strcmp(quad.arg1_kind, "char") == 0)) && (strcmp(quad.arg2, "RET") == 0))
+				inception_function_table[call_counter] += 1;
+			else
+				inception_function_table[call_counter] += 2;
         }
     }
 	else if (strcmp(quad.quad, "array") == 0){
@@ -538,63 +557,63 @@ void printexterns(FILE * fp, int * externs){
             switch(i){
                 case 0:
 	                fprintf(fp,"\textrn _puti : proc\n");
-                    fprintf(fp,"\textrn _puti_call_table : word\n");
+                    /*fprintf(fp,"\textrn _puti_call_table : word\n");*/
                     break;
                 case 1:
 	                fprintf(fp,"\textrn _putb : proc\n");
-                    fprintf(fp,"\textrn _putb_call_table : word\n");
+                    /*fprintf(fp,"\textrn _putb_call_table : word\n");*/
                     break;
                 case 2:
 	                fprintf(fp,"\textrn _putc : proc\n");
-                    fprintf(fp,"\textrn _putc_call_table : word\n");
+                    /*fprintf(fp,"\textrn _putc_call_table : word\n");*/
                     break;
                 case 3:
 	                fprintf(fp,"\textrn _puts : proc\n");
-                    fprintf(fp,"\textrn _puts_call_table : word\n");
+                    /*fprintf(fp,"\textrn _puts_call_table : word\n");*/
                     break;
                 case 4:
 	                fprintf(fp,"\textrn _geti : proc\n");
-                    fprintf(fp,"\textrn _geti_call_table : word\n");
+                    /*fprintf(fp,"\textrn _geti_call_table : word\n");*/
                     break;
                 case 5:
 	                fprintf(fp,"\textrn _getb : proc\n");
-                    fprintf(fp,"\textrn _getb_call_table : word\n");
+                    /*fprintf(fp,"\textrn _getb_call_table : word\n");*/
                     break;
                 case 6:
 	                fprintf(fp,"\textrn _getc : proc\n");
-                    fprintf(fp,"\textrn _getc_call_table : word\n");
+                    /*fprintf(fp,"\textrn _getc_call_table : word\n");*/
                     break;
                 case 7:
 	                fprintf(fp,"\textrn _gets : proc\n");
-                    fprintf(fp,"\textrn _gets_call_table : word\n");
+                    /*fprintf(fp,"\textrn _gets_call_table : word\n");*/
                     break;
                 case 8:
 	                fprintf(fp,"\textrn _abs : proc\n");
-                    fprintf(fp,"\textrn _abs_call_table : word\n");
+                    /*fprintf(fp,"\textrn _abs_call_table : word\n");*/
                     break;
                 case 9:
-	                fprintf(fp,"\textrn _org : proc\n");
-                    fprintf(fp,"\textrn _org_call_table : word\n");
+	                fprintf(fp,"\textrn _ord : proc\n");
+                    /*fprintf(fp,"\textrn _ord_call_table : word\n");*/
                     break;
                 case 10:
                     fprintf(fp,"\textrn _chr : proc\n");
-                    fprintf(fp,"\textrn _chr_call_table : word\n");
+                    /*fprintf(fp,"\textrn _chr_call_table : word\n");*/
                     break;
                 case 11:
 	                fprintf(fp,"\textrn _strlen : proc\n");
-                    fprintf(fp,"\textrn _strlen_call_table : word\n");
+                    /*fprintf(fp,"\textrn _strlen_call_table : word\n");*/
                     break;
                 case 12:
-	                fprintf(fp,"\textrn _strcmp : proc\n");
-                    fprintf(fp,"\textrn _strcmp_call_table : word\n");
+	            	fprintf(fp,"\textrn _strcmp : proc\n");
+                    /*fprintf(fp,"\textrn _strcmp_call_table : word\n");*/
                     break;
                 case 13:
-	                fprintf(fp,"\textrn _strcpy : proc\n");
-                    fprintf(fp,"\textrn _strcpy_call_table : word\n");
+	            	fprintf(fp,"\textrn _strcpy : proc\n");
+                    /*fprintf(fp,"\textrn _strcpy_call_table : word\n");*/
                     break;
                 case 14:
-	                fprintf(fp,"\textrn _strcat : proc\n");
-                    fprintf(fp,"\textrn _strcat_call_table : word\n");
+	            	fprintf(fp,"\textrn _strcat : proc\n");
+                    /*fprintf(fp,"\textrn _strcat_call_table : word\n");*/
                     break;
                 case 15:
                     fprintf(fp,"\textrn _consp : proc\n");
@@ -606,19 +625,19 @@ void printexterns(FILE * fp, int * externs){
                     break;
                 case 17:
                     fprintf(fp,"\textrn _head : proc\n");
-                    fprintf(fp,"\textrn _head_call_table : word\n");
+                    /*fprintf(fp,"\textrn _head_call_table : word\n");*/
                     break;
                 case 18:
                     fprintf(fp,"\textrn _newarrp : proc\n");
-                    fprintf(fp,"\textrn _newarrp_call_table : word\n");
+                   /* fprintf(fp,"\textrn _newarrp_call_table : word\n");*/
                     break;
                 case 19:
                     fprintf(fp,"\textrn _newarrv : proc\n");
-                    fprintf(fp,"\textrn _newarrv_call_table : word\n");
+                    /*fprintf(fp,"\textrn _newarrv_call_table : word\n");*/
                     break;
                 case 20:
                     fprintf(fp,"\textrn _tail : proc\n");
-                    fprintf(fp,"\textrn _tail_call_table : word\n");
+                    /*fprintf(fp,"\textrn _tail_call_table : word\n");*/
                     break;
             }
 }
@@ -628,7 +647,7 @@ void printexterns2(FILE * fp, int * externs){
     for (i=0;i<21;i++)
         if (externs[i] != 0)
             switch(i){
-                case 0:
+                /*case 0:
                     fprintf(fp,"\n\tmov ax, OFFSET _puti_call_table\n\tcall near ptr _register_call_table");
                     break;
                 case 1:
@@ -656,7 +675,7 @@ void printexterns2(FILE * fp, int * externs){
                     fprintf(fp,"\n\tmov ax, OFFSET _abs_call_table\n\tcall near ptr _register_call_table");
                     break;
                 case 9:
-                    fprintf(fp,"\n\tmov ax, OFFSET _org_call_table\n\tcall near ptr _register_call_table");
+                    fprintf(fp,"\n\tmov ax, OFFSET _ord_call_table\n\tcall near ptr _register_call_table");
                     break;
                 case 10:
                     fprintf(fp,"\n\tmov ax, OFFSET _chr_call_table\n\tcall near ptr _register_call_table");
@@ -672,14 +691,14 @@ void printexterns2(FILE * fp, int * externs){
                     break;
                 case 14:
                     fprintf(fp,"\n\tmov ax, OFFSET _strcat_call_table\n\tcall near ptr _register_call_table");
-                    break;
+                    break;*/
                 case 15:
                     fprintf(fp,"\n\tmov ax, OFFSET _consp_call_table\n\tcall near ptr _register_call_table");
                     break;
                 case 16:
                     fprintf(fp,"\n\tmov ax, OFFSET _consv_call_table\n\tcall near ptr _register_call_table");
                     break;
-                case 17:
+                /*case 17:
                     fprintf(fp,"\n\tmov ax, OFFSET _head_call_table\n\tcall near ptr _register_call_table");
                     break;
                 case 18:
@@ -690,11 +709,11 @@ void printexterns2(FILE * fp, int * externs){
                     break;
                 case 20:
                     fprintf(fp,"\n\tmov ax, OFFSET _tail_call_table\n\tcall near ptr _register_call_table");
-                    break;
+                    break;*/
             }
 }
 
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset){
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table){
     /* this needs fixing */
     int temp_number;
     /* this needs fixing */
@@ -712,7 +731,7 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
             fprintf(fp, "\tdw 0\n");
         else
             fprintf(fp, "\tdw @call_%s_%d\n", fun_name, i+1);
-        fprintf(fp, "\tdw 1 + 2 + %d + 4\n", temp_var_offset); /* this line needs fixing */
+        fprintf(fp, "\tdw 4 + %d + %d + %d + 4\n", param_byte_table[i], inception_function_table[i], temp_var_offset);
         fprintf(fp, "IF LIVENESS eq 0\n");
         /* this needs fixing */
         for(j =0; j < temp_number; j++){

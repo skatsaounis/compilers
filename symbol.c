@@ -658,6 +658,7 @@ unsigned int sizeOfType (Type type)
         case TYPE_INTEGER:
         case TYPE_IARRAY:
         case TYPE_POINTER:
+	case TYPE_LIST:
             return 2;
         case TYPE_BOOLEAN:
         case TYPE_CHAR:

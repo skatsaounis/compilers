@@ -820,9 +820,12 @@ char * symbol_kind (SymbolEntry * p){
                 case TYPE_VOID:
                     return strdup("procedure");
                     break;
+				case TYPE_BOOLEAN:
+        		case TYPE_CHAR:
+		            return strdup("byte");
+		            break;
 				default:
-					return strdup("function");
-					break;
+					return strdup("word");
 			}
 			break;
     }

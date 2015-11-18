@@ -37,6 +37,6 @@ void printstrings(FILE * fp);
 void printexterns(FILE * fp, int * externs);
 void printexterns2(FILE * fp, int * externs);
 void string_to_db(FILE * fp, char * node_str);
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset);
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table);
 
 #endif
