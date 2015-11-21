@@ -62,6 +62,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
     quad_array[nextquad].arg1_req.kind = symbol_kind (x);
     quad_array[nextquad].arg1_req.offset = symbol_offset (x);
+    quad_array[nextquad].arg1_req.ext_offset = -1;
     if (x != NULL)
         sprintf(tmp, "%u", x->nestingLevel);
     else
@@ -102,6 +103,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
     quad_array[nextquad].arg2_req.kind = symbol_kind (y);
     quad_array[nextquad].arg2_req.offset = symbol_offset (y);
+    quad_array[nextquad].arg2_req.ext_offset = -1;
     if (y != NULL)
         sprintf(tmp, "%u", y->nestingLevel);
     else
@@ -124,6 +126,7 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
     quad_array[nextquad].dest_req.type = symbol_type (z);
     quad_array[nextquad].dest_req.pm = symbol_pm (z);
     quad_array[nextquad].dest_req.kind = symbol_kind (z);
+    quad_array[nextquad].dest_req.ext_offset = -1;
     if (q == CALL_QUAD){
         char buffer[256];
         sprintf(buffer, "%d", offset);
@@ -178,6 +181,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
     quad_array[nextquad].arg1_req.kind = symbol_kind (x);
     quad_array[nextquad].arg1_req.offset = symbol_offset (x);
+    quad_array[nextquad].arg1_req.ext_offset = -1;
     if (x != NULL)
         sprintf(tmp, "%u", x->nestingLevel);
     else
@@ -218,6 +222,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
     quad_array[nextquad].arg2_req.pm = symbol_pm (y);
     quad_array[nextquad].arg2_req.kind = symbol_kind (y);
     quad_array[nextquad].arg2_req.offset = symbol_offset (y);
+    quad_array[nextquad].arg2_req.ext_offset = -1;
     if (y != NULL)
         sprintf(tmp, "%u", y->nestingLevel);
     else
@@ -230,6 +235,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
+    quad_array[nextquad].dest_req.ext_offset = -1;
     if (q == CALL_QUAD){
         char buffer[256];
         sprintf(buffer, "%d", offset);
@@ -253,6 +259,7 @@ long GenQuad3(QuadType q, char * x, char * y, char * z)
     quad_array[nextquad].arg1_req.nesting = strdup("-");
     quad_array[nextquad].arg1_req.kind = strdup("-");
     quad_array[nextquad].arg1_req.offset = strdup("-");
+    quad_array[nextquad].arg1_req.ext_offset = -1;
     if (y == NULL)
         quad_array[nextquad].arg2 = "-";
     else
@@ -263,6 +270,7 @@ long GenQuad3(QuadType q, char * x, char * y, char * z)
     quad_array[nextquad].arg2_req.nesting = strdup("-");
     quad_array[nextquad].arg2_req.kind = strdup("-");
     quad_array[nextquad].arg2_req.offset = strdup("-");
+    quad_array[nextquad].arg2_req.ext_offset = -1;
     if (z == NULL)
         quad_array[nextquad].dest = "-";
     else
@@ -273,11 +281,12 @@ long GenQuad3(QuadType q, char * x, char * y, char * z)
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
     quad_array[nextquad].dest_req.offset = strdup("-");
+    quad_array[nextquad].dest_req.ext_offset = -1;
     /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
         return nextquad++;
 }
 
-long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
+long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z, SymbolEntry * new_temp)
 {
     char tmp[1];
 
@@ -332,6 +341,7 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
     quad_array[nextquad].arg2_req.nesting = strdup("-");
     quad_array[nextquad].arg2_req.kind = strdup("-");
     quad_array[nextquad].arg2_req.offset = strdup("-");
+    quad_array[nextquad].arg2_req.ext_offset = -1;
     if (z == NULL)
         quad_array[nextquad].dest = "-";
     else
@@ -342,8 +352,16 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
     quad_array[nextquad].dest_req.nesting = strdup("-");
     quad_array[nextquad].dest_req.kind = strdup("-");
     quad_array[nextquad].dest_req.offset = strdup("-");
+    quad_array[nextquad].dest_req.ext_offset = -1;
     /*printf("x: %s y: %s z: %s\n",quad_array[nextquad].arg1,quad_array[nextquad].arg2,quad_array[nextquad].dest);*/
-        return nextquad++;
+    if(new_temp != NULL){
+        new_temp->new_offset += atoi(symbol_offset(x));
+        quad_array[nextquad].arg1_req.ext_offset = new_temp->new_offset;
+    }
+    else
+        quad_array[nextquad].arg1_req.ext_offset = -1;
+
+    return nextquad++;
 }
 
 label_list emptylist(){
@@ -424,7 +442,7 @@ char * outp(char * inp){
 void print_all_quads(FILE * fp){
         static int i = 0;
         for(; i < nextquad; i++)
-            fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
+            fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%d\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
                 quad_array[i].arg1_req.pm, quad_array[i].arg1_req.type, quad_array[i].arg1_req.nesting,
@@ -432,7 +450,7 @@ void print_all_quads(FILE * fp){
                 quad_array[i].arg2_req.pm, quad_array[i].arg2_req.type, quad_array[i].arg2_req.nesting,
         quad_array[i].arg2_req.kind, quad_array[i].arg2_req.offset,
                 quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting,
-        quad_array[i].dest_req.kind, quad_array[i].dest_req.offset
+        quad_array[i].dest_req.kind, quad_array[i].dest_req.offset, quad_array[i].arg1_req.ext_offset
                 );
 }
 

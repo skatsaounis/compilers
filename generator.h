@@ -11,6 +11,7 @@ typedef struct{
 	char * arg1_pm, * arg1_type, * arg1_nesting, * arg1_kind, * arg1_offset;
 	char * arg2_pm, * arg2_type, * arg2_nesting, * arg2_kind, * arg2_offset;
 	char * dest_pm, * dest_type, * dest_nesting, * dest_kind, * dest_offset;
+	int ext_offset;
 }Interpreted_quad;
 
 typedef struct program_strings_struct{

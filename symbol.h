@@ -106,6 +106,7 @@ typedef enum {
 typedef struct SymbolEntry_tag SymbolEntry;
 
 struct SymbolEntry_tag {
+   int new_offset;
    const char   * id;                 /* Ονομα αναγνωριστικού          */
    EntryType      entryType;          /* Τύπος της εγγραφής            */
    unsigned int   nestingLevel;       /* Βάθος φωλιάσματος             */

@@ -474,11 +474,11 @@ simple:
                           if(($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
                             nextquad--;
                           if($3.pointer == 1){
-                            GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+                            GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL, NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrv", 2);
 							externs[19] = 1;
                           } else if($3.pointer == 2){
-							GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+							GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL, NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrp", 2);
 							externs[18] = 1;
 						  }
@@ -550,7 +550,7 @@ opt5:
                           checkNoParams(currnode->a);
                           if(b->u.eFunction.resultType != typeVoid){
                                 $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
-                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, b);
                           }
                           else
                                 $$.symbol_entry = b;
@@ -560,9 +560,9 @@ opt5:
                           pm = currnode->a->u.eParameter.mode;
                           checkParams(&(currnode->a), lookup_type_find($1.symbol_entry));
                           if (pm == PASS_BY_VALUE)
-                                GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
+                                GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL, b);
                           else
-                                GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
+                                GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL, b);
                         }
           opt6          { $$.symbol_entry = $3.symbol_entry; }
 ;
@@ -572,7 +572,7 @@ opt6:
                           checkNoParams(currnode->a);
                           if(b->u.eFunction.resultType != typeVoid){
                                 $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
-                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, b);
                           }
                           else
                                 $$.symbol_entry = b;
@@ -582,9 +582,9 @@ opt6:
                           pm = currnode->a->u.eParameter.mode;
                           checkParams(&(currnode->a), lookup_type_find($2.symbol_entry));
                           if (pm == PASS_BY_VALUE)
-                                GenQuad4(PAR_QUAD, $2.symbol_entry, "VALUE", NULL);
+                                GenQuad4(PAR_QUAD, $2.symbol_entry, "VALUE", NULL, b);
                           else
-                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFERENCE", NULL);
+                                GenQuad4(PAR_QUAD, $2.symbol_entry, "REFERENCE", NULL, b);
                         }
           opt6          { $$.symbol_entry = $4.symbol_entry; }
 ;
@@ -704,15 +704,15 @@ expr:
                                             ERROR("exprs must be of type t and list[t] respectively") ;
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
                                       if((lookup_type_find($1.symbol_entry) == TYPE_LIST || lookup_type_find($1.symbol_entry) == TYPE_IARRAY)){
-											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
-											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
-									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL, NULL);
+											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL, NULL);
+									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, NULL);
                                       		GenQuad2(CALL_QUAD, NULL, NULL, "consp", 4);
 											externs[15] = 1;
 									  } else {
-											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
-											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
-									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL, NULL);
+											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL, NULL);
+									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, NULL);
                                       		GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4);
 											externs[16] = 1;
 									  }
@@ -743,7 +743,7 @@ expr:
                                       S = newConstant ("a", typeInteger, custom_sizeof($2.refT));
                                       W = newTemporary(typeInteger);
                                       GenQuad(MULT_QUAD, $4.symbol_entry, S, W, 0);
-                                      GenQuad4(PAR_QUAD, W, "VALUE", NULL);
+                                      GenQuad4(PAR_QUAD, W, "VALUE", NULL, NULL);
 
 									  if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST)
                                       		$$.pointer = 2; /*array of pointers*/
@@ -763,8 +763,8 @@ expr:
 									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
                                             ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(lookup_type_find($3.symbol_entry)->refType);
-									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
-									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL, NULL);
+									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, NULL);
                                       GenQuad2(CALL_QUAD, NULL, NULL, "head", 2);
 									  externs[17] = 1;
                                     }
@@ -773,8 +773,8 @@ expr:
 									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
                                             ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
-                                      GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
-									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                      GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL, NULL);
+									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL, NULL);
                                       GenQuad2(CALL_QUAD, NULL, NULL, "tail", 2);
 									  externs[20] = 1;
                                     }

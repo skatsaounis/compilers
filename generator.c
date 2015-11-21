@@ -17,6 +17,7 @@ char * current_unit;
 int call_counter;
 int param_byte_table[256];
 int inception_function_table[256];
+int extra_table[256];
 
 void generator(int * externs, int * offsets){
     int i;
@@ -32,7 +33,7 @@ void generator(int * externs, int * offsets){
     fp = fopen("a.asm", "w+");
     fp2 = fopen("quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
-    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nLIVENESS = 0\nmain proc near");
+    fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nLIVENESS = 1\nmain proc near");
     fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
 
     for(i = 0; i < unit_counter; i++){
@@ -84,7 +85,7 @@ Interpreted_quad consume_quad(FILE * fp){
     interpreted_quad.dest_nesting = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_kind    = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_offset  = strdup(strtok (NULL,"\v"));
-
+    interpreted_quad.ext_offset   = atoi(strtok (NULL,"\v"));
     free(line);
 
     return interpreted_quad;
@@ -159,6 +160,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         current_unit = strdup(quad.arg1);
         call_counter = 1;
 		inception_function_table[call_counter] = 0;
+        extra_table[call_counter] = 0;
         fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
     }
     else if (strcmp(quad.quad, "endu") == 0){
@@ -181,9 +183,11 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
 		else
 			return_param = 2;
 		inception_function_table[call_counter] = inception_function_table[call_counter] - atoi(quad.dest_offset) - return_param;
-		param_byte_table[call_counter] = atoi(quad.dest_offset);
+
+        param_byte_table[call_counter] = atoi(quad.dest_offset);
         fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);
 		inception_function_table[call_counter] = inception_function_table[call_counter-1];
+        extra_table[call_counter] = extra_table[call_counter-1];
         fprintf(fp, "\n\tadd sp,%d+4\n", atoi(quad.dest_offset));
     }
     else if (strcmp(quad.quad, "ret") == 0){
@@ -233,6 +237,11 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
 			else
 				inception_function_table[call_counter] += 2;
         }
+        /*printf("%s : %s\n", quad.arg1, quad.arg1_offset);*/
+        if (strcmp(quad.arg2, "RET") != 0)
+            extra_table[call_counter] += atoi(quad.arg1_offset);
+
+        printf("%s -- %d\n", quad.arg1, quad.ext_offset);
     }
 	else if (strcmp(quad.quad, "array") == 0){
 		load("ax", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
@@ -739,8 +748,8 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
         }
         /* this needs fixing */
         fprintf(fp, "ENDIF\n");
-        if((call_counter - i) > 1)
-            fprintf(fp, "\tdw -10\n");
+        if(inception_function_table[i] != 0)
+            fprintf(fp, "\tdw %d\n", extra_table[i]);
         fprintf(fp, "\tdw 0\n");
     }
 }

@@ -37,6 +37,7 @@ typedef struct
 	char * nesting;
 	char * kind;
 	char * offset;
+	int ext_offset;
 } Quad_req;
 
 typedef struct {                 /*********/
@@ -78,7 +79,7 @@ void print_all_quads();                          /* prints all quad_array       
 char * outp(char *inp);
 long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset);
 long GenQuad3(QuadType q, char * x, char * y, char * z);
-long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z);
+long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z, SymbolEntry * new_temp);
 char * symbol_type (SymbolEntry * p);
 char * symbol_pm (SymbolEntry * p);
 char * symbol_kind (SymbolEntry * p);

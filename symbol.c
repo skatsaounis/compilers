@@ -379,6 +379,7 @@ SymbolEntry * newFunction (const char * name)
     if (e == NULL) {
         e = newEntry(name);
         if (e != NULL) {
+            e->new_offset = 6;
             e->entryType = ENTRY_FUNCTION;
             e->u.eFunction.isForward = false;
             e->u.eFunction.pardef = PARDEF_DEFINE;
