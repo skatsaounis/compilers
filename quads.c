@@ -440,25 +440,17 @@ void print_all_quads(FILE * fp){
                 temp = currentScope->entries;
                 while(temp != NULL){
                     if((temp->entryType != ENTRY_FUNCTION) && (temp->entryType != ENTRY_CONSTANT)){
-                        fprintf(fp, "%s", temp->id);
+                        fprintf(fp, "\tdw %s ; %s", symbol_offset(temp), temp->id);
                         flag = 1;
                     }
                     temp = temp->nextInScope;
                     if((temp != NULL) && (flag == 1) && (temp->entryType != ENTRY_FUNCTION) && (temp->entryType != ENTRY_CONSTANT)){
-                        fprintf(fp, ",");
+                        fprintf(fp, "\f");
                         flag = 0;
                     }
                 }
                 temp = lookupEntry(quad_array[i].arg1, LOOKUP_ALL_SCOPES, true);
                 temp2 = temp->u.eFunction.firstArgument;
-                if (temp2 != NULL){
-                    fprintf(fp, "***");
-                    while(temp2 != temp->u.eFunction.lastArgument){
-                        fprintf(fp, "%s,", temp2->id);
-                        temp2 = temp2->u.eParameter.next;
-                    }
-                    fprintf(fp, "%s", temp2->id);
-                }
                 fprintf(fp, "\n");
             }
         }

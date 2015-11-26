@@ -11,6 +11,7 @@ typedef struct{
 	char * arg1_pm, * arg1_type, * arg1_nesting, * arg1_kind, * arg1_offset;
 	char * arg2_pm, * arg2_type, * arg2_nesting, * arg2_kind, * arg2_offset;
 	char * dest_pm, * dest_type, * dest_nesting, * dest_kind, * dest_offset;
+	char * next_words;
 }Interpreted_quad;
 
 typedef struct program_strings_struct{
@@ -37,6 +38,6 @@ void printstrings(FILE * fp);
 void printexterns(FILE * fp, int * externs);
 void printexterns2(FILE * fp, int * externs);
 void string_to_db(FILE * fp, char * node_str);
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table);
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words);
 
 #endif

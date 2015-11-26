@@ -13,7 +13,7 @@ Program_strings temp;
 
 int unique, counterg=0;
 char * unit_name;
-char * current_unit;
+char * current_unit, * current_next_words;
 int call_counter;
 int param_byte_table[256];
 int inception_function_table[256];
@@ -91,7 +91,7 @@ Interpreted_quad consume_quad(FILE * fp){
         line = NULL;
         linesize = 0;
         getline(&line, &linesize, fp);
-        printf("%s\n", line);
+        interpreted_quad.next_words = strdup(line);
         free(line);
     }
 
@@ -165,6 +165,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
     else if (strcmp(quad.quad, "unit") == 0){
         unit_name = name(quad.arg1);
         current_unit = strdup(quad.arg1);
+        current_next_words = strdup(quad.next_words);
         call_counter = 1;
 		inception_function_table[call_counter] = 0;
         fprintf(fp, "%s proc near\n\tpush bp\n\tmov bp,sp\n\tsub sp,%d\n", unit_name, offset);
@@ -173,7 +174,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
         fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
-        print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table);
+        print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table, current_next_words);
 		counterg++;
     }
     else if (strcmp(quad.quad, "call") == 0){
@@ -721,19 +722,13 @@ void printexterns2(FILE * fp, int * externs){
             }
 }
 
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table){
-    /* this needs fixing */
-    int temp_number;
-    /* this needs fixing */
-
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words){
+    char *token, * temp_next_words;
     int i, j;
-
-    /* this needs fixing */
-    temp_number = 3;
-    /* this needs fixing */
 
     fprintf(fp, "_%s_call_table:\n", fun_name);
     for(i = 1; i < call_counter; i++){
+        temp_next_words = strdup(next_words);
         fprintf(fp, "@call_%s_%d\tdw @%s_call_%d\n", fun_name, i, fun_name, i);
         if((call_counter - i) == 1)
             fprintf(fp, "\tdw 0\n");
@@ -741,14 +736,14 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
             fprintf(fp, "\tdw @call_%s_%d\n", fun_name, i+1);
         fprintf(fp, "\tdw 4 + %d + %d + %d + 4\n", param_byte_table[i], inception_function_table[i], temp_var_offset);
         fprintf(fp, "IF LIVENESS eq 0\n");
-        /* this needs fixing */
-        for(j =0; j < temp_number; j++){
-            fprintf(fp, "\tdw 10\n");
+
+        token = strtok(temp_next_words, "\f");
+        while( token != NULL ){
+            fprintf(fp, "%s\n", token);
+            token = strtok(NULL, "\f");
         }
-        /* this needs fixing */
+
         fprintf(fp, "ENDIF\n");
-        if((call_counter - i) > 1)
-            fprintf(fp, "\tdw -10\n");
         fprintf(fp, "\tdw 0\n");
     }
 }
