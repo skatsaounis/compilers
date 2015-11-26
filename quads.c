@@ -423,7 +423,7 @@ char * outp(char * inp){
 
 void print_all_quads(FILE * fp){
         static int i = 0;
-        SymbolEntry * temp;
+        SymbolEntry * temp, * temp2;
         int flag = 0;
         for(; i < nextquad; i++){
             fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
@@ -448,6 +448,16 @@ void print_all_quads(FILE * fp){
                         fprintf(fp, ",");
                         flag = 0;
                     }
+                }
+                temp = lookupEntry(quad_array[i].arg1, LOOKUP_ALL_SCOPES, true);
+                temp2 = temp->u.eFunction.firstArgument;
+                if (temp2 != NULL){
+                    fprintf(fp, "***");
+                    while(temp2 != temp->u.eFunction.lastArgument){
+                        fprintf(fp, "%s,", temp2->id);
+                        temp2 = temp2->u.eParameter.next;
+                    }
+                    fprintf(fp, "%s", temp2->id);
                 }
                 fprintf(fp, "\n");
             }
