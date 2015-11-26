@@ -23,11 +23,20 @@ char *strdup(const char *str)
     return dup;
 }
 
-long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int offset)
+long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int offset, char * prev_param_string)
 {
     char tmp[1];
 
     quad_array[nextquad].type = q;
+	if (q == CALL_QUAD){
+		quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+		quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+		quad_array[nextquad].dest_req.prev_param_string = strdup(prev_param_string);
+	} else {
+		quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+		quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+		quad_array[nextquad].dest_req.prev_param_string = strdup("-");
+	}
     if (x == NULL)
        quad_array[nextquad].arg1 = "-";
     else if (x->entryType == ENTRY_CONSTANT){
@@ -139,11 +148,20 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
     return nextquad++;
 }
 
-long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset)
+long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset, char * prev_param_string)
 {
     char tmp[1];
 
     quad_array[nextquad].type=q;
+	if (q == CALL_QUAD){
+		quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+		quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+		quad_array[nextquad].dest_req.prev_param_string = strdup(prev_param_string);
+	} else {
+		quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+		quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+		quad_array[nextquad].dest_req.prev_param_string = strdup("-");
+	}
     if (x == NULL)
         quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
@@ -243,6 +261,9 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
 long GenQuad3(QuadType q, char * x, char * y, char * z)
 {
     quad_array[nextquad].type = q;
+	quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+	quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+	quad_array[nextquad].dest_req.prev_param_string = strdup("-");
     if (x == NULL)
         quad_array[nextquad].arg1 = "-";
     else
@@ -282,6 +303,9 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
     char tmp[1];
 
     quad_array[nextquad].type=q;
+	quad_array[nextquad].arg1_req.prev_param_string = strdup("-");
+	quad_array[nextquad].arg2_req.prev_param_string = strdup("-");
+	quad_array[nextquad].dest_req.prev_param_string = strdup("-");
     if (x == NULL)
         quad_array[nextquad].arg1 = "-";
         else if (x->entryType == ENTRY_CONSTANT){
@@ -424,15 +448,15 @@ char * outp(char * inp){
 void print_all_quads(FILE * fp){
         static int i = 0;
         for(; i < nextquad; i++)
-            fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
+            fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
                 quad_array[i].arg1_req.pm, quad_array[i].arg1_req.type, quad_array[i].arg1_req.nesting,
-        quad_array[i].arg1_req.kind, quad_array[i].arg1_req.offset,
+        quad_array[i].arg1_req.kind, quad_array[i].arg1_req.offset, quad_array[i].arg1_req.prev_param_string,
                 quad_array[i].arg2_req.pm, quad_array[i].arg2_req.type, quad_array[i].arg2_req.nesting,
-        quad_array[i].arg2_req.kind, quad_array[i].arg2_req.offset,
+        quad_array[i].arg2_req.kind, quad_array[i].arg2_req.offset, quad_array[i].arg2_req.prev_param_string,
                 quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting,
-        quad_array[i].dest_req.kind, quad_array[i].dest_req.offset
+        quad_array[i].dest_req.kind, quad_array[i].dest_req.offset, quad_array[i].dest_req.prev_param_string
                 );
 }
 
