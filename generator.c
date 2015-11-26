@@ -87,6 +87,14 @@ Interpreted_quad consume_quad(FILE * fp){
 
     free(line);
 
+    if(strcmp(interpreted_quad.quad, "unit") == 0){
+        line = NULL;
+        linesize = 0;
+        getline(&line, &linesize, fp);
+        printf("%s\n", line);
+        free(line);
+    }
+
     return interpreted_quad;
 }
 

@@ -423,7 +423,9 @@ char * outp(char * inp){
 
 void print_all_quads(FILE * fp){
         static int i = 0;
-        for(; i < nextquad; i++)
+        SymbolEntry * temp;
+        int flag = 0;
+        for(; i < nextquad; i++){
             fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
@@ -434,6 +436,21 @@ void print_all_quads(FILE * fp){
                 quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting,
         quad_array[i].dest_req.kind, quad_array[i].dest_req.offset
                 );
+            if (print_quad(i) == "unit"){
+                temp = currentScope->entries;
+                while(temp != NULL){
+                    if(temp->entryType != ENTRY_FUNCTION){
+                        fprintf(fp, "%s", temp->id);
+                        flag = 1;
+                    }
+                    temp = temp->nextInScope;
+                    if((temp != NULL) && (flag == 1) && (temp->entryType != ENTRY_FUNCTION))
+                        fprintf(fp, ",");
+                    flag = 0;
+                }
+                fprintf(fp, "\n");
+            }
+        }
 }
 
 
