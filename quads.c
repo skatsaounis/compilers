@@ -439,14 +439,15 @@ void print_all_quads(FILE * fp){
             if (print_quad(i) == "unit"){
                 temp = currentScope->entries;
                 while(temp != NULL){
-                    if(temp->entryType != ENTRY_FUNCTION){
+                    if((temp->entryType != ENTRY_FUNCTION) && (temp->entryType != ENTRY_CONSTANT)){
                         fprintf(fp, "%s", temp->id);
                         flag = 1;
                     }
                     temp = temp->nextInScope;
-                    if((temp != NULL) && (flag == 1) && (temp->entryType != ENTRY_FUNCTION))
+                    if((temp != NULL) && (flag == 1) && (temp->entryType != ENTRY_FUNCTION) && (temp->entryType != ENTRY_CONSTANT)){
                         fprintf(fp, ",");
-                    flag = 0;
+                        flag = 0;
+                    }
                 }
                 fprintf(fp, "\n");
             }
