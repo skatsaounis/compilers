@@ -8,9 +8,9 @@ typedef struct{
 	char * arg2;
 	char * dest;
 	char * nesting;
-	char * arg1_pm, * arg1_type, * arg1_nesting, * arg1_kind, * arg1_offset;
-	char * arg2_pm, * arg2_type, * arg2_nesting, * arg2_kind, * arg2_offset;
-	char * dest_pm, * dest_type, * dest_nesting, * dest_kind, * dest_offset;
+	char * arg1_pm, * arg1_type, * arg1_nesting, * arg1_kind, * arg1_offset, * arg1_prev_param_string;
+	char * arg2_pm, * arg2_type, * arg2_nesting, * arg2_kind, * arg2_offset, * arg2_prev_param_string;
+	char * dest_pm, * dest_type, * dest_nesting, * dest_kind, * dest_offset, * dest_prev_param_string;
 	char * next_words;
 }Interpreted_quad;
 
@@ -38,6 +38,6 @@ void printstrings(FILE * fp);
 void printexterns(FILE * fp, int * externs);
 void printexterns2(FILE * fp, int * externs);
 void string_to_db(FILE * fp, char * node_str);
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words);
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words, char ** prev_param_offset_table);
 
 #endif

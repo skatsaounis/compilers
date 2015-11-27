@@ -17,6 +17,7 @@ char * current_unit, * current_next_words;
 int call_counter;
 int param_byte_table[256];
 int inception_function_table[256];
+char * prev_param_offset_table[256];
 
 void generator(int * externs, int * offsets){
     int i;
@@ -74,16 +75,19 @@ Interpreted_quad consume_quad(FILE * fp){
     interpreted_quad.arg1_nesting = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg1_kind    = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg1_offset  = strdup(strtok (NULL,"\v"));
+	interpreted_quad.arg1_prev_param_string = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg2_pm      = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg2_type    = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg2_nesting = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg2_kind    = strdup(strtok (NULL,"\v"));
     interpreted_quad.arg2_offset  = strdup(strtok (NULL,"\v"));
+	interpreted_quad.arg2_prev_param_string = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_pm      = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_type    = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_nesting = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_kind    = strdup(strtok (NULL,"\v"));
     interpreted_quad.dest_offset  = strdup(strtok (NULL,"\v"));
+	interpreted_quad.dest_prev_param_string = strdup(strtok (NULL,"\v"));
 
     free(line);
 
@@ -174,8 +178,8 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
         fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
-        print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table, current_next_words);
-		counterg++;
+        print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table, current_next_words, prev_param_offset_table);
+        counterg++;
     }
     else if (strcmp(quad.quad, "call") == 0){
         temp_name = name(quad.dest);
@@ -191,6 +195,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
 			return_param = 2;
 		inception_function_table[call_counter] = inception_function_table[call_counter] - atoi(quad.dest_offset) - return_param;
 		param_byte_table[call_counter] = atoi(quad.dest_offset);
+		prev_param_offset_table[call_counter] = quad.dest_prev_param_string;
         fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);
 		inception_function_table[call_counter] = inception_function_table[call_counter-1];
         fprintf(fp, "\n\tadd sp,%d+4\n", atoi(quad.dest_offset));
@@ -722,7 +727,7 @@ void printexterns2(FILE * fp, int * externs){
             }
 }
 
-void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words){
+void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words, char ** prev_param_offset_table){
     char *token, * temp_next_words;
     int i, j;
 
@@ -744,6 +749,20 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
         }
 
         fprintf(fp, "ENDIF\n");
+        if(strcmp(prev_param_offset_table[i],"\n") == 0) /*previous parameters*/
+            ;
+		else {
+			/* get the first token */
+		   char *token = strtok(prev_param_offset_table[i],"\b");
+
+		   /* walk through other tokens */
+		   while( token != NULL )
+		   {
+			  fprintf(fp, "\t%s\n",token );
+
+			  token = strtok(NULL,"\b");
+		   }
+		}
         fprintf(fp, "\tdw 0\n");
     }
 }
