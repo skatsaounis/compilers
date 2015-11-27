@@ -9,7 +9,7 @@ parser.h parser.c: parser.y
 	bison -dv -o parser.c parser.y
 
 lexer.c: lexer.l
-	flex -s -o lexer.c lexer.l
+	flex -s -D_POSIX_SOURCE -o lexer.c lexer.l
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<

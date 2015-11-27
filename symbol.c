@@ -255,6 +255,7 @@ SymbolEntry * newVariable (const char * name, Type type)
 
 SymbolEntry * newConstant (const char * name, Type type, ...)
 {
+    char buffer[10];
     SymbolEntry * e;
     va_list ap;
     RepString str;
@@ -281,7 +282,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
             strcpy((char *) (value.vString), str);
             break;
         case TYPE_REAL:
-            value.vReal = va_arg(ap, RepReal);
+            /*value.vReal = va_arg(ap, RepReal);*/
             break;
         case TYPE_ARRAY:
             if (equalType(type->refType, typeChar)) {
@@ -339,7 +340,7 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
     else
         e = newEntry(name);
 */
-        char buffer[10];
+
     sprintf(buffer, "#%d", constNumber);
     constNumber++;
     e = newEntry(buffer);
@@ -367,6 +368,8 @@ SymbolEntry * newConstant (const char * name, Type type, ...)
                 break;
             case TYPE_IARRAY:
                 e->u.eConstant.value.vString = value.vString;
+            default:
+                break;
         }
     }
     return e;
@@ -646,6 +649,8 @@ void destroyType (Type type)
                 destroyType(type->refType);
                 delete(type);
             }
+        default:
+            break;
     }
 }
 
@@ -684,6 +689,8 @@ bool equalType (Type type1, Type type2)
                 return false;
         case TYPE_POINTER:
             return equalType(type1->refType, type2->refType);
+        default:
+            break;
     }
     return true;
 }
@@ -722,6 +729,8 @@ void printType (Type type)
         case TYPE_POINTER:
             printf("^");
             printType(type->refType);
+            break;
+        default:
             break;
     }
 }

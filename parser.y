@@ -1,6 +1,11 @@
 %{
+extern int yylex();
+%}
+
+%{
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "quads.h"
@@ -53,6 +58,8 @@ SymbolEntry * p, * b, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
 
+void ERROR (const char * fmt, ...);
+
 int custom_sizeof(Type refT){
   switch (refT->kind) {
     case TYPE_INTEGER:
@@ -96,9 +103,9 @@ void init_for_temps(for_temps * temps){
 
 
 Type lookup_type_find(SymbolEntry * p){
-        if(p == NULL)
-                ERROR("I am here\n");
     Type value;
+    if(p == NULL)
+            ERROR("I am here\n");
     switch(p->entryType){
         case ENTRY_CONSTANT:
             value = p->u.eConstant.type;
@@ -198,7 +205,7 @@ void yyerror (const char *msg);
 %token T_skip     "skip"
 %token T_tail     "tail"
 %token T_true     "true"
-%token<n> T_num
+%token<s> T_num
 %token T_nequal   "<>"
 %token T_gequal   ">="
 %token T_lequal   "<="
@@ -237,8 +244,8 @@ program:
 func_def:
     { flag = 0; }
     "def" header  ':' func_def_list
-    {       
-            snprintf(units[unit_counter++], "%s", currentScope->name);
+    {
+            sprintf(units[unit_counter++], "%s", currentScope->name);
             GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
             curr_param_node = NULL;
     }
@@ -547,7 +554,7 @@ call:
 						  else if (strcmp($1, "strcat") == 0)
 							externs[14] = 1;
                         }
-    '('                 { 
+    '('                 {
                           temp_param_node = (prev_params *) new(sizeof(prev_params));
                           if (curr_param_node == NULL){
                             temp_param_node->prev_param_string = strdup("");
@@ -590,7 +597,7 @@ opt5:
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
                           else
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
-                          
+
                           switch($1.symbol_entry->entryType){
                                 case ENTRY_CONSTANT:
                                 case ENTRY_FUNCTION:
@@ -604,7 +611,7 @@ opt5:
                                 case ENTRY_TEMPORARY:
                                     offset = $1.symbol_entry->u.eTemporary.offset;
                                     break;
-                          } 
+                          }
                           sprintf(buf, "dw %d\b", offset);
                           strcat(curr_param_node->prev_param_string, buf);
                         }
@@ -622,7 +629,7 @@ opt6:
                                 $$.symbol_entry = b;
                           if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                 GenQuad(CALL_QUAD, NULL, NULL, b, (b->u.eFunction.firstArgument)->u.eParameter.offset - 6, "");
-                          else 
+                          else
                                 GenQuad(CALL_QUAD, NULL, NULL, b, (b->u.eFunction.firstArgument)->u.eParameter.offset - 6, curr_param_node->prev->prev_param_string);
                         }
     | ',' expr          {
@@ -646,7 +653,7 @@ opt6:
                                 case ENTRY_TEMPORARY:
                                     offset = $2.symbol_entry->u.eTemporary.offset;
                                     break;
-                          } 
+                          }
                           sprintf(buf, "dw %d\b", offset);
                           strcat(curr_param_node->prev_param_string, buf);
                         }
@@ -776,7 +783,7 @@ expr:
                                         temp_param_node->prev = curr_param_node;
                                       }
                                       curr_param_node = temp_param_node;
-                                      if((lookup_type_find($1.symbol_entry) == TYPE_LIST || lookup_type_find($1.symbol_entry) == TYPE_IARRAY)){
+                                      if((lookup_type_find($1.symbol_entry)->kind == TYPE_LIST || lookup_type_find($1.symbol_entry)->kind == TYPE_IARRAY)){
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
@@ -790,7 +797,7 @@ expr:
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                                             if (curr_param_node == NULL || curr_param_node->prev == NULL)
-                                                GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");    
+                                                GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");
                                             else
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, curr_param_node->prev->prev_param_string);
 											externs[16] = 1;
@@ -893,7 +900,7 @@ expr:
 
 %%
 
-void ERROR (const char * fmt, ...);
+
 
 void yyerror (const char *msg)
 {

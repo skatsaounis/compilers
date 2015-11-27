@@ -24,7 +24,8 @@ void ERROR (const char * fmt, ...);
 
 
 %}
-
+%option noinput
+%option nounput
 %option yylineno
 
 Lc [A-Z]
@@ -51,15 +52,15 @@ E  ["n""t""r""0"\'\"\\]
 "head" 					{ return T_head; }
 "if" 					{ return T_if; }
 "int" 					{ return T_int; }
-"list" 					{ return T_list; } 
+"list" 					{ return T_list; }
 "mod" 					{ return T_mod; }
 "new" 					{ return T_new; }
 "nil" 					{ return T_nil; }
 "nil?" 					{ return T_nilq; }
 "not" 					{ return T_not; }
 "or" 					{ return T_or; }
-"ref" 					{ return T_ref; } 
-"return"	 			{ return T_return; } 
+"ref" 					{ return T_ref; }
+"return"	 			{ return T_return; }
 "skip" 					{ return T_skip; }
 "tail" 					{ return T_tail; }
 "true" 					{ return T_true; }
@@ -81,7 +82,7 @@ E  ["n""t""r""0"\'\"\\]
 [\(\)\[\]\,\;\:]			{ return yytext[0]; } /* Separators munch */
 ":="					{ return T_assignor; }
 
-\"([^\'\"\r\n\\]|\\({E}|"x"{X}{X}))*\"	{ yylval.s = strdup(yytext); 
+\"([^\'\"\r\n\\]|\\({E}|"x"{X}{X}))*\"	{ yylval.s = strdup(yytext);
 					  return T_string; } /* Strings munch */
 {W}+					{ /*columnno++;*/ }
 \t   					{ yycolumn += 9 - (yycolumn % 8); }

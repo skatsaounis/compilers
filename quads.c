@@ -53,6 +53,8 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
                 break;
             case TYPE_IARRAY:
                 sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
+            default:
+                break;
         }
         quad_array[nextquad].arg1 = strdup(bufferx);
     }
@@ -93,6 +95,8 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
                         break;
                     case TYPE_IARRAY:
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
+                    default:
+                        break;
                 }
                 quad_array[nextquad].arg2 = strdup(buffery);
     }
@@ -178,6 +182,8 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
                         break;
                     case TYPE_IARRAY:
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
+                    default:
+                        break;
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
@@ -218,6 +224,8 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
                         break;
                     case TYPE_IARRAY:
                         sprintf(buffery, "%s", (char *) y->u.eConstant.value.vString);
+                    default:
+                        break;
                 }
                 quad_array[nextquad].arg2 = strdup(buffery);
         }
@@ -322,6 +330,8 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
                         break;
                     case TYPE_IARRAY:
                         sprintf(bufferx, "%s", (char *) x->u.eConstant.value.vString);
+                    default:
+                        break;
                 }
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
@@ -383,9 +393,10 @@ label_list make_list(long val)
 }
 
 label_list merge(label_list a, label_list b){
+    label_list l;
     if (b == NULL)
         return a;
-    label_list l = a;
+    l = a;
     if (l == NULL)
         return b;
     while (l->next != NULL)
@@ -397,7 +408,7 @@ label_list merge(label_list a, label_list b){
 void backpatch(label_list list, long val){
     label_list l = list;
     char tmp[256];
-    sprintf(tmp, "%d", val); /*the previous implementation was giving wrong result*/
+    sprintf(tmp, "%ld", val); /*the previous implementation was giving wrong result*/
     while ((list = l) != NULL) {
         if(strcmp(quad_array[l->label].dest, "-1") == 0){
             delete(quad_array[l->label].dest);
@@ -447,9 +458,9 @@ char * outp(char * inp){
 
 void print_all_quads(FILE * fp){
         static int i = 0;
-        SymbolEntry * temp, * temp2;
+        SymbolEntry * temp;
         int flag = 0;
-        for(; i < nextquad; i++)
+        for(; i < nextquad; i++){
             fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
                 currentScope->nestingLevel,
@@ -460,7 +471,7 @@ void print_all_quads(FILE * fp){
                 quad_array[i].dest_req.pm, quad_array[i].dest_req.type, quad_array[i].dest_req.nesting,
         quad_array[i].dest_req.kind, quad_array[i].dest_req.offset, quad_array[i].dest_req.prev_param_string
                 );
-            if (print_quad(i) == "unit"){
+            if (strcmp(print_quad(i), "unit") == 0){
                 temp = currentScope->entries;
                 while(temp != NULL){
                     if((temp->entryType != ENTRY_FUNCTION) && (temp->entryType != ENTRY_CONSTANT)){
@@ -473,8 +484,6 @@ void print_all_quads(FILE * fp){
                         flag = 0;
                     }
                 }
-                temp = lookupEntry(quad_array[i].arg1, LOOKUP_ALL_SCOPES, true);
-                temp2 = temp->u.eFunction.firstArgument;
                 fprintf(fp, "\n");
             }
         }
@@ -499,6 +508,8 @@ char * symbol_type (SymbolEntry * p){
             break;
         case ENTRY_TEMPORARY:
             return strdup("temporary");
+            break;
+        default:
             break;
     }
     return NULL;
@@ -545,6 +556,8 @@ char * symbol_kind (SymbolEntry * p){
                 case TYPE_CHAR:
                     return strdup("char");
                     break;
+                default:
+                    break;
                 case TYPE_IARRAY:
 				switch (p->u.eConstant.type->refType->kind) {
                         case TYPE_VOID:
@@ -565,6 +578,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
                 case TYPE_LIST:
@@ -587,7 +602,9 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
-					}
+					    default:
+                            break;
+                    }
                     break;
 				case TYPE_POINTER:
 				switch (p->u.eConstant.type->refType->kind) {
@@ -609,6 +626,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
             }
@@ -647,6 +666,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
                 case TYPE_LIST:
@@ -669,6 +690,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
 				case TYPE_POINTER:
@@ -691,7 +714,11 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
+                    break;
+                default:
                     break;
             }
             break;
@@ -729,6 +756,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
                 case TYPE_LIST:
@@ -751,6 +780,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
 				case TYPE_POINTER:
@@ -773,7 +804,11 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
+                    break;
+                default:
                     break;
             }
             break;
@@ -811,6 +846,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
                 case TYPE_LIST:
@@ -833,6 +870,8 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
                     break;
 				case TYPE_POINTER:
@@ -855,7 +894,11 @@ char * symbol_kind (SymbolEntry * p){
 						case TYPE_LIST:
                     		return strdup("list");
                     		break;
+                        default:
+                            break;
 					}
+                    break;
+                default:
                     break;
             }
             break;

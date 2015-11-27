@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -729,7 +731,7 @@ void printexterns2(FILE * fp, int * externs){
 
 void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words, char ** prev_param_offset_table){
     char *token, * temp_next_words;
-    int i, j;
+    int i;
 
     fprintf(fp, "_%s_call_table:\n", fun_name);
     for(i = 1; i < call_counter; i++){
