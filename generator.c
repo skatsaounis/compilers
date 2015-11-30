@@ -379,11 +379,12 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
                 fprintf(fp, "\tmov byte ptr [di], %s\n", a);
     }
     else if(atoi(data_nesting)==atoi(nesting)) {
-        if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
+        if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
             else
                 fprintf(fp, "\tmov byte ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+        }
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             fprintf(fp, "\tmov si, word ptr [bp + (%d)]\n", atoi(data_offset));
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
@@ -391,7 +392,12 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
             else
                 fprintf(fp, "\tmov byte ptr [si], %s\n", a);
         }
-    } else
+        else
+            if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
+                fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+            else
+                fprintf(fp, "\tmov byte ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+    } else{
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
@@ -407,6 +413,7 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
             else
                 fprintf(fp, "\tmov byte ptr [si], %s\n", a);
         }
+    }
 }
 
 void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
@@ -437,6 +444,9 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
             else
                 fprintf(fp, "\tlea %s, byte ptr [bp + (%d)]\n", a, atoi(data_offset));
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
+            fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+        }
+        else{
             fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
         }
     }

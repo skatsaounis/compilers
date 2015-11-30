@@ -1,7 +1,3 @@
--- Implement Next Words for Call Table
-
 ~General~
 -- Fix general bugs to make the programs run.
 -- Optimizations
-
-

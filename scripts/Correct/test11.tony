@@ -1,11 +1,18 @@
 def main():
 	int i
 	i := 1
-	if true:
+	puti(i)
+	puts("\n")
+	i := i+1
+	puti(i)
+	puts("\n")
+	if i>2:
 		i := i + 2
-	elsif false:
+	elsif true:
 		i := i * 10
 	else:
 		i := i - 4
 	end
+	puti(i)
+	puts("\n")
 end

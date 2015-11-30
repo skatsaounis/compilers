@@ -1,5 +1,0 @@
-def main ():
-	char[] a
-	a := new char[16]
-	puts("a")
-end

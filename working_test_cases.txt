@@ -1,0 +1,7 @@
+test3     -- partially correct
+test4     -- infinite loop
+test5     -- infinite loop and not assigning correct to table elements
+test6     -- not showing list
+test7     -- not assigning correct to table elements
+test10    -- wrong
+nestedifs -- (??)

@@ -45,7 +45,7 @@ int unit_counter, offset;
 char units[256][256];
 char buf[256];
 
-FILE * fp;
+FILE * fp, * fp2;
 
 if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
@@ -254,7 +254,7 @@ func_def:
                 GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);
 		        offsets[counter] = -(currentScope->negOffset);
                 counter++;
-                print_all_quads(fp);
+                print_all_quads(fp, fp2);
         closeScope();
     }
 ;
@@ -911,6 +911,7 @@ int main ()
 { int i;
   unit_counter = 0;
   fp = fopen("quads.txt", "w+");
+  fp2 = fopen("pure_quads.txt", "w+");
   for (i = 0; i<21; i++)
 	externs[i] = 0;
   if (yyparse()==0){
@@ -919,6 +920,7 @@ int main ()
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
   fclose(fp);
+  fclose(fp2);
   generator(externs, offsets);
   destroySymbolTable();
   return 0;

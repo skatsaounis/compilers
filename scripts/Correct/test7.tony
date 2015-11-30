@@ -1,24 +1,56 @@
-def bool quicksort( int[] a; int m,n ):
-	int i, j, ii, jj, temp
-	if n <=m: return  true end
+def main():
+	def bool quicksort( int[] a; int m,n ):
+		int i, j, ii, jj, temp
+		if n <=m: return  true end
 
-	for i := m, j :=n ; i <= j ; i := i+1:
-		for ii:=i; a[ii] < a[(m+n) / 2]; ii := ii+1 :
-			skip
+		for i := m, j :=n ; i <= j ; i := i+1:
+			for ii:=i; a[ii] < a[(m+n) / 2]; ii := ii+1 :
+				skip
+			end
+			for jj := j ; a[jj] > a[(m+n) / 2] ; jj := jj-1 :
+				skip
+			end
+			if (ii <= jj):
+				temp := a[ii]
+				a[ii] := a[jj]
+				a[jj] := temp
+				ii := ii+1
+				jj := jj-1
+				i := ii
+				j := jj
+			end
 		end
-		for jj := j ; a[jj] > a[(m+n) / 2] ; jj := jj-1 :
-			skip
-		end
-		if (ii <= jj):
-			temp := a[ii]
-			a[ii] := a[jj]
-			a[jj] := temp
-			ii := ii+1
-			jj := jj-1
-			i := ii
-			j := jj
+		quicksort(a,m,j)
+		quicksort(a,i,n)
+	end
+
+	int m, n, i
+	int[] a
+
+	a := new int[5]
+	m := 0
+	n := 4
+	a[0]:= 5
+	a[1]:= 2
+	a[2]:= 8
+	a[3]:= 1
+	a[4]:= 4
+
+	puts("\n")
+
+	for i := 0; i <= n; i := i+1:
+		puti(a[i])
+		if i <> 4:
+			puts(",")
 		end
 	end
-	quicksort(a,m,j)
-	quicksort(a,i,n)
+	puts("\n")
+	quicksort(a, m, n)
+	for i := 0; i <= n; i := i+1:
+		puti(a[i])
+		if i <> 4:
+			puts(",")
+		end
+	end
+	puts("\n")
 end

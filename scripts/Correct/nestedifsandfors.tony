@@ -4,12 +4,15 @@ def main():
 	if (i < 10):
 		for i:= 0; i < 20; i := i+1:
 			if (true):
-				puts("a")
+				puts("a,")
 			end
 		end
+		puts("\n")
 	elsif	(i < 35):
 		i := i + 1005
 	else:
 		i := 69
 	end
+	puti(i)
+	puts("\n")
 end

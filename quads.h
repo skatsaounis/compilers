@@ -75,7 +75,7 @@ void backpatch(label_list list, long val);       /* replace unknown labels of qu
 char * print_quad(int i);                        /* printable version of quad type                         */
 /*void FreeQuads(void);                             Should we use it ?!? */
 char *strdup(const char *str);
-void print_all_quads();                          /* prints all quad_array                                  */
+void print_all_quads(FILE *fp, FILE *fp2);                          /* prints all quad_array                                  */
 char * outp(char *inp);
 long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset, char * prev_param_string);
 long GenQuad3(QuadType q, char * x, char * y, char * z);

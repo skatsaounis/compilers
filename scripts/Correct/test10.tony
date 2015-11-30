@@ -1,7 +1,11 @@
 def main():
 	int i
 	list[int] lt
+	lt := nil
+	i:=0
 	if nil?(lt):
 		i := 1
 	end
+	puti(i)
+	puts("\n")
 end
