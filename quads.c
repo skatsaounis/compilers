@@ -64,7 +64,10 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
 				char bufferx[256];
 				sprintf(bufferx, "[%s]", (char *) x->id);
 				quad_array[nextquad].arg1 = strdup(bufferx);
-			} else
+			}
+            else if ((lookup_type_find_b(x)->kind == TYPE_LIST) && (lookup_type_find_b(x)->refType == typeVoid))
+                quad_array[nextquad].arg1 = strdup("nil");
+            else
 				quad_array[nextquad].arg1 = (char *) x->id;
 		else
 			quad_array[nextquad].arg1 = (char *) x->id;
@@ -944,4 +947,26 @@ char * symbol_offset (SymbolEntry * p){
         return strdup("-");
     }
     return strdup(buffer);
+}
+
+Type lookup_type_find_b(SymbolEntry * p){
+    Type value;
+    switch(p->entryType){
+        case ENTRY_CONSTANT:
+            value = p->u.eConstant.type;
+            break;
+        case ENTRY_FUNCTION:
+            value = p->u.eFunction.resultType;
+            break;
+        case ENTRY_PARAMETER:
+            value = p->u.eParameter.type;
+            break;
+        case ENTRY_VARIABLE:
+            value = p->u.eVariable.type;
+            break;
+        case ENTRY_TEMPORARY:
+            value = p->u.eTemporary.type;
+            break;
+    }
+    return value;
 }

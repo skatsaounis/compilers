@@ -1,6 +1,4 @@
 test4     -- correct but infinite loop in the end
-test5     -- infinite loop and not assigning correct to table elements
+test5     -- correct but infinite loop in the end
 test6     -- not showing list
-test7     -- not assigning correct to table elements
-test10    -- wrong
 nestedifs -- (??)

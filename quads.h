@@ -84,5 +84,5 @@ char * symbol_type (SymbolEntry * p);
 char * symbol_pm (SymbolEntry * p);
 char * symbol_kind (SymbolEntry * p);
 char * symbol_offset (SymbolEntry * p);
-
+Type lookup_type_find_b(SymbolEntry * p);
 #endif

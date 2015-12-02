@@ -227,11 +227,11 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
     else if (strcmp(quad.quad, "nil?") == 0){
         temp_label = label(quad.dest);
         load("ax", quad.arg2, fp, quad.arg2_pm, quad.arg2_type, quad.arg2_nesting, quad.nesting, quad.arg2_kind, quad.arg2_offset);
-        fprintf(fp, "\tor ax,ax\n");
-        fprintf(fp, "\tjnz %s\n", temp_label);
+        fprintf(fp, "\tcmp ax,0\n");
+        fprintf(fp, "\tje %s\n", temp_label);
     }
     else if (strcmp(quad.quad, "par") == 0){
-        if ((strcmp(quad.arg2, "VALUE") == 0) && (strcmp(quad.arg1_kind, "integer") == 0)){
+        if ((strcmp(quad.arg2, "VALUE") == 0) && ((strcmp(quad.arg1_kind, "integer") == 0) || (strcmp(quad.arg1_kind, "iarray") == 0) || (strcmp(quad.arg1_kind, "list") == 0))){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush ax\n");
 			inception_function_table[call_counter] += 2;
@@ -352,6 +352,8 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
             else
                 fprintf(fp, "\tmov %s, byte ptr [si]\n", a);
         }
+        else
+            fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
     } else
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
