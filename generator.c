@@ -244,10 +244,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
 			inception_function_table[call_counter] += 1;
         }
         else if ((strcmp(quad.arg2, "REFERENCE") == 0) || (strcmp(quad.arg2, "RET") == 0)){
-            if ((strcmp(quad.arg1_type,"constant") == 0) && (strcmp(quad.arg1_kind, "integer") == 0) )
-                fprintf(fp, "\tmov si,%s\n", quad.arg1);
-            else
-                loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
+            loadAddr("si", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
             fprintf(fp, "\tpush si\n");
 			if(((strcmp(quad.arg1_kind, "boolean") == 0) || (strcmp(quad.arg1_kind, "char") == 0)) && (strcmp(quad.arg2, "RET") == 0))
 				inception_function_table[call_counter] += 1;
