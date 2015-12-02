@@ -21,6 +21,7 @@ typedef struct prev_params prev_params;
 
 struct node{
     SymbolEntry * a;
+    SymbolEntry * b;
     node * prev;
 };
 
@@ -54,7 +55,7 @@ prev_params * curr_param_node, *temp_param_node;
 node * currnode, * temp;
 int flag, main_flag=0, counter=0, logical_expr=0;
 int externs[21], offsets[257];
-SymbolEntry * p, * b, * W, * S;
+SymbolEntry * p, * W, * S;
 Type type, refType;
 PassMode pMode, pm;
 
@@ -521,7 +522,7 @@ call:
                           temp = (node *) new(sizeof(node));
                           temp->prev = currnode;
                           currnode = temp;
-                          b = lookupEntry($1, LOOKUP_ALL_SCOPES, true); currnode->a = b->u.eFunction.firstArgument;
+                          currnode->b = lookupEntry($1, LOOKUP_ALL_SCOPES, true); currnode->a = currnode->b->u.eFunction.firstArgument;
 
 						  if (strcmp($1, "puti") == 0)
 							externs[0] = 1;
@@ -579,16 +580,16 @@ call:
 opt5:
     /* nothing */       {
                           checkNoParams(currnode->a);
-                          if(b->u.eFunction.resultType != typeVoid){
-                                $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
+                          if(currnode->b->u.eFunction.resultType != typeVoid){
+                                $$.symbol_entry = newTemporary(currnode->b->u.eFunction.resultType);
                                 GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                           }
                           else
-                                $$.symbol_entry = b;
+                                $$.symbol_entry = currnode->b;
                           if (curr_param_node == NULL || curr_param_node->prev == NULL)
-                                GenQuad(CALL_QUAD, NULL, NULL, b, 0, "");
+                                GenQuad(CALL_QUAD, NULL, NULL, currnode->b, 0, "");
                           else
-                                GenQuad(CALL_QUAD, NULL, NULL, b, 0, curr_param_node->prev->prev_param_string);
+                                GenQuad(CALL_QUAD, NULL, NULL, currnode->b, 0, curr_param_node->prev->prev_param_string);
                         }
     | expr              {
                           pm = currnode->a->u.eParameter.mode;
@@ -621,16 +622,16 @@ opt5:
 opt6:
     /* nothing */       {
                           checkNoParams(currnode->a);
-                          if(b->u.eFunction.resultType != typeVoid){
-                                $$.symbol_entry = newTemporary(b->u.eFunction.resultType);
+                          if(currnode->b->u.eFunction.resultType != typeVoid){
+                                $$.symbol_entry = newTemporary(currnode->b->u.eFunction.resultType);
                                 GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                           }
                           else
-                                $$.symbol_entry = b;
+                                $$.symbol_entry = currnode->b;
                           if (curr_param_node == NULL || curr_param_node->prev == NULL)
-                                GenQuad(CALL_QUAD, NULL, NULL, b, (b->u.eFunction.firstArgument)->u.eParameter.offset - 6, "");
+                                GenQuad(CALL_QUAD, NULL, NULL, currnode->b, (currnode->b->u.eFunction.firstArgument)->u.eParameter.offset - 6, "");
                           else
-                                GenQuad(CALL_QUAD, NULL, NULL, b, (b->u.eFunction.firstArgument)->u.eParameter.offset - 6, curr_param_node->prev->prev_param_string);
+                                GenQuad(CALL_QUAD, NULL, NULL, currnode->b, (currnode->b->u.eFunction.firstArgument)->u.eParameter.offset - 6, curr_param_node->prev->prev_param_string);
                         }
     | ',' expr          {
                           pm = currnode->a->u.eParameter.mode;

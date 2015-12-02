@@ -24,7 +24,7 @@ char * prev_param_offset_table[256];
 void generator(int * externs, int * offsets){
     int i;
     char program[256];
-    FILE * fp, * fp2;
+    FILE * fp, * fp2, * fp3;
 
     unique = 0;
     program_strings = (program_string_t *) new(sizeof(program_string_t));
@@ -34,6 +34,7 @@ void generator(int * externs, int * offsets){
 
     fp = fopen("a.asm", "w+");
     fp2 = fopen("quads.txt", "r");
+    fp3 = fopen("pure_quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
     fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nLIVENESS = 0\nmain proc near");
     fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
@@ -47,6 +48,7 @@ void generator(int * externs, int * offsets){
     fprintf(fp, "\n\tcall near ptr _%s\n_ret_of_main:\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
 
     for(i = 0; i < nextquad; i++){
+        comment(fp3, fp);
         fprintf(fp, "@%d:\n", i);
         generate(consume_quad(fp2), fp, offsets[counterg]);
         fprintf(fp, "\n");
@@ -777,4 +779,14 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
 		}
         fprintf(fp, "\tdw 0\n");
     }
+}
+
+void comment(FILE *fp, FILE *fp2){
+    char * line = NULL;
+    size_t linesize;
+
+    linesize = 0;
+    getline(&line, &linesize, fp);
+    fprintf(fp2, "; %s", line);
+    free(line);
 }
