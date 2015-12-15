@@ -22,7 +22,7 @@ def main ():
 	if limit >= 2: counter := counter + 1 puti(2) puts("\n") end
 	if limit >= 3: counter := counter + 1 puti(3) puts("\n") end
 
-	for number := 6; number <= limit; number := number + 6:
+	for number := 6; number <= limit; number := number + 6:	
 		if prime?(number - 1):
 			counter := counter + 1
 			puti(number - 1)

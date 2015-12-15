@@ -674,7 +674,12 @@ atom:
                                       $$.symbol_entry = newTemporary(typePointer(lookup_type_find($1.symbol_entry)));
                                       GenQuad(ARRAY_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,"");
                                     }
-    | call                          { $$.symbol_entry = $1.symbol_entry; }
+    | call                          { $$.symbol_entry = $1.symbol_entry;
+				   					  if ((logical_expr == 1) && (lookup_type_find($$.symbol_entry) == typeBoolean)){
+                                      	$$.true_list = make_list(GenQuad2(EQ_QUAD, $$.symbol_entry, newConstant ("a", typeBoolean, 1), "-1", 0,""));
+                                      	$$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
+                                      }
+				    				}
 ;
 
 expr:
