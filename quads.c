@@ -258,17 +258,7 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
     quad_array[nextquad].dest_req.type = strdup("-");
     quad_array[nextquad].dest_req.pm = strdup("-");
     quad_array[nextquad].dest_req.nesting = strdup("-");
-    if (
-        (strcmp(quad_array[nextquad].dest, "consp") == 0)
-        || (strcmp(quad_array[nextquad].dest, "consv") == 0)
-        || (strcmp(quad_array[nextquad].dest, "head") == 0)
-        || (strcmp(quad_array[nextquad].dest, "tail") == 0)
-        || (strcmp(quad_array[nextquad].dest, "newarrp") == 0)
-        || (strcmp(quad_array[nextquad].dest, "newarrv") == 0)
-        )
-        quad_array[nextquad].dest_req.kind = strdup("procedure");
-    else
-        quad_array[nextquad].dest_req.kind = strdup("-");
+    quad_array[nextquad].dest_req.kind = strdup("-");
 
     if (q == CALL_QUAD){
         char buffer[256];
