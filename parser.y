@@ -42,6 +42,7 @@ struct prev_params{
     prev_params * prev;
 };
 
+int new_const;
 int unit_counter, offset;
 char units[256][256];
 char buf[256];
@@ -698,28 +699,58 @@ expr:
                                     }
     | expr '+' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) + ((int) $3.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | expr '-' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) - ((int) $3.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | expr '*' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) * ((int) $3.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | expr '/' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) / ((int) $3.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | expr "mod" expr               { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
                                             ERROR("exprs must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) % ((int) $3.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | expr '=' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
@@ -814,13 +845,18 @@ expr:
                                     }
     | '-' expr         %prec UMINUS { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(MINUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry, 0,""); /* Added Today */
+                                      if($2.symbol_entry->entryType == ENTRY_CONSTANT){
+                                        new_const = 0 - ((int) $2.symbol_entry->u.eConstant.value.vInteger);
+                                        $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else{
+                                        $$.symbol_entry = newTemporary(typeInteger);
+                                        GenQuad(MINUS_QUAD, newConstant ("a", typeInteger, 0), $2.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                      }
                                     }
     | '+' expr         %prec UPLUS  { if(lookup_type_find($2.symbol_entry) != typeInteger)
                                             ERROR("expr must be of type int");
-                                      $$.symbol_entry = newTemporary(typeInteger);
-                                      GenQuad(PLUS_QUAD, $2.symbol_entry, NULL, $$.symbol_entry, 0,""); /* Added Today */
+                                      $$.symbol_entry = $2.symbol_entry;
                                     }
     | '(' expr ')'                  { $$.symbol_entry = $2.symbol_entry;
                                       $$.true_list = $2.true_list;

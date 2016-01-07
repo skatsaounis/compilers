@@ -289,6 +289,8 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
 
 	if(isdigit(b[0]))
         fprintf(fp, "\tmov %s,%s\n", a, b);
+    else if(b[0]=='-' && isdigit(b[1]))
+        fprintf(fp, "\tmov %s,%s\n", a, b);
     else if (strcmp(b, "true") == 0)
         fprintf(fp, "\tmov %s,1\n", a);
     else if ((strcmp(b, "false") == 0) || (strcmp(b, "nil") == 0 ))
