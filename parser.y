@@ -703,6 +703,12 @@ expr:
                                         new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) + ((int) $3.symbol_entry->u.eConstant.value.vInteger);
                                         $$.symbol_entry = newConstant ("a", typeInteger, new_const);
                                       }
+                                      else if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $1.symbol_entry->u.eConstant.value.vInteger) == 0)){
+                                        $$.symbol_entry = $3.symbol_entry;
+                                      }
+                                      else if(($3.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $3.symbol_entry->u.eConstant.value.vInteger) == 0)){
+                                        $$.symbol_entry = $1.symbol_entry;
+                                      }
                                       else{
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
@@ -724,6 +730,18 @@ expr:
                                       if(($1.symbol_entry->entryType == ENTRY_CONSTANT)&&($3.symbol_entry->entryType == ENTRY_CONSTANT)){
                                         new_const = ((int) $1.symbol_entry->u.eConstant.value.vInteger) * ((int) $3.symbol_entry->u.eConstant.value.vInteger);
                                         $$.symbol_entry = newConstant ("a", typeInteger, new_const);
+                                      }
+                                      else if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $1.symbol_entry->u.eConstant.value.vInteger) == 0)){
+                                        $$.symbol_entry = newConstant ("a", typeInteger, 0);
+                                      }
+                                      else if(($3.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $3.symbol_entry->u.eConstant.value.vInteger) == 0)){
+                                        $$.symbol_entry = newConstant ("a", typeInteger, 0);
+                                      }
+                                      else if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $1.symbol_entry->u.eConstant.value.vInteger) == 1)){
+                                        $$.symbol_entry = $3.symbol_entry;
+                                      }
+                                      else if(($3.symbol_entry->entryType == ENTRY_CONSTANT) && (((int) $3.symbol_entry->u.eConstant.value.vInteger) == 1)){
+                                        $$.symbol_entry = $1.symbol_entry;
                                       }
                                       else{
                                         $$.symbol_entry = newTemporary(typeInteger);
