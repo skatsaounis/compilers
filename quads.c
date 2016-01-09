@@ -23,6 +23,34 @@ char *strdup(const char *str)
     return dup;
 }
 
+long dest_replace(SymbolEntry *z){
+    char tmp[1];
+
+    if (z == NULL)
+        quad_array[nextquad-1].dest = "-";
+    else
+        if (z->entryType == ENTRY_TEMPORARY)
+            if (z->u.eTemporary.type->kind == TYPE_POINTER && quad_array[nextquad].type != ARRAY_QUAD){
+                char bufferz[256];
+                sprintf(bufferz, "[%s]", (char *) z->id);
+                quad_array[nextquad-1].dest = strdup(bufferz);
+            } else
+                quad_array[nextquad-1].dest = (char *) z->id;
+        else
+            quad_array[nextquad-1].dest = (char *) z->id;
+
+    quad_array[nextquad-1].dest_req.type = symbol_type (z);
+    quad_array[nextquad-1].dest_req.pm = symbol_pm (z);
+    quad_array[nextquad-1].dest_req.kind = symbol_kind (z);
+    quad_array[nextquad-1].dest_req.offset = symbol_offset (z);
+    if (z != NULL)
+        sprintf(tmp, "%u", z->nestingLevel);
+    else
+        sprintf(tmp, "-");
+    quad_array[nextquad-1].dest_req.nesting = strdup(tmp);
+    return nextquad-1;
+}
+
 long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int offset, char * prev_param_string)
 {
     char tmp[1];

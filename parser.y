@@ -170,7 +170,8 @@ void yyerror (const char *msg);
                 Type refT;
                 label_list true_list;
                 label_list false_list;
-        label_list next_list;
+                label_list next_list;
+                int arithmetic;
                 SymbolEntry * symbol_entry;
     } a;
 
@@ -501,8 +502,12 @@ simple:
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrp", 2,"");
 							externs[18] = 1;
 						  }
-
-                          $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry, 0,""));
+                          if($3.arithmetic != 1){
+                            $$.next_list = make_list(GenQuad(ASSIGN_QUAD, $3.symbol_entry, NULL, $1.symbol_entry, 0,""));
+                          }
+                          else{
+                            $$.next_list = make_list(dest_replace($1.symbol_entry));
+                          }
                           $$.false_list = emptylist();
                           $$.true_list = emptylist();
                         }
@@ -710,6 +715,7 @@ expr:
                                         $$.symbol_entry = $1.symbol_entry;
                                       }
                                       else{
+                                        $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
                                       }
@@ -721,6 +727,7 @@ expr:
                                         $$.symbol_entry = newConstant ("a", typeInteger, new_const);
                                       }
                                       else{
+                                        $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
                                       }
@@ -744,6 +751,7 @@ expr:
                                         $$.symbol_entry = $1.symbol_entry;
                                       }
                                       else{
+                                        $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
                                       }
@@ -755,6 +763,7 @@ expr:
                                         $$.symbol_entry = newConstant ("a", typeInteger, new_const);
                                       }
                                       else{
+                                        $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
                                       }
@@ -766,6 +775,7 @@ expr:
                                         $$.symbol_entry = newConstant ("a", typeInteger, new_const);
                                       }
                                       else{
+                                        $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
                                         GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
                                       }
