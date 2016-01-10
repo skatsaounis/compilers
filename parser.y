@@ -492,7 +492,11 @@ simple:
     | atom ":=" expr    { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
                                 ERROR("not the same type of exprs");
                           if((($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($3.symbol_entry->entryType == ENTRY_TEMPORARY) && ($3.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
-                            nextquad--;
+                          {
+                            while((quad_array[nextquad-1].type == JMP_QUAD)&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){
+                              nextquad--;
+                            }
+                          }
                           if($3.pointer == 1){
                             GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrv", 2,"");

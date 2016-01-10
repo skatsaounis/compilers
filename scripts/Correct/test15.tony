@@ -1,19 +1,19 @@
 def main():
-	int a,b,c,d,e
-	a:= 4+5
-	b:= 1-10
-	c:= 6*8
-	d:= 40/3
-	e:= 40 mod 3
+	int a,b,c,d
+	bool foo,bar
 
-	puti(a)
-	puts("\n")
-	puti(b)
-	puts("\n")
-	puti(c)
-	puts("\n")
+	foo:=false
+	a:=1
+	b:=2
+	c:=3
+	d:=1+2+3-5-2
 	puti(d)
 	puts("\n")
-	puti(e)
-	puts("\n")
+
+	foo:=true or foo
+	if foo:
+		puts("stam\n")
+	else:
+		puts("ilias\n")
+	end
 end
