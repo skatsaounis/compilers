@@ -234,7 +234,7 @@ void yyerror (const char *msg);
 program:
     {
         initSymbolTable(257);
-        openScope(NULL);
+        openScope(NULL, 0);
                 p = predefines();
     }
     func_def
@@ -284,15 +284,18 @@ header:
     opt1 T_id
     {   /* fprintf(stderr,"%s \n", $2);
                 GenQuad3(UNIT_QUAD, $2, NULL, NULL);*/
-		if (main_flag == 0){
-			main_flag = 1;
-			fprintf(fp, "%s\n", $2);
-		}
-                p = newFunction($2);
-        if(flag){
-            forwardFunction(p);
-        }
-        openScope($2);
+  		p = newFunction($2);
+      if(flag){
+          forwardFunction(p);
+      }
+      if (main_flag == 0) {
+        main_flag = 1;
+        fprintf(fp, "%s\n", $2);
+        openScope($2, 1);
+      }
+      else {
+        openScope($2, 0);
+      }
     }
     '(' opt2 ')'
     {

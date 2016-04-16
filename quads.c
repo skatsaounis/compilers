@@ -493,16 +493,20 @@ void print_all_quads(FILE * fp, FILE * fp2){
         SymbolEntry * temp;
         char * stam;
         int flag = 0;
+        int new_off;
         for(; i < nextquad; i++){
             if ((strcmp(print_quad(i), "par") == 0) && (strcmp(quad_array[i].arg2, "REFERENCE") == 0) && (strcmp(quad_array[i].arg1_req.type, "temporary") == 0))
                 stam = strdup("parameter");
             else
                 stam = quad_array[i].arg1_req.type;
-
+            if(currentScope->flag == 1)
+                new_off = 1;
+            else
+                new_off = currentScope->nestingLevel;
             fprintf(fp2, "%d: %s, %s, %s, %s\n", i, print_quad(i), quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest);
             fprintf(fp, "%d\v%s\v%s\v%s\v%s\v%u\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\v%s\n", i, print_quad(i),
                 quad_array[i].arg1, quad_array[i].arg2, quad_array[i].dest,
-                currentScope->nestingLevel,
+                new_off,
                 quad_array[i].arg1_req.pm, stam, quad_array[i].arg1_req.nesting,
         quad_array[i].arg1_req.kind, quad_array[i].arg1_req.offset, quad_array[i].arg1_req.prev_param_string,
                 quad_array[i].arg2_req.pm, quad_array[i].arg2_req.type, quad_array[i].arg2_req.nesting,

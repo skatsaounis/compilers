@@ -476,6 +476,7 @@ void updateAL(FILE * fp, char * a, char * nesting){
     nx = atoi(a);
     np = atoi(nesting);
     times = np - nx - 1;
+    printf("nx:%d np:%d\n", nx, np);
 
     if (np<nx)
         fprintf(fp, "\tpush bp\n");

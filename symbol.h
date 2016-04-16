@@ -171,6 +171,7 @@ struct Scope_tag {
     Scope        * parent;                   /* Περιβάλλουσα εμβέλεια  */
     SymbolEntry  * entries;                  /* Σύμβολα της εμβέλειας  */
     char * name;
+    int flag;
 };
 
 
@@ -204,7 +205,7 @@ extern const Type typeReal;
 void          initSymbolTable    (unsigned int size);
 void          destroySymbolTable (void);
 
-void          openScope          (char * name);
+void          openScope          (char * name, int flag);
 void          closeScope         (void);
 
 SymbolEntry * newVariable        (const char * name, Type type);

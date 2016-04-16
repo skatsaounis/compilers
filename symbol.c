@@ -172,13 +172,14 @@ void destroySymbolTable ()
     delete(hashTable);
 }
 
-void openScope (char * name)
+void openScope (char * name, int flag)
 {
     Scope * newScope = (Scope *) new(sizeof(Scope));
 
     newScope->negOffset = START_NEGATIVE_OFFSET;
     newScope->parent    = currentScope;
     newScope->entries   = NULL;
+    newScope->flag      = flag;
 
     if (currentScope == NULL)
         newScope->nestingLevel = 1;
