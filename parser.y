@@ -318,7 +318,7 @@ opt2_list:
 formal:
     opt3 type T_id
     {   /* fprintf(stderr,"%s \n", $3); */
-	if ($2.refT->kind == TYPE_IARRAY || $2.refT->kind == TYPE_LIST){
+	if ($2.refT->kind == TYPE_IARRAY){
 		newParameter($3, $2.refT, PASS_BY_REFERENCE, p);
 		type = $2.refT;
 		pMode = PASS_BY_REFERENCE;
@@ -948,7 +948,7 @@ expr:
                                         temp_param_node->prev = curr_param_node;
                                       }
                                       curr_param_node = temp_param_node;
-									  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+									  GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                                       if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                             GenQuad2(CALL_QUAD, NULL, NULL, "head", 2, "");
@@ -973,7 +973,7 @@ expr:
                                         temp_param_node->prev = curr_param_node;
                                       }
                                       curr_param_node = temp_param_node;
-                                      GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+                                      GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                                       if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                             GenQuad2(CALL_QUAD, NULL, NULL, "tail", 2, "");
