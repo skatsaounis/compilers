@@ -1,6 +1,6 @@
 def test ():
 
-    def make_list (int size):
+    def list[int] make_list (int size):
         list[int] result
         int i
         result := nil

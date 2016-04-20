@@ -368,15 +368,27 @@ long GenQuad4(QuadType q, SymbolEntry * x, char * y, char * z)
                 quad_array[nextquad].arg1 = strdup(bufferx);
         }
     else
-    	if (x->entryType == ENTRY_TEMPORARY)
-			if (x->u.eTemporary.type->kind == TYPE_POINTER){
-				char bufferx[256];
-				sprintf(bufferx, "[%s]", (char *) x->id);
-				quad_array[nextquad].arg1 = strdup(bufferx);
-			} else
-				quad_array[nextquad].arg1 = (char *) x->id;
-		else
-			quad_array[nextquad].arg1 = (char *) x->id;
+        if (x->entryType == ENTRY_TEMPORARY)
+            if (x->u.eTemporary.type->kind == TYPE_POINTER){
+                char bufferx[256];
+                sprintf(bufferx, "[%s]", (char *) x->id);
+                quad_array[nextquad].arg1 = strdup(bufferx);
+            }
+            else if ((lookup_type_find_b(x)->kind == TYPE_LIST) && (lookup_type_find_b(x)->refType == typeVoid))
+                quad_array[nextquad].arg1 = strdup("nil");
+            else
+                quad_array[nextquad].arg1 = (char *) x->id;
+        else
+            quad_array[nextquad].arg1 = (char *) x->id;
+
+
+
+
+
+
+
+
+
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);

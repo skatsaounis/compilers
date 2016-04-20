@@ -1,22 +1,39 @@
 def main ():
+	decl writeList (char[] msg; list[int] l)
 	def list[int] qsort (list[int] l):
+		list[int] tempex
 		def list[int] qsort_aux (list[int] l, rest):
 			int pivot, x
 			list[int] lt, ge
-
+			list[int] temp1, temp2, temp3
+			writeList("rest ", rest)
 			if nil?(l): return rest end
 			pivot := head(l)
 			l := tail(l)
+			writeList("rest ", rest)
+			writeList("l ", l)
 
 			for lt := nil, ge := nil; nil?(l); l := tail(l):
+				writeList("for_loop:l ",l)
 				x := head(l)
 				if x < pivot: lt := x # lt else: ge := x # ge end
 			end
 
-			return qsort_aux(lt, pivot # qsort_aux(ge, rest))
-		end
+			writeList("ge ", ge)
+			writeList("rest ", rest)
 
-		return qsort_aux(l, nil)
+			temp1:= qsort_aux(ge, rest)
+
+			writeList("temp1 ", temp1)
+
+			temp2:= pivot # temp1
+			temp3:= qsort_aux(lt, temp2)
+
+			return temp3
+		end
+		writeList("qsort:l ",l)
+		tempex := qsort_aux(l, nil)
+		return tempex
 	end
 
 	def writeList (char[] msg; list[int] l):
