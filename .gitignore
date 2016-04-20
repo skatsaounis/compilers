@@ -6,3 +6,6 @@ pure_quads.txt
 code.txt
 scripts/A.COM
 scripts/A.OBJ
+scripts/asm/*
+tonygc/getfile.py
+tonygc/pap_quads.txt

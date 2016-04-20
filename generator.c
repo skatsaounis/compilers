@@ -40,7 +40,9 @@ void generator(int * externs, int * offsets){
     fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
 
     for(i = 0; i < unit_counter; i++){
-        fprintf(fp, "\n\tmov ax, OFFSET _%s_call_table\n\tcall near ptr _register_call_table", units[i]);
+        if(unit_flags[i] == 1){
+            fprintf(fp, "\n\tmov ax, OFFSET _%s_call_table\n\tcall near ptr _register_call_table", units[i]);
+        }
     }
 
     printexterns2(fp, externs);
@@ -751,7 +753,8 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
     char *token, * temp_next_words;
     int i;
 
-    fprintf(fp, "_%s_call_table:\n", fun_name);
+    if(call_counter > 1)
+        fprintf(fp, "_%s_call_table:\n", fun_name);
     for(i = 1; i < call_counter; i++){
         temp_next_words = strdup(next_words);
         fprintf(fp, "@call_%s_%d\tdw @%s_call_%d\n", fun_name, i, fun_name, i);

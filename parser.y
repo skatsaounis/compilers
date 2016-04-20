@@ -45,6 +45,7 @@ struct prev_params{
 int new_const;
 int unit_counter, offset;
 char units[256][256];
+char unit_flags[256];
 char buf[256];
 
 FILE * fp, * fp2;
@@ -248,6 +249,7 @@ func_def:
     { flag = 0; }
     "def" header  ':' func_def_list
     {
+            currentScope->unit_counter = unit_counter;
             sprintf(units[unit_counter++], "%s", currentScope->name);
             GenQuad3(UNIT_QUAD, currentScope->name, NULL, NULL);
             curr_param_node = NULL;
@@ -515,7 +517,9 @@ simple:
                           $$.false_list = emptylist();
                           $$.true_list = emptylist();
                         }
-    | call              { $$.next_list = emptylist(); }
+    | call              { $$.next_list = emptylist();
+                          currentScope->unit_flag = 1;
+                        }
 ;
 
 simple_list: /* may need fixing with next_list */

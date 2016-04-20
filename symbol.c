@@ -187,6 +187,8 @@ void openScope (char * name)
 
     if( name != NULL)
         newScope->name = name;
+    newScope->unit_counter = 0;
+    newScope->unit_flag = 0;
     currentScope = newScope;
 }
 
@@ -194,6 +196,11 @@ void closeScope ()
 {
     SymbolEntry * e = currentScope->entries;
     Scope       * t = currentScope;
+
+    if(currentScope->unit_flag == 1)
+        unit_flags[currentScope->unit_counter] = 1;
+    else
+        unit_flags[currentScope->unit_counter] = 0;
 
     while (e != NULL) {
         SymbolEntry * next = e->nextInScope;

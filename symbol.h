@@ -171,6 +171,8 @@ struct Scope_tag {
     Scope        * parent;                   /* Περιβάλλουσα εμβέλεια  */
     SymbolEntry  * entries;                  /* Σύμβολα της εμβέλειας  */
     char * name;
+    int unit_flag;
+    int unit_counter;
 };
 
 
