@@ -877,7 +877,7 @@ expr:
 											externs[15] = 1;
 									  } else {
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
-											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+											GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
                                             if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");
