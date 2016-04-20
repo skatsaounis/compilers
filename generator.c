@@ -109,7 +109,7 @@ Interpreted_quad consume_quad(FILE * fp){
 
 void generate(Interpreted_quad quad, FILE * fp, int offset){
     char * temp_label, * temp_name, * temp_endof;
-	int return_param;
+	int return_param, is_lib_fun;
     if (strcmp(quad.quad, ":=") == 0){
         if(strcmp(quad.arg1_kind, "integer") == 0 || strcmp(quad.arg1_kind, "iarray") == 0 || strcmp(quad.arg1_kind, "list") == 0 || strcmp(quad.dest_kind, "integer") == 0 || strcmp(quad.dest_kind, "iarray") == 0 || strcmp(quad.dest_kind, "list") == 0){
             load("ax", quad.arg1, fp, quad.arg1_pm, quad.arg1_type, quad.arg1_nesting, quad.nesting, quad.arg1_kind, quad.arg1_offset);
@@ -189,7 +189,8 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
         temp_name = name(quad.dest);
 		if (strcmp(quad.dest_kind, "procedure") == 0)
         	fprintf(fp, "\tsub sp,2\n");
-        updateAL(fp, quad.dest_nesting, quad.nesting);
+        is_lib_fun = is_lib_function(temp_name);
+        updateAL(fp, quad.dest_nesting, quad.nesting, is_lib_fun);
         fprintf(fp, "\tcall near ptr %s", temp_name);
 		if (strcmp(quad.dest_kind, "procedure") == 0)
 			return_param = 0;
@@ -469,8 +470,7 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
         }
 }
 
-void updateAL(FILE * fp, char * a, char * nesting){
-    /*fprintf(fp, "\tupdateAL()\n");*/
+void updateAL(FILE * fp, char * a, char * nesting, int is_lib_function){
     int np, nx, times, i;
 
     nx = atoi(a);
@@ -478,6 +478,8 @@ void updateAL(FILE * fp, char * a, char * nesting){
     times = np - nx - 1;
 
     if (np<nx)
+        fprintf(fp, "\tpush bp\n");
+    else if (is_lib_function == 1)
         fprintf(fp, "\tpush bp\n");
     else if (np==nx)
         fprintf(fp, "\tpush word ptr [bp+4]\n");
@@ -793,4 +795,51 @@ void comment(FILE *fp, FILE *fp2){
     getline(&line, &linesize, fp);
     fprintf(fp2, "; %s", line);
     free(line);
+}
+
+int is_lib_function(char * function_name){
+    if (strcmp(function_name, "_puti") == 0)
+        return 1;
+    else if (strcmp(function_name, "_putb") == 0 )
+        return 1;
+    else if (strcmp(function_name, "_putc") == 0)
+        return 1;
+    else if (strcmp(function_name, "_puts") == 0)
+        return 1;
+    else if (strcmp(function_name, "_geti") == 0)
+        return 1;
+    else if (strcmp(function_name, "_getb") == 0)
+        return 1;
+    else if (strcmp(function_name, "_getc") == 0)
+        return 1;
+    else if (strcmp(function_name, "_gets") == 0)
+        return 1;
+    else if (strcmp(function_name, "_abs") == 0)
+        return 1;
+    else if (strcmp(function_name, "_org") == 0)
+        return 1;
+    else if (strcmp(function_name, "_chr") == 0)
+        return 1;
+    else if (strcmp(function_name, "_strlen") == 0)
+        return 1;
+    else if (strcmp(function_name, "_strcmp") == 0)
+        return 1;
+    else if (strcmp(function_name, "_strcpy") == 0)
+        return 1;
+    else if (strcmp(function_name, "_strcat") == 0)
+        return 1;
+    else if (strcmp(function_name, "_newarrv") == 0)
+        return 1;
+    else if (strcmp(function_name, "_newarrp") == 0)
+        return 1;
+    else if (strcmp(function_name, "_head") == 0)
+        return 1;
+    else if (strcmp(function_name, "_tail") == 0)
+        return 1;
+    else if (strcmp(function_name, "_consv") == 0)
+        return 1;
+    else if (strcmp(function_name, "_consp") == 0)
+        return 1;
+    else
+        return 0;
 }

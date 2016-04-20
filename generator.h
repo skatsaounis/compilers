@@ -29,7 +29,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset);
 void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offet);
 void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset);
 void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset);
-void updateAL(FILE * fp, char * a, char * nesting);
+void updateAL(FILE * fp, char * a, char * nesting, int is_lib_function);
 void getAR(char * a, FILE * fp, char * nesting);
 char * endof(char * a);
 char * label(char * a);
@@ -40,4 +40,5 @@ void printexterns2(FILE * fp, int * externs);
 void string_to_db(FILE * fp, char * node_str);
 void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words, char ** prev_param_offset_table);
 void comment(FILE *fp, FILE *fp2);
+int is_lib_function(char * function_name);
 #endif
