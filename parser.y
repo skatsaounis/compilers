@@ -500,11 +500,11 @@ simple:
                             }
                           }
                           if($3.pointer == 1){
-                            GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+                            GenQuad4(PAR_QUAD, $3.symbol_entry, "RET", NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrv", 2,"");
 							externs[19] = 1;
                           } else if($3.pointer == 2){
-							GenQuad4(PAR_QUAD, $1.symbol_entry, "RET", NULL);
+							GenQuad4(PAR_QUAD, $3.symbol_entry, "RET", NULL);
                             GenQuad2(CALL_QUAD, NULL, NULL, "newarrp", 2,"");
 							externs[18] = 1;
 						  }

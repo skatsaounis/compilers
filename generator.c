@@ -205,7 +205,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
 		prev_param_offset_table[call_counter] = quad.dest_prev_param_string;
         fprintf(fp, "\n@%s_call_%d:", current_unit, call_counter++);
 		inception_function_table[call_counter] = inception_function_table[call_counter-1];
-        fprintf(fp, "\n\tadd sp,%d+4\n", atoi(quad.dest_offset));
+        fprintf(fp, "\n\tadd sp,%d\n", (atoi(quad.dest_offset)+4));
     }
     else if (strcmp(quad.quad, "ret") == 0){
         temp_endof = endof(unit_name);
