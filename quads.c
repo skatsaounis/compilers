@@ -137,7 +137,10 @@ long GenQuad(QuadType q, SymbolEntry * x, SymbolEntry * y, SymbolEntry * z, int 
 				char buffery[256];
 				sprintf(buffery, "[%s]", (char *) y->id);
 				quad_array[nextquad].arg2 = strdup(buffery);
-			} else
+			}
+            else if ((lookup_type_find_b(y)->kind == TYPE_LIST) && (lookup_type_find_b(y)->refType == typeVoid))
+                quad_array[nextquad].arg2 = strdup("nil");
+            else
 				quad_array[nextquad].arg2 = (char *) y->id;
 		else
 			quad_array[nextquad].arg2 = (char *) y->id;
@@ -220,14 +223,17 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
         }
     else
     	if (x->entryType == ENTRY_TEMPORARY)
-			if (x->u.eTemporary.type->kind == TYPE_POINTER){
-				char bufferx[256];
-				sprintf(bufferx, "[%s]", (char *) x->id);
-				quad_array[nextquad].arg1 = strdup(bufferx);
-			} else
-				quad_array[nextquad].arg1 = (char *) x->id;
-		else
-			quad_array[nextquad].arg1 = (char *) x->id;
+            if (x->u.eTemporary.type->kind == TYPE_POINTER){
+                char bufferx[256];
+                sprintf(bufferx, "[%s]", (char *) x->id);
+                quad_array[nextquad].arg1 = strdup(bufferx);
+            }
+            else if ((lookup_type_find_b(x)->kind == TYPE_LIST) && (lookup_type_find_b(x)->refType == typeVoid))
+                quad_array[nextquad].arg1 = strdup("nil");
+            else
+                quad_array[nextquad].arg1 = (char *) x->id;
+        else
+            quad_array[nextquad].arg1 = (char *) x->id;
 
     quad_array[nextquad].arg1_req.type = symbol_type (x);
     quad_array[nextquad].arg1_req.pm = symbol_pm (x);
@@ -266,7 +272,10 @@ long GenQuad2(QuadType q, SymbolEntry * x, SymbolEntry * y, char * z, int offset
 				char buffery[256];
 				sprintf(buffery, "[%s]", (char *) y->id);
 				quad_array[nextquad].arg2 = strdup(buffery);
-			} else
+			}
+            else if ((lookup_type_find_b(y)->kind == TYPE_LIST) && (lookup_type_find_b(y)->refType == typeVoid))
+                quad_array[nextquad].arg2 = strdup("nil");
+            else
 				quad_array[nextquad].arg2 = (char *) y->id;
 		else
 			quad_array[nextquad].arg2 = (char *) y->id;
