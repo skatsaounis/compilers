@@ -129,6 +129,19 @@ Type lookup_type_find(SymbolEntry * p){
     return value;
 }
 
+int cons_check(Type a, Type b){
+  if (a->kind == TYPE_LIST){
+    if (b->refType->kind != TYPE_LIST) {
+      return 0;
+    }
+    cons_check(a->refType, b->refType);
+  }
+  else if (b->refType->kind != a->kind) {
+    return 0;
+  }
+  return 1;
+}
+
 Type lookup_type_in_arrays(Type p){
     while (p->kind == TYPE_IARRAY || p->kind == TYPE_POINTER)
         p = p->refType;
@@ -858,7 +871,7 @@ expr:
                                       $$.true_list = merge($1.true_list, $4.true_list);
                                       $$.false_list = $4.false_list;
                                     }
-    | expr '#' expr                 { if((lookup_type_find($3.symbol_entry)->kind != TYPE_LIST) || (lookup_type_find($1.symbol_entry) != lookup_type_find($3.symbol_entry)->refType))
+    | expr '#' expr                 { if ((lookup_type_find($3.symbol_entry)->kind != TYPE_LIST) || (cons_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0))
                                             ERROR("exprs must be of type t and list[t] respectively") ;
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
                                       temp_param_node = (prev_params *) new(sizeof(prev_params));
@@ -871,26 +884,27 @@ expr:
                                       }
                                       curr_param_node = temp_param_node;
                                       if((lookup_type_find($1.symbol_entry)->kind == TYPE_LIST || lookup_type_find($1.symbol_entry)->kind == TYPE_IARRAY)){
-											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
-											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
-									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                        currentScope->unit_flag = 1;
+                    											  GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
+                    											  GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
+                    									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                            currentScope->unit_flag = 1;
                                             if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consp", 4, "");
                                             else
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consp", 4, curr_param_node->prev->prev_param_string);
-											externs[15] = 1;
-									  } else {
-											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
-											GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
-									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                        currentScope->unit_flag = 1;
-                                            if (curr_param_node == NULL || curr_param_node->prev == NULL)
-                                                GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");
-                                            else
-                                                GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, curr_param_node->prev->prev_param_string);
-											externs[16] = 1;
-									  }
+                  											externs[15] = 1;
+                  									  }
+                                      else {
+                  											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
+                  											GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
+                  									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                                          currentScope->unit_flag = 1;
+                                                              if (curr_param_node == NULL || curr_param_node->prev == NULL)
+                                                                  GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");
+                                                              else
+                                                                  GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, curr_param_node->prev->prev_param_string);
+                  											externs[16] = 1;
+                  									  }
                                       temp_param_node = curr_param_node;
                                       curr_param_node = curr_param_node->prev;
                                       delete(temp_param_node);
