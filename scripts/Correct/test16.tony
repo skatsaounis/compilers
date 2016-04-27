@@ -1,0 +1,38 @@
+def main():
+	def writeList (char[] msg; list[int] l):
+		bool more
+		puts(msg)
+
+		for more := false; not nil?(l); l := tail(l), more := true:
+			if more: puts(", ") end
+			puti(head(l))
+		end
+
+		puts("\n")
+	end
+
+	list[int] l,r
+	list[list[int]] li
+	int seed, i
+
+	seed := 65
+	for i := 0, l := nil; i < 16; i := i+1:
+		seed := (seed * 137 + 220 + i) mod 101
+		l := seed # l
+	end
+	writeList("List l: ", l)
+
+	seed := 42
+	for i := 0, r := nil; i < 16; i := i+1:
+		seed := (seed * 137 + 220 + i) mod 101
+		r := seed # r
+	end
+	writeList("List r: ", r)
+
+	li := nil
+	li := l # li
+	li := r # li
+	writeList("List r: ", head(li))
+	li := tail(li)
+	writeList("List l: ", head(li))
+end
