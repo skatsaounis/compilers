@@ -289,7 +289,7 @@ void getAR(char * a, FILE * fp, char * nesting){
 }
 
 void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
-
+    int d_offset = atoi(data_offset);
 	if(isdigit(b[0]))
         fprintf(fp, "\tmov %s,%s\n", a, b);
     else if(b[0]=='-' && isdigit(b[1]))
@@ -347,29 +347,50 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov %s, word ptr [bp+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tmov %s, word ptr [bp%d]\n", a, d_offset);
             else
-                fprintf(fp, "\tmov %s, byte ptr [bp + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov %s, byte ptr [bp+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tmov %s, byte ptr [bp%d]\n", a, d_offset);
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
-            fprintf(fp, "\tmov si, word ptr [bp + (%d)]\n", atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov si, word ptr [bp+%d]\n", d_offset);
+            else
+                fprintf(fp, "\tmov si, word ptr [bp%d]\n", d_offset);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [si]\n", a);
             else
                 fprintf(fp, "\tmov %s, byte ptr [si]\n", a);
         }
         else
-            fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov %s, word ptr [bp+%d]\n", a, d_offset);
+            else
+                fprintf(fp, "\tmov %s, word ptr [bp%d]\n", a, d_offset);
     } else
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tmov %s, word ptr [si + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov %s, word ptr [si+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tmov %s, word ptr [si%d]\n", a, d_offset);
             else
-                fprintf(fp, "\tmov %s, byte ptr [si + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov %s, byte ptr [si+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tmov %s, byte ptr [si%d]\n", a, d_offset);
         } else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             getAR(data_nesting, fp, nesting);
-            fprintf(fp, "\tmov si, word ptr [si + (%d)]\n", atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov si, word ptr [si+%d]\n", d_offset);
+            else
+                fprintf(fp, "\tmov si, word ptr [si%d]\n", d_offset);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov %s, word ptr [si]\n", a);
             else
@@ -378,6 +399,7 @@ void load(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char 
 }
 
 void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
+    int d_offset = atoi(data_offset);
     if (b[0] == '[') {
         memmove(b, b+1, strlen(b));
         b[strlen(b)-1] = 0;
@@ -390,12 +412,21 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov word ptr [bp+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov word ptr [bp%d], %s\n", d_offset, a);
             else
-                fprintf(fp, "\tmov byte ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov byte ptr [bp+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov byte ptr [bp%d], %s\n", d_offset, a);
         }
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
-            fprintf(fp, "\tmov si, word ptr [bp + (%d)]\n", atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov si, word ptr [bp+%d]\n", d_offset);
+            else
+                fprintf(fp, "\tmov si, word ptr [bp%d]\n", d_offset);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [si], %s\n", a);
             else
@@ -403,20 +434,35 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
         }
         else
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tmov word ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov word ptr [bp+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov word ptr [bp%d], %s\n", d_offset, a);
             else
-                fprintf(fp, "\tmov byte ptr [bp + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov byte ptr [bp+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov byte ptr [bp%d], %s\n", d_offset, a);
     } else{
         if((strcmp(data_type, "variable") == 0) || (strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) ||
             (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tmov word ptr [si + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov word ptr [si+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov word ptr [si%d], %s\n", d_offset, a);
             else
-                fprintf(fp, "\tmov byte ptr [si + (%d)], %s\n", atoi(data_offset), a);
+                if(d_offset > 0)
+                    fprintf(fp, "\tmov word ptr [si+%d], %s\n", d_offset, a);
+                else
+                    fprintf(fp, "\tmov word ptr [si%d], %s\n", d_offset, a);
         } else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             getAR(data_nesting, fp, nesting);
-            fprintf(fp, "\tmov si, word ptr [si + (%d)]\n", atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov si, word ptr [si+%d]\n", d_offset);
+            else
+                fprintf(fp, "\tmov si, word ptr [si%d]\n", d_offset);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
                 fprintf(fp, "\tmov word ptr [si], %s\n", a);
             else
@@ -426,6 +472,7 @@ void store(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char
 }
 
 void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, char * data_nesting, char * nesting, char * data_kind, char * data_offset){
+    int d_offset = atoi(data_offset);
     if (b[0] == '\"'){
         unique++;
         memmove(b, b+1, strlen(b));
@@ -449,26 +496,47 @@ void loadAddr(char * a, char * b, FILE * fp, char * data_pm, char * data_type, c
     else if(atoi(data_nesting)==atoi(nesting)) {
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0))
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tlea %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tlea %s, word ptr [bp+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tlea %s, word ptr [bp%d]\n", a, d_offset);
             else
-                fprintf(fp, "\tlea %s, byte ptr [bp + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tlea %s, byte ptr [bp+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tlea %s, byte ptr [bp%d]\n", a, d_offset);
         else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
-            fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov %s, word ptr [bp+%d]\n", a, d_offset);
+            else
+                fprintf(fp, "\tmov %s, word ptr [bp%d]\n", a, d_offset);
         }
         else{
-            fprintf(fp, "\tmov %s, word ptr [bp + (%d)]\n", a, atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov %s, word ptr [bp+%d]\n", a, d_offset);
+            else
+                fprintf(fp, "\tmov %s, word ptr [bp%d]\n", a, d_offset);
         }
     }
     else
         if((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "value") == 0) || (strcmp(data_type, "temporary") == 0)){
             getAR(data_nesting, fp, nesting);
             if(strcmp(data_kind, "integer") == 0 || strcmp(data_kind, "iarray") == 0 || strcmp(data_kind, "list") == 0)
-                fprintf(fp, "\tlea %s, word ptr [si + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tlea %s, word ptr [si+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tlea %s, word ptr [si%d]\n", a, d_offset);
             else
-                fprintf(fp, "\tlea %s, byte ptr [si + (%d)]\n", a, atoi(data_offset));
+                if(d_offset > 0)
+                    fprintf(fp, "\tlea %s, byte ptr [si+%d]\n", a, d_offset);
+                else
+                    fprintf(fp, "\tlea %s, byte ptr [si%d]\n", a, d_offset);
         } else if ((strcmp(data_type, "parameter") == 0 && strcmp(data_pm, "reference") == 0) ) {
             getAR(data_nesting, fp, nesting);
-            fprintf(fp, "\tmov %s, word ptr [si + (%d)]\n", a, atoi(data_offset));
+            if(d_offset > 0)
+                fprintf(fp, "\tmov %s, word ptr [si+%d]\n", a, d_offset);
+            else
+                fprintf(fp, "\tmov %s, word ptr [si%d]\n", a, d_offset);
         }
 }
 
@@ -762,7 +830,7 @@ void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var
             fprintf(fp, "\tdw 0\n");
         else
             fprintf(fp, "\tdw @call_%s_%d\n", fun_name, i+1);
-        fprintf(fp, "\tdw 4 + %d + %d + %d + 4\n", param_byte_table[i], inception_function_table[i], temp_var_offset);
+        fprintf(fp, "\tdw %d + %d + %d + 4\n", 4+param_byte_table[i], inception_function_table[i], temp_var_offset);
         fprintf(fp, "IF LIVENESS eq 0\n");
 
         token = strtok(temp_next_words, "\f");
