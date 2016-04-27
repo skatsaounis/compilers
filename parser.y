@@ -134,12 +134,27 @@ int cons_check(Type a, Type b){
     if (b->refType->kind != TYPE_LIST) {
       return 0;
     }
-    cons_check(a->refType, b->refType);
+    return cons_check(a->refType, b->refType);
   }
   else if (b->refType->kind != a->kind) {
     return 0;
   }
   return 1;
+}
+
+int assign_check(Type a, Type b){
+  if(a->kind == b->kind){
+    if(a->kind != TYPE_LIST){
+      return 1;
+    }
+    else{
+      return assign_check(a->refType, b->refType);
+    }
+  }
+  if(b->kind == TYPE_VOID){
+    return 1;
+  }
+  return 0;
 }
 
 Type lookup_type_in_arrays(Type p){
@@ -504,8 +519,15 @@ else_list:
 
 simple:
     "skip"              { $$.next_list = emptylist(); }
-    | atom ":=" expr    { if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
+    | atom ":=" expr    {
+                          if(!equalType(lookup_type_in_arrays(lookup_type_find($1.symbol_entry)), lookup_type_in_arrays(lookup_type_find($3.symbol_entry))))
                                 ERROR("not the same type of exprs");
+                          if(lookup_type_find($1.symbol_entry)->kind == TYPE_LIST){
+                            if(assign_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0){
+                              ERROR("not the same type of exprs");
+                            }
+                          }
+
                           if((($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($3.symbol_entry->entryType == ENTRY_TEMPORARY) && ($3.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
                           {
                             while((quad_array[nextquad-1].type == JMP_QUAD)&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){

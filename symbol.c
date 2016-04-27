@@ -714,7 +714,7 @@ void printType (Type type)
             printf("void");
             break;
         case TYPE_INTEGER:
-            printf("integer");
+            printf("integer\n");
             break;
         case TYPE_BOOLEAN:
             printf("boolean");
@@ -731,6 +731,10 @@ void printType (Type type)
             break;
         case TYPE_IARRAY:
             printf("array of ");
+            printType(type->refType);
+            break;
+        case TYPE_LIST:
+            printf("list of ");
             printType(type->refType);
             break;
         case TYPE_POINTER:
