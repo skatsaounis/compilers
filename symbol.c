@@ -187,7 +187,7 @@ void openScope (char * name)
 
     if( name != NULL)
         newScope->name = name;
-    newScope->unit_counter = 0;
+    newScope->unit_counter = -1;
     newScope->unit_flag = 0;
     currentScope = newScope;
 }

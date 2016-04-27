@@ -517,9 +517,7 @@ simple:
                           $$.false_list = emptylist();
                           $$.true_list = emptylist();
                         }
-    | call              { $$.next_list = emptylist();
-                          currentScope->unit_flag = 1;
-                        }
+    | call              { $$.next_list = emptylist(); }
 ;
 
 simple_list: /* may need fixing with next_list */
@@ -600,6 +598,7 @@ opt5:
                           }
                           else
                                 $$.symbol_entry = currnode->b;
+                          currentScope->unit_flag = 1;
                           if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                 GenQuad(CALL_QUAD, NULL, NULL, currnode->b, 0, "");
                           else
@@ -642,6 +641,7 @@ opt6:
                           }
                           else
                                 $$.symbol_entry = currnode->b;
+                          currentScope->unit_flag = 1;
                           if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                 GenQuad(CALL_QUAD, NULL, NULL, currnode->b, (currnode->b->u.eFunction.firstArgument)->u.eParameter.offset - 6, "");
                           else
@@ -874,6 +874,7 @@ expr:
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "REFERENCE", NULL);
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "REFERENCE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                        currentScope->unit_flag = 1;
                                             if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consp", 4, "");
                                             else
@@ -883,6 +884,7 @@ expr:
 											GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
 											GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  		GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                        currentScope->unit_flag = 1;
                                             if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                                 GenQuad2(CALL_QUAD, NULL, NULL, "consv", 4, "");
                                             else
@@ -954,6 +956,7 @@ expr:
                                       curr_param_node = temp_param_node;
 									  GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                    currentScope->unit_flag = 1;
                                       if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                             GenQuad2(CALL_QUAD, NULL, NULL, "head", 2, "");
                                       else
@@ -979,6 +982,7 @@ expr:
                                       curr_param_node = temp_param_node;
                                       GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
+                    currentScope->unit_flag = 1;
                                       if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                             GenQuad2(CALL_QUAD, NULL, NULL, "tail", 2, "");
                                       else
