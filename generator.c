@@ -47,7 +47,7 @@ void generator(int * externs, int * offsets){
 
     printexterns2(fp, externs);
 
-    fprintf(fp, "\n\tcall near ptr _%s\n_ret_of_main:\n\tmov ax,4C00h\n\tint 21h\nmain endp\n", program);
+    fprintf(fp, "\n\tcall near ptr _%s\n_ret_of_main:\n\tmov ax,4C00h\n\tint 21h\nmain endp\n\n", program);
 
     for(i = 0; i < nextquad; i++){
         comment(fp3, fp);
@@ -183,7 +183,7 @@ void generate(Interpreted_quad quad, FILE * fp, int offset){
     else if (strcmp(quad.quad, "endu") == 0){
         unit_name = name(quad.arg1);
         temp_endof = endof(unit_name);
-        fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n", temp_endof, unit_name);
+        fprintf(fp, "%s: mov sp,bp\n\tpop bp\n\tret\n%s endp\n\n", temp_endof, unit_name);
         print_call_table(fp, current_unit, call_counter, offset, param_byte_table, inception_function_table, current_next_words, prev_param_offset_table);
         counterg++;
     }
