@@ -49,7 +49,7 @@ def test ():
     list[int] l, r
     int i
 
-    for i := 1; i < 1000; i := i+1:
+    for i := 1; i < 10; i := i+1:
         l := make_list(i)
         if i < 10:
             print_list(l)

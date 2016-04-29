@@ -1,10 +1,10 @@
 #!/bin/bash
 
-MYLANG=alan
+MYLANG=tony
 
 start="$1"
 
-for f in Correct/[0-9]*.$MYLANG Wrong/[0-9]*.$MYLANG ; do
+for f in Correct/test[0-9]*.$MYLANG Wrong/test[0-9]*.$MYLANG ; do
   t=${f/%.$MYLANG}
   if [[ "$t" < "$start" ]]; then
     continue
