@@ -1,0 +1,38 @@
+def main():
+	def writeArray (char[] msg; int n; int[] x):
+		int i
+		puts(msg)
+		for i := 0; i < n; i := i+1:
+			if i > 0: puts(", ") end
+			puti(x[i])
+		end
+		puts("\n")
+	end
+
+	int seed, i
+	int[] x, y
+	list[int[]] z
+	x := new int[16]
+	y := new int[16]
+
+	seed := 65
+	for i := 0; i < 16; i := i+1:
+		seed := (seed * 137 + 220 + i) mod 101
+		x[i] := seed
+	end
+
+	seed := 56
+	for i := 0; i < 16; i := i+1:
+		seed := (seed * 137 + 220 + i) mod 101
+		y[i] := seed
+	end
+
+	writeArray("X array: ", 16, x)
+	writeArray("Y array: ", 16, y)
+
+	z := nil
+	z := x # z
+	writeArray("X array: ", 16, head(z))
+	z := y # z
+	writeArray("Y array: ", 16, head(z))
+end
