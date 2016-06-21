@@ -281,9 +281,9 @@ void getAR(char * a, FILE * fp, char * nesting){
     na = atoi(a);
     ncur = atoi(nesting);
     times = ncur - na - 1;
-    fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+    fprintf(fp, "\tmov si, word ptr [bp]\n");
     for (i=0; i < times ; i++)
-        fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+        fprintf(fp, "\tmov si, word ptr [si]\n");
     /*printf("%d\n", times);
     fprintf(fp, "\tgetAR(%s)\n", a);*/
 }
@@ -596,12 +596,12 @@ void updateAL(FILE * fp, char * a, char * nesting, int is_lib_function){
     else if (is_lib_function == 1)
         fprintf(fp, "\tpush bp\n");
     else if (np==nx)
-        fprintf(fp, "\tpush word ptr [bp+4]\n");
+        fprintf(fp, "\tpush word ptr [bp]\n");
     else {
-        fprintf(fp, "\tmov si, word ptr [bp+4]\n");
+        fprintf(fp, "\tmov si, word ptr [bp]\n");
         for (i=0; i < times ; i++)
-            fprintf(fp, "\tmov si, word ptr [si+4]\n");
-        fprintf(fp, "\tpush word ptr [si+4]\n");
+            fprintf(fp, "\tmov si, word ptr [si]\n");
+        fprintf(fp, "\tpush word ptr [si]\n");
     }
 }
 
