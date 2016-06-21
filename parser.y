@@ -909,9 +909,12 @@ expr:
                                             } else
                                                 ERROR("$3.symbol entry must be of type list or array of lists");
                                       }
-                                      if(cons_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0)
-                                            ERROR("exprs must be of type t and list[t] respectively");
-                                      $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
+                                       if (lookup_type_find($3.symbol_entry)->refType != typeVoid){
+                                            if(cons_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0)
+                                                ERROR("exprs must be of type t and list[t] respectively");
+                                            $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));                
+                                       } else                                    
+                                            $$.symbol_entry = newTemporary(typeList(lookup_type_find($1.symbol_entry)));
                                       temp_param_node = (prev_params *) new(sizeof(prev_params));
                                       if (curr_param_node == NULL){
                                         temp_param_node->prev_param_string = strdup("");
