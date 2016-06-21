@@ -144,6 +144,8 @@ int cons_check(Type a, Type b){
     } else {
       return 0; 
     }
+  } else if (a->kind == TYPE_POINTER) {
+    return cons_check(a->refType->refType,b);
   } else if (b->refType->kind != a->kind) {
     return 0;
   }
