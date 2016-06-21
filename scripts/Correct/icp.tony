@@ -1,0 +1,6 @@
+def main():
+	int a,b
+	a:=2+4+(8 mod 3)
+	b:=a+34
+	puti(b)
+end

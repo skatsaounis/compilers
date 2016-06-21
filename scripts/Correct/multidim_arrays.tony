@@ -1,0 +1,15 @@
+def solve():
+	int[][] a	% 2x1 array of int
+	int[][][] b
+
+	a := new int[][2]
+	a[0] := new int[1]
+	a[1] := new int[1]
+
+	a[1][2]:=3
+	if a[1][0]=b[1][2][3] :
+		puts("wrong\n")
+	else :
+		puts("correct\n")
+	end
+end

@@ -1,0 +1,6 @@
+def main():
+	int [] a
+	a := new int[2]
+	a[0]:=1
+	puti(a[0])
+end

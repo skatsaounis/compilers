@@ -1,0 +1,10 @@
+def main():
+	def print(char [] a):
+		puts(a)
+	end
+	char [] a
+	gets(6,a)
+	putc(a[2])
+	putc('\n')
+	print(a)
+end

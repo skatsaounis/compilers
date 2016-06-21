@@ -1,0 +1,8 @@
+def main():
+	def int add(int a, b):
+		return a+b
+	end
+	int a
+	a:=98
+	puti(add(1,add(add(a,2),3)))
+end

@@ -1,0 +1,31 @@
+def solve ():
+	def hanoi (int rings; char[] source, target, auxiliary):
+		def move (char[] source, target):
+			puts("Moving from ") puts(source)
+			puts(" to ")
+			puts(target)
+			puts(".\n")
+		end
+		bool flag
+		flag:=true
+		if rings>=1 and not flag or 2=4:
+			hanoi(rings-1, source, auxiliary, target)
+			move(source, target)
+			hanoi(rings-1, auxiliary, target, source)
+		end
+	end
+
+	int NumberOfRings
+
+	def foo (bool f):
+		putb(f)
+	end
+	bool flag2
+	flag2:=false
+	foo(flag2 and true)
+	putc('\n')
+
+	puts("Rings: ")
+	NumberOfRings := geti()
+	hanoi(NumberOfRings, "left", "right", "middle")
+end

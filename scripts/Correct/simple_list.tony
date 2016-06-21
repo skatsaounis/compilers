@@ -1,0 +1,22 @@
+def lists():
+    def print_list (list[int] l):
+	
+		for skip; not nil?(l); l := tail(l):
+			puti(head(l))
+			puts(" ")
+		end
+		puts("end\n")
+	end
+
+	list[int] a
+	int x
+
+	if nil?(a):
+		puts("list is initially empty\n")
+	end
+	print_list(a)
+	a := 1 # nil
+	a := 2 # 3 # 4 # 5 # 6 # a
+	print_list(tail(a))
+
+end

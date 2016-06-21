@@ -131,12 +131,20 @@ Type lookup_type_find(SymbolEntry * p){
 
 int cons_check(Type a, Type b){
   if (a->kind == TYPE_LIST){
-    if (b->refType->kind != TYPE_LIST) {
+    if (b->refType->kind == TYPE_LIST) {
+      return cons_check(a->refType, b->refType);
+    } else if (b->refType->refType->kind == TYPE_LIST) {
+      return cons_check(a->refType, b->refType->refType);
+    } else {
       return 0;
     }
-    return cons_check(a->refType, b->refType);
-  }
-  else if (b->refType->kind != a->kind) {
+  } else if (b->kind == TYPE_POINTER) {
+    if (b->refType->refType->kind == TYPE_LIST) {
+      return cons_check(a, b->refType->refType);
+    } else {
+      return 0; 
+    }
+  } else if (b->refType->kind != a->kind) {
     return 0;
   }
   return 1;
@@ -380,7 +388,7 @@ type:
     | "bool"                        { $$.refT = typeBoolean;         }
     | "char"                        { $$.refT = typeChar;            }
     | type '[' ']'                  { $$.refT = typeIArray($1.refT); }
-    | "list" '[' type ']'           { $$.refT = typeList($3.refT);   }
+    | "list" '[' type ']'           { $$.refT = typeList($3.refT); }
 ;
 
 func_decl:
@@ -893,8 +901,16 @@ expr:
                                       $$.true_list = merge($1.true_list, $4.true_list);
                                       $$.false_list = $4.false_list;
                                     }
-    | expr '#' expr                 { if ((lookup_type_find($3.symbol_entry)->kind != TYPE_LIST) || (cons_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0))
-                                            ERROR("exprs must be of type t and list[t] respectively") ;
+    | expr '#' expr                 { if (lookup_type_find($3.symbol_entry)->kind != TYPE_LIST){
+                                            if (lookup_type_find($3.symbol_entry)->kind == TYPE_POINTER){
+                                                if(lookup_type_find($3.symbol_entry)->refType->refType->kind != TYPE_LIST){      
+                                                    ERROR("$3.symbol entry must be array of lists, not array of another type");
+                                                }
+                                            } else
+                                                ERROR("$3.symbol entry must be of type list or array of lists");
+                                      }
+                                      if(cons_check(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)) == 0)
+                                            ERROR("exprs must be of type t and list[t] respectively");
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
                                       temp_param_node = (prev_params *) new(sizeof(prev_params));
                                       if (curr_param_node == NULL){
@@ -970,14 +986,26 @@ expr:
                                       $$.symbol_entry = newTemporary(typeIArray($2.refT));
                                     }
     | "nil"                         { $$.symbol_entry = newTemporary(typeList(typeVoid)); }
-    | "nil?" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
-                                            ERROR("expr must be of type list");
+    | "nil?" '(' expr ')'           { if (lookup_type_find($3.symbol_entry)->kind != TYPE_LIST){
+                                            if (lookup_type_find($3.symbol_entry)->kind == TYPE_POINTER){
+                                                if(lookup_type_find($3.symbol_entry)->refType->refType->kind != TYPE_LIST){      
+                                                    ERROR("$3.symbol entry must be array of lists, not array of another type");
+                                                }
+                                            } else
+                                                ERROR("$3.symbol entry must be of type list or array of lists");
+                                      }
                                       $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(ISNIL_QUAD, NULL, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
-    | "head" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
-                                            ERROR("expr must be of type list");
+    | "head" '(' expr ')'           { if (lookup_type_find($3.symbol_entry)->kind != TYPE_LIST){
+                                            if (lookup_type_find($3.symbol_entry)->kind == TYPE_POINTER){
+                                                if(lookup_type_find($3.symbol_entry)->refType->refType->kind != TYPE_LIST){      
+                                                    ERROR("$3.symbol entry must be array of lists, not array of another type");
+                                                }
+                                            } else
+                                                ERROR("$3.symbol entry must be of type list or array of lists");
+                                      }
 									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
                                             ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(lookup_type_find($3.symbol_entry)->refType);
@@ -1002,8 +1030,14 @@ expr:
                                       curr_param_node = curr_param_node->prev;
                                       delete(temp_param_node);
                                     }
-    | "tail" '(' expr ')'           { if(lookup_type_find($3.symbol_entry)->kind != TYPE_LIST)
-                                            ERROR("expr must be of type list");
+    | "tail" '(' expr ')'           { if (lookup_type_find($3.symbol_entry)->kind != TYPE_LIST){
+                                            if (lookup_type_find($3.symbol_entry)->kind == TYPE_POINTER){
+                                                if(lookup_type_find($3.symbol_entry)->refType->refType->kind != TYPE_LIST){      
+                                                    ERROR("$3.symbol entry must be array of lists, not array of another type");
+                                                }
+                                            } else
+                                                ERROR("$3.symbol entry must be of type list or array of lists");
+                                      }
 									  if(lookup_type_find($3.symbol_entry)->refType == typeVoid)
                                             ERROR("The list must not be empty");
                                       $$.symbol_entry = newTemporary(typeList(lookup_type_find($3.symbol_entry)->refType));
@@ -1018,7 +1052,7 @@ expr:
                                       curr_param_node = temp_param_node;
                                       GenQuad4(PAR_QUAD, $3.symbol_entry, "VALUE", NULL);
 									  GenQuad4(PAR_QUAD, $$.symbol_entry, "RET", NULL);
-                    currentScope->unit_flag = 1;
+                                      currentScope->unit_flag = 1;
                                       if (curr_param_node == NULL || curr_param_node->prev == NULL)
                                             GenQuad2(CALL_QUAD, NULL, NULL, "tail", 2, "");
                                       else

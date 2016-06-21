@@ -1,0 +1,14 @@
+def main():
+
+	def int add(int a; list[int] b):
+		return a+head(b)
+	end
+
+	list[int] a
+	int[] b
+	
+	b := new int[4]
+	b[2] := 40
+	a := 2 # nil
+	puti(add(head(a),b[2]#a))
+end

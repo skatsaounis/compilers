@@ -21,6 +21,7 @@ def main():
 		seed := (seed * 137 + 220 + i) mod 101
 		l[1] := seed # l[1]
 	end
-	writeList("List l: ", l[0])
-	writeList("List l: ", l[1])
+	for i := 0; i < 2; i := i+1:
+		writeList("List l: ", l[i])
+	end
 end

@@ -1,0 +1,19 @@
+def main():
+
+	int n
+
+	def int add(int a):
+		
+		def int add1(int a):
+			
+			return n+a
+		end
+		
+		return n+a+add1(3)
+	end
+	
+	n := 2
+
+	puti(add(35))
+	puts("\n")
+end
