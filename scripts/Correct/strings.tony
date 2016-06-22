@@ -1,6 +1,7 @@
 def main():
 	def print(char [] a):
 		puts(a)
+		putc('\n')
 	end
 	char [] a
 	gets(6,a)

@@ -8,7 +8,7 @@ def solve ():
 		end
 		bool flag
 		flag:=true
-		if rings>=1 and not flag or 2=4:
+		if rings>=1 and ((not flag) or 2<=4):
 			hanoi(rings-1, source, auxiliary, target)
 			move(source, target)
 			hanoi(rings-1, auxiliary, target, source)
@@ -22,7 +22,8 @@ def solve ():
 	end
 	bool flag2
 	flag2:=false
-	foo(flag2 and true)
+	flag2:=2<=4 and not flag2
+	foo(flag2)
 	putc('\n')
 
 	puts("Rings: ")

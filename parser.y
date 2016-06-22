@@ -309,7 +309,7 @@ func_def_list:
     | var_def func_def_list
 ;
 
-stmt_list: /* needs fixing with next_list */
+stmt_list: 
     stmt             { $$.next_list = $1.next_list;
                        $$.false_list = $1.false_list;
                        $$.true_list = $1.true_list;
@@ -322,8 +322,7 @@ stmt_list: /* needs fixing with next_list */
 
 header:
     opt1 T_id
-    {   /* fprintf(stderr,"%s \n", $2);
-                GenQuad3(UNIT_QUAD, $2, NULL, NULL);*/
+    {   
 		if (main_flag == 0){
 			main_flag = 1;
 			fprintf(fp, "%s\n", $2);
@@ -357,7 +356,7 @@ opt2_list:
 
 formal:
     opt3 type T_id
-    {   /* fprintf(stderr,"%s \n", $3); */
+    {   
 	if ($2.refT->kind == TYPE_IARRAY){
 		newParameter($3, $2.refT, PASS_BY_REFERENCE, p);
 		type = $2.refT;
@@ -379,7 +378,7 @@ opt3:
 formal_list:
     /* nothing */
     | ',' T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
+    {  
         newParameter($2, type, pMode, p);
     }
     formal_list
@@ -403,7 +402,7 @@ func_decl:
 
 var_def:
     type T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
+    {   
         newVariable($2, $1.refT);
         type = $1.refT;
     }
@@ -413,7 +412,7 @@ var_def:
 var_def_list:
     /* nothing */
     | ',' T_id
-    {   /* fprintf(stderr,"%s \n", $2); */
+    {   
         newVariable($2, type);
     }
     var_def_list
@@ -428,8 +427,16 @@ stmt:
     | "exit"            { $$.next_list = emptylist();  }
     | "return" expr     { if (!equalType(lookup_type_find($2.symbol_entry), lookup_in_curScope()))
                                 ERROR("Wrong type for return value");
-                          if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
-                            nextquad--;
+                          /*if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN))
+                            nextquad--;*/
+                          if((($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($2.symbol_entry->entryType == ENTRY_VARIABLE) && ($2.symbol_entry->u.eVariable.type->kind == TYPE_BOOLEAN)) || (($2.symbol_entry->entryType == ENTRY_TEMPORARY) && ($2.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
+                          {
+                            /*while(((quad_array[nextquad-1].type == JMP_QUAD) || (quad_array[nextquad-1].type == EQ_QUAD) || (quad_array[nextquad-1].type == NE_QUAD) || (quad_array[nextquad-1].type == GT_QUAD) || (quad_array[nextquad-1].type == LT_QUAD)|| (quad_array[nextquad-1].type == GE_QUAD) || (quad_array[nextquad-1].type == LE_QUAD))&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){
+                              nextquad--;
+                            }*/
+                            backpatch($2.true_list,nextquad);
+                            backpatch($2.false_list,nextquad);
+                          }                          
                           GenQuad(RETV_QUAD, $2.symbol_entry, NULL, NULL, 0,"");
                           GenQuad(RET_QUAD, NULL, NULL, NULL, 0,"");
                         }
@@ -538,11 +545,13 @@ simple:
                             }
                           }
 
-                          if((($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($3.symbol_entry->entryType == ENTRY_TEMPORARY) && ($3.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
+                          if((($3.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($3.symbol_entry->entryType == ENTRY_VARIABLE) && ($3.symbol_entry->u.eVariable.type->kind == TYPE_BOOLEAN)) || (($3.symbol_entry->entryType == ENTRY_TEMPORARY) && ($3.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
                           {
-                            while((quad_array[nextquad-1].type == JMP_QUAD)&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){
+                            /*while(((quad_array[nextquad-1].type == JMP_QUAD) || (quad_array[nextquad-1].type == EQ_QUAD) || (quad_array[nextquad-1].type == NE_QUAD) || (quad_array[nextquad-1].type == GT_QUAD) || (quad_array[nextquad-1].type == LT_QUAD)|| (quad_array[nextquad-1].type == GE_QUAD) || (quad_array[nextquad-1].type == LE_QUAD))&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){
                               nextquad--;
-                            }
+                            }*/
+                            backpatch($3.true_list,nextquad);
+                            backpatch($3.false_list,nextquad);
                           }
                           if($3.pointer == 1){
                             GenQuad4(PAR_QUAD, $3.symbol_entry, "RET", NULL);
@@ -565,11 +574,11 @@ simple:
     | call              { $$.next_list = emptylist(); }
 ;
 
-simple_list: /* may need fixing with next_list */
+simple_list: 
     simple opt4         { $$.next_list = $2.next_list; }
 ;
 
-opt4: /* may need fixing with next_list */
+opt4: 
     /* nothing */       { $$.next_list = emptylist();  }
     | ',' simple opt4   { $$.next_list = $3.next_list; }
 ;
@@ -651,7 +660,15 @@ opt5:
                         }
     | expr              {
                           pm = currnode->a->u.eParameter.mode;
-                          checkParams(&(currnode->a), lookup_type_find($1.symbol_entry));
+                          checkParams(&(currnode->a), lookup_type_find($1.symbol_entry));                          
+                          if((($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.type->kind == TYPE_BOOLEAN)) || (($1.symbol_entry->entryType == ENTRY_VARIABLE) && ($1.symbol_entry->u.eVariable.type->kind == TYPE_BOOLEAN)) || (($1.symbol_entry->entryType == ENTRY_TEMPORARY) && ($1.symbol_entry->u.eTemporary.type->kind == TYPE_BOOLEAN)))
+                                {
+                                  backpatch($1.true_list,nextquad);
+                                  backpatch($1.false_list,nextquad);
+                                  /*while(((quad_array[nextquad-1].type == JMP_QUAD) || (quad_array[nextquad-1].type == EQ_QUAD) || (quad_array[nextquad-1].type == NE_QUAD) || (quad_array[nextquad-1].type == GT_QUAD) || (quad_array[nextquad-1].type == LT_QUAD)|| (quad_array[nextquad-1].type == GE_QUAD) || (quad_array[nextquad-1].type == LE_QUAD))&&(strcmp(quad_array[nextquad-1].dest,"-1")==0)){
+                                    nextquad--;
+                                  }*/
+                                }
                           if (pm == PASS_BY_VALUE)
                                 GenQuad4(PAR_QUAD, $1.symbol_entry, "VALUE", NULL);
                           else
@@ -670,7 +687,7 @@ opt5:
                                 case ENTRY_TEMPORARY:
                                     offset = $1.symbol_entry->u.eTemporary.offset;
                                     break;
-                          }
+                           }
                           sprintf(buf, "dw %d\b", offset);
                           strcat(curr_param_node->prev_param_string, buf);
                         }
@@ -743,8 +760,8 @@ atom:
 
 expr:
     atom                            { $$.symbol_entry = $1.symbol_entry; }
-    | T_num                         { $$.symbol_entry = newConstant ("a", typeInteger, atoi($1)); } /* atoi can also go to lexer, I don't know what is better */
-    | T_const                       { $$.symbol_entry = newConstant ("a", typeChar, $1);    } /* Here we may have a problem to solve */
+    | T_num                         { $$.symbol_entry = newConstant ("a", typeInteger, atoi($1)); } 
+    | T_const                       { $$.symbol_entry = newConstant ("a", typeChar, $1);    } 
     | "true"                        {
                                       $$.symbol_entry = newConstant ("a", typeBoolean, 1);
                                       $$.true_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
@@ -770,7 +787,7 @@ expr:
                                       else{
                                         $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(PLUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); 
                                       }
                                     }
     | expr '-' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
@@ -782,7 +799,7 @@ expr:
                                       else{
                                         $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(MINUS_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); 
                                       }
                                     }
     | expr '*' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
@@ -806,7 +823,7 @@ expr:
                                       else{
                                         $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(MULT_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); 
                                       }
                                     }
     | expr '/' expr                 { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
@@ -818,7 +835,7 @@ expr:
                                       else{
                                         $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(DIV_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); 
                                       }
                                     }
     | expr "mod" expr               { if((lookup_type_find($1.symbol_entry) != typeInteger) || (lookup_type_find($3.symbol_entry) != typeInteger))
@@ -830,42 +847,140 @@ expr:
                                       else{
                                         $$.arithmetic = 1;
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(MOD_QUAD, $1.symbol_entry, $3.symbol_entry, $$.symbol_entry, 0,""); 
                                       }
                                     }
     | expr '=' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeBoolean){
+                                            if ($1.symbol_entry->u.eConstant.value.vBoolean == $3.symbol_entry->u.eConstant.value.vBoolean)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeInteger) {
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger == $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString == $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(EQ_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
     | expr '<' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeInteger){
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger < $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString < $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(LT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
     | expr '>' expr                 { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeInteger){
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger > $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString > $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(GT_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
     | expr "<>" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeBoolean){
+                                            if ($1.symbol_entry->u.eConstant.value.vBoolean != $3.symbol_entry->u.eConstant.value.vBoolean)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeInteger) {
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger != $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString != $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(NE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
     | expr "<=" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeBoolean) {
+                                            if ($1.symbol_entry->u.eConstant.value.vBoolean <= $3.symbol_entry->u.eConstant.value.vBoolean)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeInteger) {
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger <= $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString <= $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(LE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
     | expr ">=" expr                { if(!equalType(lookup_type_find($1.symbol_entry), lookup_type_find($3.symbol_entry)))
                                             ERROR("not the same type of exprs");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($3.symbol_entry->entryType == ENTRY_CONSTANT)){
+                                        if (lookup_type_find($1.symbol_entry) == typeBoolean){
+                                            if ($1.symbol_entry->u.eConstant.value.vBoolean >= $3.symbol_entry->u.eConstant.value.vBoolean)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeInteger) {
+                                            if ($1.symbol_entry->u.eConstant.value.vInteger >= $3.symbol_entry->u.eConstant.value.vInteger)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        } else if (lookup_type_find($1.symbol_entry) == typeChar) {
+                                            if ($1.symbol_entry->u.eConstant.value.vString >= $3.symbol_entry->u.eConstant.value.vString)
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                            else
+                                                $$.symbol_entry = newConstant ("a", typeBoolean, 0);
+                                        }
+                                      } else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = make_list(GenQuad2(GE_QUAD, $1.symbol_entry, $3.symbol_entry, "-1", 0,""));
                                       $$.false_list = make_list(GenQuad2(JMP_QUAD, NULL, NULL, "-1", 0,""));
                                     }
@@ -874,15 +989,15 @@ expr:
                                       backpatch($1.true_list,nextquad);
                                     }
           "and" expr                { if(lookup_type_find($4.symbol_entry) != typeBoolean)
-                                            ERROR("exprs must be of type bool");
-					                  if((($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.value.vBoolean == 0) )|| (($4.symbol_entry->entryType == ENTRY_CONSTANT) && ($4.symbol_entry->u.eConstant.value.vBoolean == 0)))
+                                            ERROR("exprs must be of type bool");					                  
+                                      if((($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.value.vBoolean == 0) )|| (($4.symbol_entry->entryType == ENTRY_CONSTANT) && ($4.symbol_entry->u.eConstant.value.vBoolean == 0)))
                                         $$.symbol_entry = newConstant ("a", typeBoolean, 0);
                                       else if (($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.value.vBoolean == 1))
                                         $$.symbol_entry = $4.symbol_entry;
                                       else if (($4.symbol_entry->entryType == ENTRY_CONSTANT) && ($4.symbol_entry->u.eConstant.value.vBoolean == 1))
                                         $$.symbol_entry = $1.symbol_entry;
                                       else
-                                        $$.symbol_entry = newTemporary(typeBoolean);
+                                        $$.symbol_entry = newTemporary(typeBoolean);                                      
                                       $$.false_list = merge($1.false_list, $4.false_list);
                                       $$.true_list = $4.true_list;
                                     }
@@ -891,7 +1006,7 @@ expr:
                                       backpatch($1.false_list,nextquad);
                                     }
           "or" expr                 { if(lookup_type_find($4.symbol_entry) != typeBoolean)
-                                            ERROR("exprs must be of type bool");
+                                            ERROR("exprs must be of type bool");                                      
                                       if((($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.value.vBoolean == 1) )|| (($4.symbol_entry->entryType == ENTRY_CONSTANT) && ($4.symbol_entry->u.eConstant.value.vBoolean == 1)))
                                         $$.symbol_entry = newConstant ("a", typeBoolean, 1);
                                       else if (($1.symbol_entry->entryType == ENTRY_CONSTANT) && ($1.symbol_entry->u.eConstant.value.vBoolean == 0))
@@ -960,7 +1075,7 @@ expr:
                                       }
                                       else{
                                         $$.symbol_entry = newTemporary(typeInteger);
-                                        GenQuad(MINUS_QUAD, newConstant ("a", typeInteger, 0), $2.symbol_entry, $$.symbol_entry, 0,""); /* Added Today */
+                                        GenQuad(MINUS_QUAD, newConstant ("a", typeInteger, 0), $2.symbol_entry, $$.symbol_entry, 0,"");
                                       }
                                     }
     | '+' expr         %prec UPLUS  { if(lookup_type_find($2.symbol_entry) != typeInteger)
@@ -973,7 +1088,12 @@ expr:
                                     }
     | "not" expr                    { if(lookup_type_find($2.symbol_entry) != typeBoolean)
                                             ERROR("expr must be of type bool");
-                                      $$.symbol_entry = newTemporary(typeBoolean);
+                                      if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.value.vBoolean == 0) )
+                                        $$.symbol_entry = newConstant ("a", typeBoolean, 1);
+                                      else if(($2.symbol_entry->entryType == ENTRY_CONSTANT) && ($2.symbol_entry->u.eConstant.value.vBoolean == 1) )
+                                        $$.symbol_entry = newConstant ("a", typeBoolean, 0);                                      
+                                      else
+                                        $$.symbol_entry = newTemporary(typeBoolean);
                                       $$.true_list = $2.false_list;
                                       $$.false_list = $2.true_list;
                                     }
