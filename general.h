@@ -36,7 +36,7 @@ void   delete (void *);
    --------------------------------------------------------------------- */
 
 extern int linecount;
-extern const char * filename;
+extern char * filename;
 
 
 #endif

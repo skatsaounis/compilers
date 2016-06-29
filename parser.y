@@ -4,9 +4,12 @@ extern int yylex();
 
 %{
 #include <stdarg.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <getopt.h>
 
 #include "quads.h"
 #include "error.h"
@@ -42,20 +45,21 @@ struct prev_params{
     prev_params * prev;
 };
 
+extern FILE *yyin;
 int new_const;
 int unit_counter, offset;
 char units[256][256];
 char unit_flags[256];
 char buf[256];
 
-FILE * fp, * fp2;
+FILE * fp1, *imm_stream, *final_stream;
 
 if_temps * curr_if_temp, *if_temp;
 for_temps * curr_for_temp, *for_temp;
 prev_params * curr_param_node, *temp_param_node;
 
 node * currnode, * temp;
-int flag, main_flag=0, counter=0, logical_expr=0;
+int flag, ProduceFinal, ProduceInterm, main_flag=0, counter=0, logical_expr=0;
 int externs[21], offsets[257];
 SymbolEntry * p, * W, * S;
 Type type, refType;
@@ -297,7 +301,7 @@ func_def:
                 GenQuad3(ENDU_QUAD, currentScope->name, NULL, NULL);
 		        offsets[counter] = -(currentScope->negOffset);
                 counter++;
-                print_all_quads(fp, fp2);
+                print_all_quads(fp1, imm_stream);
         closeScope();
     }
 ;
@@ -325,7 +329,7 @@ header:
     {   
 		if (main_flag == 0){
 			main_flag = 1;
-			fprintf(fp, "%s\n", $2);
+			fprintf(fp1, "%s\n", $2);
 		}
                 p = newFunction($2);
         if(flag){
@@ -1198,11 +1202,91 @@ void yyerror (const char *msg)
   ERROR("parser said, %s", msg);
 }
 
-int main ()
-{ int i;
+void usage(char *s)
+{
+    fprintf(stderr, "Usage: %s [-i | -f | filename.tony\n", s);
+    fprintf(stderr, "\nIf -i or -f is specified in the command line, then\n");
+    fprintf(stderr, "the standard input is used as the Tony source file.\n");
+    fprintf(stderr, "\t-i: Output the intermediate code to stdout\n");
+    fprintf(stderr, "\t-f: Output the final assembly code to stdout\n");
+    fprintf(stderr, "\nIf a source filename is specified, then\n");
+    fprintf(stderr, "filename.imm and filename.asm are produced.\n");
+    exit(1);
+}
+
+int main(int argc, char *argv[])
+{ int i, opt_i=0, opt_f=0;
+  char fname[255], *ext, c;
+
+  /* Parse arguments and initialize compiler */
+  opterr=0;
+  while ((c=getopt(argc, argv, "if")) > 0) {
+          switch (c) {
+              case 'i':
+                  opt_i=1;
+                  break;
+              case 'f':
+                  opt_f=1;
+                  break;
+              default:
+                  fprintf(stderr, "`-%c': Unknown option\n", optopt);
+                  exit(1);
+          }
+  }
+
+  ProduceInterm=ProduceFinal=1;
+
+  if (!opt_i && !opt_f) {
+        /* No -i or -f argument, a file name is required */
+        if (optind!=argc-1)
+            usage(argv[0]);
+        strncpy(fname, argv[optind], 255);
+        if (strlen(argv[optind])>254)
+            fname[254]='\0';
+        
+        /* Set up the input and output files */
+        if ( !(ext=strstr(fname, ".tony"))) {
+            fprintf(stderr, "The input filename's extension must be .tony\n");
+            exit(1);
+        }
+        if ( !(yyin=fopen(fname, "r"))) {
+                fprintf(stderr, "Cannot open source file `%s'\n", fname);
+            exit(1);
+        }
+
+        strcpy(ext, ".imm");
+        if ( !(imm_stream=fopen(fname, "w+"))) {
+            fprintf(stderr, "Cannot open output file `%s'\n", fname);
+            exit(1);
+        }
+
+        strcpy(ext, ".asm");
+        if ( !(final_stream=fopen(fname, "w+"))) {
+            fprintf(stderr, "Cannot open output file `%s'\n", fname);
+            exit(1);
+        }
+    
+        strcpy(ext, ".tony");
+        filename=strdup(fname);
+    } else {
+        if ((opt_i && opt_f) || optind!=argc)
+            usage(argv[0]);
+        
+        /* Set up the input and output files */
+        yyin=stdin;
+        if (opt_i) {
+            imm_stream=stdout;
+            ProduceFinal=0;
+        } else {
+            imm_stream=fopen("pure_quads.txt", "w+");
+            final_stream=stdout;
+            ProduceInterm=0;
+        }
+        filename=strdup("standard input");
+    }
+  fp1 = fopen("quads.txt", "w+");
   unit_counter = 0;
-  fp = fopen("quads.txt", "w+");
-  fp2 = fopen("pure_quads.txt", "w+");
+
   for (i = 0; i<21; i++)
 	externs[i] = 0;
   if (yyparse()==0){
@@ -1210,9 +1294,28 @@ int main ()
   }
   else
     printf("Ooops. Something is wrong. Check the error message above.\n");
-  fclose(fp);
-  fclose(fp2);
-  generator(externs, offsets);
+  fclose(fp1);
+  fclose(imm_stream);
+  if (ProduceInterm==0){
+    fclose(imm_stream);
+    imm_stream = fopen("pure_quads.txt", "r");
+  }
+  fp1 = fopen("quads.txt", "r");
+  if (!opt_i && !opt_f) {
+    strcpy(ext, ".imm");
+    imm_stream=fopen(fname, "r");
+  }
+  generator(externs, offsets, final_stream, fp1, imm_stream);
   destroySymbolTable();
+  
+  /* Clean up all the mess */
+  if (ProduceInterm)
+    fclose(imm_stream);
+  if (ProduceFinal)
+    fclose(final_stream);
+  fclose(fp1);
+  
+
+  
   return 0;
 }

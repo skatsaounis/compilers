@@ -1,3 +1,0 @@
-~General~
--- Fix general bugs to make the programs run.
--- Optimizations

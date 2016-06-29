@@ -21,20 +21,18 @@ int param_byte_table[256];
 int inception_function_table[256];
 char * prev_param_offset_table[256];
 
-void generator(int * externs, int * offsets){
+void generator(int * externs, int * offsets, FILE * fp, FILE * fp2, FILE * fp3){
     int i;
     char program[256];
-    FILE * fp, * fp2, * fp3;
-
+    
+    if (!ProduceFinal)
+        return;
     unique = 0;
     program_strings = (program_string_t *) new(sizeof(program_string_t));
     program_strings = NULL;
     program_strings_tail = (program_string_t *) new(sizeof(program_string_t));
 	program_strings_tail = program_strings;
 
-    fp = fopen("a.asm", "w+");
-    fp2 = fopen("quads.txt", "r");
-    fp3 = fopen("pure_quads.txt", "r");
     fscanf(fp2, "%[^\t\n]\n", program);
     fprintf(fp, "xseg segment public'code'\n\tassume cs:xseg, ds:xseg, ss:xseg\n\torg 100h\nLIVENESS = 0\nmain proc near");
     fprintf(fp, "\n\tmov cx, OFFSET DGROUP:_start_of_space\n\tmov word ptr _space_from, cx\n\tmov word ptr _next, cx\n\tmov ax, 0FFFEh\n\tsub ax, cx\n\txor dx, dx\n\tmov bx, 3\n\tidiv bx\n\tand ax, 0FFFEh ; even number!\n\tadd cx, ax\n\tmov word ptr _limit_from, cx\n\tmov word ptr _space_to, cx\n\tadd cx, ax\n\tmov word ptr _limit_to, cx");
@@ -60,7 +58,7 @@ void generator(int * externs, int * offsets){
     printexterns(fp, externs);
     fprintf(fp, "\tpublic _next\n\tpublic _space_from\n\tpublic _limit_from\n\tpublic _space_to\n\tpublic _limit_to\n\tpublic _ret_of_main\n\n\t_space_from dw ?\n\t_limit_from dw ?\n\t_space_to dw ?\n\t_limit_to dw ?\n\t_next dw ?\n\n\txseg ends\n\n_DATA_END segment byte public 'stack'\n_start_of_space label byte\n_DATA_END ends\n\nDGROUP group xseg,_DATA_END\n\n\tend main\n"
 );
-    fclose(fp);
+
 }
 
 Interpreted_quad consume_quad(FILE * fp){

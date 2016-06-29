@@ -1,4 +1,0 @@
-test4     -- correct but infinite loop in the end
-test5     -- correct but infinite loop in the end
-test6     -- not showing list
-nestedifs -- (??)

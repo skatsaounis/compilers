@@ -64,7 +64,7 @@ extern char units[256][256];
 extern char unit_flags[256];
 extern int unit_counter;
 extern long nextquad;                            /* returns next's quad label                              */
-
+extern int ProduceInterm;
 
 long GenQuad(QuadType q, SymbolEntry * x,        /* generates next quad                                    */
 	SymbolEntry * y, SymbolEntry * z, int offset, char * prev_param_string);

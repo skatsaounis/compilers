@@ -22,7 +22,7 @@ typedef struct program_strings_struct{
 
 typedef program_string_t * Program_strings;
 
-void generator(int * externs, int * offsets);
+void generator(int * externs, int * offsets, FILE * fp, FILE * fp2, FILE * fp3);
 Interpreted_quad consume_quad(FILE * fp);
 void print_consumed_quad(Interpreted_quad quad);
 void generate(Interpreted_quad quad, FILE * fp, int offset);
@@ -41,4 +41,7 @@ void string_to_db(FILE * fp, char * node_str);
 void print_call_table(FILE * fp, char * fun_name, int call_counter, int temp_var_offset, int * param_byte_table, int * inception_function_table, char * next_words, char ** prev_param_offset_table);
 void comment(FILE *fp, FILE *fp2);
 int is_lib_function(char * function_name);
+
+extern int ProduceFinal;
+
 #endif

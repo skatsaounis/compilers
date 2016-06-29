@@ -1,5 +1,6 @@
 *~
-a.asm
+*.asm
+*.imm
 tonyc
 quads.txt
 pure_quads.txt
@@ -7,5 +8,8 @@ code.txt
 scripts/A.COM
 scripts/A.OBJ
 scripts/asm/*
+scripts/a.tony
+scripts/a.asm
+scripts/a.imm
 tonygc/getfile.py
 tonygc/pap_quads.txt

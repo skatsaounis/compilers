@@ -17,7 +17,7 @@ while [ "$1" != "" ]; do
   printf "%-40s" "$f"
   rm -f *.asm a.*
   cp -f "$f".$MYLANG a.$MYLANG
-  ./$MYCOMP < a.$MYLANG || die
+  ./$MYCOMP a.$MYLANG || die
   printf "success\n"
 
   dosbox run.bat -exit >& /dev/null
@@ -25,6 +25,6 @@ while [ "$1" != "" ]; do
   shift
 done
 
-rm -f *.asm a.*
+
 
 exit 0
