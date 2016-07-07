@@ -1297,7 +1297,6 @@ int main(int argc, char *argv[])
   fclose(fp1);
   fclose(imm_stream);
   if (ProduceInterm==0){
-    fclose(imm_stream);
     imm_stream = fopen("pure_quads.txt", "r");
   }
   fp1 = fopen("quads.txt", "r");
