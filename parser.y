@@ -1310,10 +1310,14 @@ int main(int argc, char *argv[])
   /* Clean up all the mess */
   if (ProduceInterm)
     fclose(imm_stream);
-  if (ProduceFinal)
+  if (ProduceFinal){
     fclose(final_stream);
+    remove("quads.txt");
+    remove("pure_quads.txt");
+  } else {
+    remove("quads.txt");
+  }
   fclose(fp1);
-  
 
   
   return 0;
